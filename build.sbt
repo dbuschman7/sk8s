@@ -1,19 +1,18 @@
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
+version in ThisBuild := "0.5.0"
+
 scalaVersion in ThisBuild := "2.12.7"
 
-def publishDest: Option[Resolver] = Some("Some Realm" at "tbd")
-
-def harnessFilter(name: String): Boolean = !(name endsWith "Harness")
-
-def singleThreadedTests(definedTests: scala.Seq[TestDefinition]): scala.Seq[Tests.Group] = definedTests map { test =>
-  Tests.Group(name = test.name, tests = Seq(test), runPolicy = Tests.SubProcess(ForkOptions()))
-}
-
+//
 // PROJECTS
+// ///////////////////////
 lazy val global = project
   .in(file("."))
   .settings(settings)
+  .settings(
+    publishArtifact := false
+  )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
     common,
@@ -42,6 +41,7 @@ lazy val core = project
     name := "core",
     settings,
     assemblySettings,
+    deploymentSettings,
     libraryDependencies ++= commonDependencies :+ dependencies.javaxInject
   )
   .dependsOn(
@@ -53,6 +53,7 @@ lazy val play = project
     name := "play",
     settings,
     assemblySettings,
+    deploymentSettings,
     libraryDependencies ++= commonDependencies ++ dependencies.playLibs
   )
   .dependsOn(
@@ -65,6 +66,7 @@ lazy val kubernetes = project
     name := "kubernetes",
     settings,
     assemblySettings,
+    deploymentSettings,
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.skuber, dependencies.parserCombinators, dependencies.quickLens)
   )
   .dependsOn(
@@ -77,10 +79,12 @@ lazy val slack = project
     name := "slack",
     settings,
     assemblySettings,
+    deploymentSettings,
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.slack)
   )
   .dependsOn(
     common % "test->test;compile->compile",
+    kubernetes,
     core
   )
 
@@ -92,6 +96,8 @@ lazy val templateBackend = project
     name := "backend",
     settings,
     assemblySettings,
+    publishArtifact := false,
+    skip in publish := true,
     libraryDependencies ++= commonDependencies
   )
   .dependsOn(
@@ -103,6 +109,8 @@ lazy val templateApi = project
     name := "api",
     settings,
     assemblySettings,
+    publishArtifact := false,
+    skip in publish := true,
     libraryDependencies ++= commonDependencies
   )
   .dependsOn(
@@ -205,7 +213,15 @@ lazy val commonSettings = Seq(
     Resolver.jcenterRepo,
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")
-  )
+  ),
+  licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/dbuschman7/sk8s/tree/release-" + version.value),
+      "scm:git:https://github.com/dbuschman7/sk8s.git",
+      Some("scm:git:https://github.com/dbuschman7sk8sgit")
+    )),
+  bintrayReleaseOnPublish in ThisBuild := false
 )
 
 //lazy val wartremoverSettings = Seq(
@@ -222,8 +238,8 @@ lazy val scalafmtSettings =
 lazy val assemblySettings = Seq(
   assemblyJarName in assembly := name.value + ".jar",
   assemblyMergeStrategy in assembly := {
-    case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-    case "application.conf"            => MergeStrategy.concat
+    case PathList("META-INF", _ @_*) => MergeStrategy.discard
+    case "application.conf"          => MergeStrategy.concat
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
@@ -235,7 +251,15 @@ lazy val deploymentSettings = Seq(
   publishArtifact in (Test, packageSrc) := true, // Publish tests-source jars
   publishArtifact in (Compile, packageDoc) := false, // Disable ScalaDoc generation
   publishArtifact in packageDoc := false,
-  publishMavenStyle := true,
+  publishMavenStyle := true
   //
-  publishTo := publishDest // must use aliases to publish
+//  publishTo := publishDest // must use aliases to publish
 )
+
+//def publishDest: Option[Resolver] = Some("Some Realm" at "tbd")
+
+def harnessFilter(name: String): Boolean = !(name endsWith "Harness")
+
+def singleThreadedTests(definedTests: scala.Seq[TestDefinition]): scala.Seq[Tests.Group] = definedTests map { test =>
+  Tests.Group(name = test.name, tests = Seq(test), runPolicy = Tests.SubProcess(ForkOptions()))
+}
