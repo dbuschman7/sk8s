@@ -1,4 +1,4 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.nio.file.Paths
 
@@ -12,14 +12,14 @@ class ServiceAccountTest extends FunSuite with Matchers {
   }
 
   test("Test resources setup -- with files") {
-    val pwd = Paths.get("sk8s").toAbsolutePath
+    val pwd           = Paths.get("common").toAbsolutePath
     val resourcesPath = Paths.get(pwd.toString + "/src/test/resources")
-    val svcAcct = Sk8s.serviceAccount(resourcesPath)
+    val svcAcct       = Sk8s.serviceAccount(resourcesPath)
 
     { // test correct path
       val fullPath = svcAcct.basePath.toString
-      val tail = fullPath.substring(fullPath.indexOf("sk8s"))
-      tail should be("sk8s/src/test/resources/kubernetes.io/serviceaccount")
+      val tail     = fullPath.substring(fullPath.indexOf("common"))
+      tail should be("common/src/test/resources/kubernetes.io/serviceaccount")
     }
 
     { // test token lookup

@@ -1,8 +1,8 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.nio.file.{ Path, Paths }
 
-import io.timeli.sk8s.http.RestQuery
+import me.lightspeed7.sk8s.http.RestQuery
 import org.scalatest.{ FunSuite, Matchers }
 import play.api.libs.json.{ JsResult, Json }
 
@@ -13,7 +13,9 @@ class KubeServiceApiTest extends FunSuite with Matchers {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val sk8sDir: Path = Paths.get("sk8s").toAbsolutePath
+  import EndpointJson._
+
+  val sk8sDir: Path           = Paths.get("sk8s").toAbsolutePath
   val testResourcesPath: Path = Paths.get(sk8sDir.toString + "/src/test/resources")
   val svcAcct: ServiceAccount = Sk8s.serviceAccount(testResourcesPath)
 
@@ -33,7 +35,7 @@ class KubeServiceApiTest extends FunSuite with Matchers {
   ignore("HostAndPort Parsing") { // this test only works for my minikube install, thus cannot run autonomous
 
     val endpoints: Option[Endpoints] = Await.result(svcAcct.endpoints("hello", "server"), Duration.Inf)
-    val pods = endpoints.get.hostIpsWithPort(endpoints.get.servicePort(Some("server")))
+    val pods                         = endpoints.get.hostIpsWithPort(endpoints.get.servicePort(Some("server")))
 
     pods.length should be(7)
     pods.map(_.port).toSet.size should be(1)
@@ -41,7 +43,6 @@ class KubeServiceApiTest extends FunSuite with Matchers {
   }
 
   test("Parse Endpoint Json Kafka") {
-    import EndpointJson._
     val endPointsJ: JsResult[Endpoints] = Json.fromJson[Endpoints](Json.parse(endpointData1))
     endPointsJ.isSuccess should be(true)
     val endPoints = endPointsJ.get
@@ -65,14 +66,13 @@ class KubeServiceApiTest extends FunSuite with Matchers {
     println(dnsList)
     dnsList.size shouldBe 3
     dnsList shouldBe Set( //
-      "kafka-0.kafka-svc.data.svc.cluster.local",
-      "kafka-2.kafka-svc.data.svc.cluster.local",
-      "kafka-1.kafka-svc.data.svc.cluster.local" //
+                         "kafka-0.kafka-svc.data.svc.cluster.local",
+                         "kafka-2.kafka-svc.data.svc.cluster.local",
+                         "kafka-1.kafka-svc.data.svc.cluster.local" //
     )
   }
 
   test("Parse Endpoint Json Mongo") {
-    import EndpointJson._
     val endPointsJ: JsResult[Endpoints] = Json.fromJson[Endpoints](Json.parse(endpointData2))
     endPointsJ.isSuccess should be(true)
     val endPoints = endPointsJ.get
@@ -97,7 +97,6 @@ class KubeServiceApiTest extends FunSuite with Matchers {
   }
 
   test("Parse endpoint metadata-svc") {
-    import EndpointJson._
     val endPointsJ: JsResult[Endpoints] = Json.fromJson[Endpoints](Json.parse(endpointData3))
     endPointsJ.isSuccess should be(true)
     val endPoints = endPointsJ.get
@@ -114,7 +113,6 @@ class KubeServiceApiTest extends FunSuite with Matchers {
   }
 
   test("Parse helm chart deployment JSON") {
-    import EndpointJson._
     val endPointsJ: JsResult[Endpoints] = Json.fromJson[Endpoints](Json.parse(endpointData4))
     endPointsJ.isSuccess should be(true)
     val endPoints = endPointsJ.get
@@ -130,7 +128,12 @@ class KubeServiceApiTest extends FunSuite with Matchers {
     hostList.map(_.host).toSet shouldBe Set("10.244.11.13", "10.244.11.14", "10.244.6.9", "10.244.7.12")
     hostList.map(_.port).toSet shouldBe Set(27017)
 
-    endPoints.dnsHosts(27017) shouldBe Set("mongo-data-mongodb-primary-0.mongo-data-mongodb-headless.data.svc.cluster.local", "mongo-data-mongodb-secondary-0.mongo-data-mongodb-headless.data.svc.cluster.local", "mongo-data-mongodb-secondary-1.mongo-data-mongodb-headless.data.svc.cluster.local", "mongo-data-mongodb-arbiter-0.mongo-data-mongodb-headless.data.svc.cluster.local")
+    endPoints.dnsHosts(27017) shouldBe Set(
+      "mongo-data-mongodb-primary-0.mongo-data-mongodb-headless.data.svc.cluster.local",
+      "mongo-data-mongodb-secondary-0.mongo-data-mongodb-headless.data.svc.cluster.local",
+      "mongo-data-mongodb-secondary-1.mongo-data-mongodb-headless.data.svc.cluster.local",
+      "mongo-data-mongodb-arbiter-0.mongo-data-mongodb-headless.data.svc.cluster.local"
+    )
 
   }
 

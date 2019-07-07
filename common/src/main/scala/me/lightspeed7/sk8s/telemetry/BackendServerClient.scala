@@ -1,8 +1,8 @@
-package io.timeli.sk8s.telemetry
+package me.lightspeed7.sk8s.telemetry
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.softwaremill.sttp.{ HttpURLConnectionBackend, Id, SttpBackend }
+import com.softwaremill.sttp._
 
 import scala.concurrent.ExecutionContext
 
@@ -14,11 +14,8 @@ final case class BackendServerClient(host: String = "localhost", port: Int = 899
 
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
-  import com.softwaremill.sttp._
-
-  override def close(): Unit = {
+  override def close(): Unit =
     mat.shutdown()
-  }
 
   def ping: Id[Response[String]] = {
     val response = sttp.get(uri"http://$host:$port/ping").send()

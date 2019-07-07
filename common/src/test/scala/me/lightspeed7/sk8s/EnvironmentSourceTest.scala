@@ -1,6 +1,5 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
-import io.timeli.sk8s.util.EnvironmentSource
 import org.scalatest.{ FunSuite, Matchers }
 
 class EnvironmentSourceTest extends FunSuite with Matchers {

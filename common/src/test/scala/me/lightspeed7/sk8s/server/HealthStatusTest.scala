@@ -1,6 +1,7 @@
-package io.timeli.sk8s.server
+package me.lightspeed7.sk8s.server
 
 import org.scalatest.{ BeforeAndAfterAll, FunSuiteLike, Matchers }
+import play.api.libs.json.{ JsBoolean, JsString }
 
 class HealthStatusTest extends FunSuiteLike with Matchers with BeforeAndAfterAll {
 
@@ -19,7 +20,12 @@ class HealthStatusTest extends FunSuiteLike with Matchers with BeforeAndAfterAll
 
     // json formatting
     println(HealthStatus.summary.toJson.toString)
-    HealthStatus.summary.toJson.toString shouldBe """{"sk8s":"health","overall_health":true,"tag1_health":true,"tag2_health":true}"""
+
+    HealthStatus.summary.toJson.fields.toSet shouldBe Set(
+      "sk8s"           -> JsString("health"),
+      "overall_health" -> JsBoolean(true),
+      "tag1_health"    -> JsBoolean(true),
+      "tag2_health"    -> JsBoolean(true)) //  """{"sk8s":"health","overall_health":true,"tag1_health":true,"tag2_health":true}"""
   }
 
 }

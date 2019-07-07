@@ -1,14 +1,13 @@
 package me.lightspeed7.sk8s
 
 import com.typesafe.scalalogging.LazyLogging
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 import me.lightspeed7.sk8s.Sk8s.HealthStatus
 import me.lightspeed7.sk8s.telemetry.BackendServer
 
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }
 
-@Singleton
 class BackgroundTasks @Inject()(implicit val ctx: Sk8sContext) extends LazyLogging {
 
   import ctx._

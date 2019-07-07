@@ -1,9 +1,9 @@
-package io.timeli.sk8s.telemetry
+package me.lightspeed7.sk8s.telemetry
 
 import akka.actor.ActorSystem
-import io.timeli.sk8s.AppInfo
-import io.timeli.sk8s.Sk8s.HealthStatus
-import io.timeli.sk8s.util.Closeables
+import me.lightspeed7.sk8s.AppInfo
+import me.lightspeed7.sk8s.Sk8s.HealthStatus
+import me.lightspeed7.sk8s.util.Closeables
 import org.joda.time.DateTime
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
 
@@ -13,7 +13,7 @@ import scala.util.Try
 
 class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
 
-  implicit val akka: ActorSystem = ActorSystem("Prometheus")
+  implicit val akka: ActorSystem    = ActorSystem("Prometheus")
   implicit val ec: ExecutionContext = akka.dispatcher
 
   implicit val appInfo: AppInfo = AppInfo("application", "version", DateTime.now)
@@ -21,9 +21,8 @@ class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
   val export = new BackendServer(protobufFormet = false, configGen = "CONFIG")
   val client = BackendServerClient()
 
-  override def beforeAll(): Unit = {
+  override def beforeAll(): Unit =
     TelemetryRegistry.counter("metric")
-  }
 
   override def afterAll(): Unit = {
     client.close()
@@ -39,8 +38,7 @@ class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
 
     response.code shouldBe 200
     response.body.right.get shouldBe "pong"
-    response
-      .headers
+    response.headers
       .find { case (k, v) => k == "Content-Type" }
       .map(_._2)
       .getOrElse("oops") shouldBe "text/plain; charset=UTF-8"
@@ -54,8 +52,7 @@ class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
 
     response.code shouldBe 200
     response.body.right.get shouldBe "OK"
-    response
-      .headers
+    response.headers
       .find { case (k, v) => k == "Content-Type" }
       .map(_._2)
       .getOrElse("oops") shouldBe "text/plain; charset=UTF-8"
@@ -68,9 +65,12 @@ class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
     response.headers.foreach { case (k, v) => println(f"$k%20s : $v%s") }
 
     response.code shouldBe 418
-    response.body.left.get shouldBe """{"sk8s":"health","overall_health":false,"prometheus_health":false}"""
-    response
-      .headers
+    val body = response.body.left.get
+    body.length should be > 0
+    body.head shouldBe '{'
+    body.last shouldBe '}'
+
+    response.headers
       .find { case (k, v) => k == "Content-Type" }
       .map(_._2)
       .getOrElse("oops") shouldBe "text/plain; charset=UTF-8"
@@ -80,12 +80,12 @@ class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
   test("Test metrics endpoint") {
     val response = client.metrics
     response.code shouldBe 200
-    val body = response.body.right.get
+    val body    = response.body.right.get
     val bodyStr = new String(body)
     println(bodyStr)
     bodyStr.length should be > 1200
 
-    val found = bodyStr.split("\n").filter(_.startsWith("timeli_application_metric")).toList
+    val found = bodyStr.split("\n").filter(_.startsWith("sk8s_application_metric")).toList
     println(found)
     found.size shouldBe 1
 

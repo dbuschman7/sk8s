@@ -1,4 +1,4 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.time.LocalDateTime
 
@@ -14,7 +14,8 @@ final case class Endpoints(kind: String, apiVersion: String, metadata: Metadata,
   // /////////////////////////
   def servicePort(portName: Option[String] = None): Int = {
     lazy val firstPort: Option[Int] = subsets.flatMap(_.ports.headOption).map(_.port).headOption
-    lazy val filteredPort: Option[Int] = portName.flatMap(pn => subsets.flatMap(_.ports.filter(_.name.contains(pn)).map(_.port)).headOption)
+    lazy val filteredPort: Option[Int] =
+      portName.flatMap(pn => subsets.flatMap(_.ports.filter(_.name.contains(pn)).map(_.port)).headOption)
     filteredPort orElse firstPort getOrElse 0
   }
 
@@ -32,30 +33,34 @@ final case class Endpoints(kind: String, apiVersion: String, metadata: Metadata,
   //
   // Lookups
   // //////////////////////////
-  def hostIpsNoPort(port: Int): Seq[String] = {
+  def hostIpsNoPort(port: Int): Seq[String] =
     subsets
       .find(_.ports.map(_.port).contains(port))
       .map(_.addresses)
-      .map { e => e.map(_.ip) }
+      .map { e =>
+        e.map(_.ip)
+      }
       .getOrElse(Seq())
-  }
 
-  def hostIpsWithPort(port: Int): Seq[HostAndPort] = {
+  def hostIpsWithPort(port: Int): Seq[HostAndPort] =
     subsets
       .find(_.ports.map(_.port).contains(port))
       .map(_.addresses)
-      .map { e => e.map(_.ip) }
-      .map { addrs => addrs.map(ip => HostAndPort(ip, port)) }
+      .map { e =>
+        e.map(_.ip)
+      }
+      .map { addrs =>
+        addrs.map(ip => HostAndPort(ip, port))
+      }
       .getOrElse(Seq())
-  }
 
-  def dnsHosts(port: Int): Set[String] = {
+  def dnsHosts(port: Int): Set[String] =
     subsets
       .find(_.ports.map(_.port).contains(port))
       .map(_.addresses)
       .map { endPts =>
         endPts
-          //          .filterNot(_.targetRef.name.contains("arbiter"))
+        //          .filterNot(_.targetRef.name.contains("arbiter"))
           .map { endP =>
             println(s"dnsHosts - $endP")
             endP.hostname orElse Option(endP.targetRef.name) match {
@@ -67,7 +72,6 @@ final case class Endpoints(kind: String, apiVersion: String, metadata: Metadata,
       }
       .getOrElse(Seq())
       .toSet
-  }
 
   def hasHosts: Boolean = subsets.flatMap(_.addresses).nonEmpty
 
@@ -110,11 +114,10 @@ final case class TargetRef(
 )
 
 object EndpointJson {
-  implicit val _port: OFormat[Port] = Json.format[Port]
+  implicit val _port: OFormat[Port]           = Json.format[Port]
   implicit val _targetRef: OFormat[TargetRef] = Json.format[TargetRef]
-  implicit val _endpoint: OFormat[EndPoint] = Json.format[EndPoint]
-  implicit val _subset: OFormat[Subset] = Json.format[Subset]
-  implicit val _metadata: OFormat[Metadata] = Json.format[Metadata]
+  implicit val _endpoint: OFormat[EndPoint]   = Json.format[EndPoint]
+  implicit val _subset: OFormat[Subset]       = Json.format[Subset]
+  implicit val _metadata: OFormat[Metadata]   = Json.format[Metadata]
   implicit val _endpoints: OFormat[Endpoints] = Json.format[Endpoints]
 }
-

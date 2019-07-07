@@ -1,0 +1,124 @@
+{
+  "kind" : "StatefulSet",
+  "apiVersion" : "apps/v1",
+  "metadata" : {
+    "name" : "sk8s-gesvbldgpzthvcokmbni-3-2",
+    "namespace" : "david"
+  },
+  "spec" : {
+    "replicas" : 3,
+    "serviceName" : "sk8s-gesvbldgpzthvcokmbni-3-2-svc",
+    "selector" : {
+      "matchLabels" : {
+        "app" : "sk8s-gesvbldgpzthvcokmbni-3-2"
+      }
+    },
+    "template" : {
+      "metadata" : {
+        "name" : "sk8s-gesvbldgpzthvcokmbni-3-2",
+        "labels" : {
+          "app" : "sk8s-gesvbldgpzthvcokmbni-3-2",
+          "metrics" : "prometheus"
+        }
+      },
+      "spec" : {
+        "affinity" : {
+          "podAntiAffinity" : {
+            "requiredDuringSchedulingIgnoredDuringExecution" : [ {
+              "labelSelector" : {
+                "matchLabels" : {
+                  "app" : "sk8s-gesvbldgpzthvcokmbni-3-2"
+                }
+              },
+              "topologyKey" : "kubernetes.io/hostname"
+            } ]
+          }
+        },
+        "containers" : [ {
+          "name" : "sk8s-gesvbldgpzthvcokmbni-3-2",
+          "image" : "docker.io/sk8s/some-container:3.7.190704.texas",
+          "imagePullPolicy" : "IfNotPresent",
+          "ports" : [ {
+            "containerPort" : 8999,
+            "name" : "backend-port",
+            "protocol" : "TCP"
+          }, {
+            "containerPort" : 9000,
+            "name" : "public-port",
+            "protocol" : "TCP"
+          } ],
+          "env" : [ {
+            "name" : "LOG_LEVEL",
+            "value" : "INFO"
+          }, {
+            "name" : "SK8S_RUN_MODE",
+            "valueFrom" : {
+              "configMapKeyRef" : {
+                "key" : "sk8s-run-mode",
+                "name" : "sk8s-config"
+              }
+            }
+          }, {
+            "name" : "HOST_IP",
+            "valueFrom" : {
+              "fieldRef" : {
+                "fieldPath" : "status.hostIP",
+                "apiVersion" : "v1"
+              }
+            }
+          }, {
+            "name" : "POD_IP",
+            "valueFrom" : {
+              "fieldRef" : {
+                "fieldPath" : "status.podIP",
+                "apiVersion" : "v1"
+              }
+            }
+          }, {
+            "name" : "JAVA_OPTS",
+            "value" : "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 "
+          } ],
+          "resources" : {
+            "limits" : {
+              "cpu" : "3"
+            },
+            "requests" : {
+              "cpu" : "1.0",
+              "memory" : "2148m"
+            }
+          },
+          "livenessProbe" : {
+            "httpGet" : {
+              "port" : 8999,
+              "path" : "/health",
+              "scheme" : "HTTP"
+            },
+            "initialDelaySeconds" : 30,
+            "timeoutSeconds" : 2,
+            "periodSeconds" : 5,
+            "successThreshold" : 1,
+            "failureThreshold" : 5
+          },
+          "readinessProbe" : {
+            "httpGet" : {
+              "port" : 8999,
+              "path" : "/health",
+              "scheme" : "HTTP"
+            },
+            "initialDelaySeconds" : 10,
+            "timeoutSeconds" : 2,
+            "periodSeconds" : 5,
+            "successThreshold" : 1,
+            "failureThreshold" : 5
+          }
+        } ],
+        "automountServiceAccountToken" : false,
+        "restartPolicy" : "Always",
+        "dnsPolicy" : "ClusterFirst",
+        "imagePullSecrets" : [ {
+          "name" : "docker-hub-credentials"
+        } ]
+      }
+    }
+  }
+}

@@ -1,22 +1,21 @@
-package io.timeli.sk8s.util
+package me.lightspeed7.sk8s.util
 
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.sk8s.util.Closeables.logger
 
 class AutoClose[A <: java.lang.AutoCloseable](protected val c: A) {
 
   // make sure the resource is closed
-  def map[B](f: (A) => B): B = try {
-    f(c)
-  }
-  finally {
-    c.close()
-  }
+  def map[B](f: A => B): B =
+    try {
+      f(c)
+    } finally {
+      c.close()
+    }
 
-  def foreach[B](f: (A) => B): B = map(f)
+  def foreach[B](f: A => B): B = map(f)
 
   // Not a proper flatMap, bit it works in for -> yield
-  def flatMap[B](f: (A) => B): B = map(f)
+  def flatMap[B](f: A => B): B = map(f)
 
 }
 
@@ -41,10 +40,20 @@ object Closeables extends LazyLogging with AutoCloseable {
     closeable
   }
 
+  def register[T](label: String, closeable: => T): T = synchronized {
+    logger.info(s"Register Closeable - $label")
+
+    val temp = closeables :+ Closeable(label, new AutoCloseable {
+      override def close(): Unit = closeable
+    })
+
+    closeables = temp
+    closeable
+  }
+
   def close(): Unit = synchronized {
     logger.info("Closing AutoCloseables ...")
-    closeables
-      .reverse // opposite of registration
+    closeables.reverse // opposite of registration
       .foreach {
         case Closeable(l, c) =>
           logger.info(s"Closing - $l")

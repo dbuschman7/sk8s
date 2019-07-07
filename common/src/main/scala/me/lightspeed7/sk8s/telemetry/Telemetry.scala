@@ -1,18 +1,18 @@
-package io.timeli.sk8s.telemetry
+package me.lightspeed7.sk8s.telemetry
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import io.timeli.sk8s.AppInfo
-import io.timeli.sk8s.util.Time
-import org.joda.time.DateTime
 import org.lyranthe.prometheus.client.registry.RegistryMetrics
 import org.lyranthe.prometheus.client.{ Counter, Gauge, _ }
+import me.lightspeed7.sk8s.AppInfo
+import me.lightspeed7.sk8s.util.Time
+import org.joda.time.DateTime
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.collection.concurrent.TrieMap
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration.Duration
+import scala.concurrent.{ ExecutionContext, Future }
 
 //
 // Telemetry Types
@@ -20,14 +20,16 @@ import scala.concurrent.duration.Duration
 sealed trait Telemetry {
 
   implicit class Snakify(in: String) {
-    def snakify: String = in.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
+    def snakify: String =
+      in.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
 
     def snakeClassname: String = in.replaceAll("\\.", "_").toLowerCase
   }
 
   def getType: String // define this in sub classes
 
-  def toMetricName(name: String, appInfo: AppInfo) = MetricName("timeli_" + appInfo.appName.snakify + "_" + name.snakify.replace("-", "_"))
+  def toMetricName(name: String, appInfo: AppInfo) =
+    MetricName("sk8s_" + appInfo.appName.snakify + "_" + name.snakify.replace("-", "_"))
 }
 
 sealed trait TimerLike {
@@ -89,31 +91,27 @@ final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Regist
 
   def time[A](f: => A): A = {
     val (nanos, result) = Time.thisBlock(f)
-    val secs: Double = nanos.toDouble / (1000.0 * 1000.0)
-    update(nanos)
+    val secs: Double    = nanos.toDouble / (1000.0 * 1000.0)
+    update(secs)
     result
   }
 
-  def time[A](f: => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+  def time[A](f: => Future[A])(implicit ec: ExecutionContext): Future[A] =
     Time.thisBlock(f).map {
       case (nanos, result) =>
         val secs: Double = nanos.toDouble / (1000.0 * 1000.0)
         update(secs)
         result
     }
-  }
 
-  def update(latencyInSeconds: Double): Unit = {
+  def update(latencyInSeconds: Double): Unit =
     histo.observe(latencyInSeconds) // units are doubles in seconds
-  }
 
-  def update(latencyInMillis: Long): Unit = {
+  def update(latencyInMillis: Long): Unit =
     histo.observe(latencyInMillis / 1000.0) // units are doubles in seconds
-  }
 
-  def update(latency: Duration): Unit = {
+  def update(latency: Duration): Unit =
     histo.observe(latency.toMillis / 1000.0) // units are doubles in seconds
-  }
 
   def deltaFrom(startTime: DateTime): Long = deltaFrom(startTime.getMillis)
 
@@ -133,7 +131,7 @@ final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: R
     .register
     .labelValues(appInfo.version, getType)
 
-  def time[A](f: => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+  def time[A](f: => Future[A])(implicit ec: ExecutionContext): Future[A] =
     Time.thisBlock(f).map {
       case (nanos, result) =>
         val secs: Double = nanos.toDouble / (1000.0 * 1000.0)
@@ -141,27 +139,23 @@ final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: R
         update(nanos)
         result
     }
-  }
 
   def time[A](f: => A): A = {
     val (nanos, result) = Time.thisBlock(f)
-    val secs: Double = nanos.toDouble / (1000.0 * 1000.0)
+    val secs: Double    = nanos.toDouble / (1000.0 * 1000.0)
     println(s"Success[ ] - ($nanos)$secs - $result")
     update(nanos)
     result
   }
 
-  def update(latencyInSeconds: Double): Unit = {
+  def update(latencyInSeconds: Double): Unit =
     gauge.set(latencyInSeconds) // units are doubles in seconds
-  }
 
-  def update(latencyInMillis: Long): Unit = {
+  def update(latencyInMillis: Long): Unit =
     gauge.set(latencyInMillis / 1000) // units are doubles in seconds
-  }
 
-  def update(latency: Duration): Unit = {
+  def update(latency: Duration): Unit =
     gauge.set(latency.toMillis / 1000) // units are doubles in seconds
-  }
 
   def deltaFrom(startTime: DateTime): Long = deltaFrom(startTime.getMillis)
 
@@ -179,28 +173,30 @@ final case class PartitionTrackingGauge(name: String, topicName: String, appInfo
 
   val gauge: TrieMap[Int, LabelledGauge] = TrieMap()
 
-  private def createGauge(name: String, partition: Int) = {
+  private def createGauge(name: String, partition: Int) =
     Gauge(toMetricName(s"${name.snakify}_$partition", appInfo), s"$name$partition")
       .labels(label"version", label"type", label"partition")
       .register
       .labelValues(appInfo.version, getType, partition.toString)
-  }
 
   def set(partition: Int, v: Long): Unit = synchronized {
     val g = gauge.getOrElseUpdate(partition, createGauge(name, partition))
     g.set(math.max(g.sum, v))
   }
 
-  def values: Seq[(Int, Double)] = gauge.map {
-    case (k, g) =>
-      k -> g.sum
-  }.toSeq.sortBy { case (k, _) => k }
+  def values: Seq[(Int, Double)] =
+    gauge
+      .map {
+        case (k, g) =>
+          k -> g.sum
+      }
+      .toSeq
+      .sortBy { case (k, _) => k }
 
   def asString: String = s"""{"$topicName": [${values.map { case (k, v) => s"{$k: ${v.toLong}}" }.mkString(", ")}]}"""
 
-  def reset(): Unit = {
+  def reset(): Unit =
     gauge.clear()
-  }
 
   def getType: String = "gauge"
 }
@@ -218,13 +214,16 @@ object TelemetryRegistry {
 
   def counter(name: String)(implicit appInfo: AppInfo): BasicCounter = BasicCounter(name, appInfo)
 
-  def timer(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer = BasicTimer(name, appInfo)
+  def timer(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+    BasicTimer(name, appInfo)
 
   def timerGauge(name: String)(implicit appInfo: AppInfo) = BasicTimerGauge(name, appInfo)
 
-  def latency(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer = BasicTimer(name, appInfo)
+  def latency(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+    BasicTimer(name, appInfo)
 
-  def partitionTracker(name: String, topicName: String)(implicit appInfo: AppInfo): PartitionTrackingGauge = PartitionTrackingGauge(name, topicName, appInfo)
+  def partitionTracker(name: String, topicName: String)(implicit appInfo: AppInfo): PartitionTrackingGauge =
+    PartitionTrackingGauge(name, topicName, appInfo)
 
   //
   // Initialize Exception Logging
@@ -246,16 +245,13 @@ object EventTelemetry extends Telemetry {
 
   def markEvent(eventName: String, tuple: (String, String))(implicit appInfo: AppInfo): Unit = {
 
-    import TelemetryRegistry.registry
-
     def genKey(): String = eventName.snakeClassname
 
-    def createCounter(): LabelledCounter = {
+    def createCounter(): LabelledCounter =
       Counter(toMetricName(genKey(), appInfo), eventName)
         .labels(label"version", label"type", label"event", LabelName(tuple._1))
-        .register
+        .register(TelemetryRegistry.registry)
         .labelValues(appInfo.version, getType, "mark", tuple._2)
-    }
 
     counters.getOrElse(genKey(), createCounter()).inc()
   }
@@ -265,21 +261,18 @@ object EventTelemetry extends Telemetry {
 
       def genKey(element: StackTraceElement): String = element.getClassName.snakeClassname
 
-      def createCounter(element: StackTraceElement, event: ILoggingEvent): LabelledCounter = {
+      def createCounter(element: StackTraceElement, event: ILoggingEvent): LabelledCounter =
         Counter(MetricName(genKey(element)), element.getClassName)
           .labels(label"version", label"exception", label"line_number", label"type", label"event")
           .register
           .labelValues(app.version, event.getThrowableProxy.getClassName, element.getLineNumber.toString, getType, "exception")
-      }
 
-      override def append(event: ILoggingEvent): Unit = {
-        event
-          .getCallerData
-          .find(_.getClassName.contains("io.timeli"))
+      override def append(event: ILoggingEvent): Unit =
+        event.getCallerData
+          .find(_.getClassName.contains("me.lightspeed7.sk8s"))
           .foreach { element =>
             counters.getOrElse(genKey(element), createCounter(element, event)).inc()
           }
-      }
     }
 
     appender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])

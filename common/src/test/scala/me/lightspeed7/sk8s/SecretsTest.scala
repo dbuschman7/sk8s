@@ -1,13 +1,16 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.nio.file.{ Path, Paths }
 
+import me.lightspeed7.sk8s.files.VolumeFiles
 import org.scalatest.{ FunSuite, Matchers }
 
 class SecretsTest extends FunSuite with Matchers {
 
-  val pwd: Path = Paths.get("sk8s").toAbsolutePath
-  val resourcesPath: Path = Paths.get(pwd.toString + "/src/test/resources")
+  import me.lightspeed7.sk8s.files.TestCrypto._
+
+  val pwd: Path               = Paths.get("common").toAbsolutePath
+  val resourcesPath: Path     = Paths.get(pwd.toString + "/src/test/resources")
   val svcAcct: ServiceAccount = Sk8s.serviceAccount(resourcesPath)
 
   test("Read secret files") {

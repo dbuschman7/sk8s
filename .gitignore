@@ -1,7 +1,45 @@
 *.class
 *.log
 
-target/
-*/target/
-project/target/
-project/project
+
+# OSX Finder
+.DS_Store
+
+# IntelliJ
+.idea
+*.iml
+
+# Eclipse
+.worksheet
+.settings
+.cache
+.project
+.classpath
+.scala_dependencies
+bin
+
+# Maven
+target
+work
+.cache-main
+.cache-tests
+.tmpBin/
+mvn.out
+
+
+# SBT
+dist
+project/boot
+project/target
+project/plugins/target
+target
+.target
+.tmpBin
+version.txt
+
+# Play
+logs
+RUNNING_PID
+
+# Other
+*.swp

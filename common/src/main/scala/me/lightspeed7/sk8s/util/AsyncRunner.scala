@@ -1,4 +1,4 @@
-package io.timeli.sk8s.util
+package me.lightspeed7.sk8s.util
 
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.LazyLogging
@@ -27,8 +27,7 @@ object AsyncRunner extends LazyLogging {
 
         if (System.currentTimeMillis() < stopTime) {
           schedule(this)
-        }
-        else {
+        } else {
           logger.debug("Runnable not scheduled")
         }
       }
@@ -38,4 +37,3 @@ object AsyncRunner extends LazyLogging {
   }
 
 }
-

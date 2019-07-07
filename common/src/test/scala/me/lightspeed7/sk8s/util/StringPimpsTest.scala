@@ -1,9 +1,10 @@
-package me.lightspeed7.sk8s
+package me.lightspeed7.sk8s.util
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers.be
+import org.scalatest.{ FunSuite, Matchers }
 
-class StringPimpsTest extends FunSuite {
+class StringPimpsTest extends FunSuite with Matchers {
+
+  import String._
 
   test("notNullTests") {
     "".notNull should be("")

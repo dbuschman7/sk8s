@@ -1,4 +1,4 @@
-package io.timeli.sk8s.telemetry
+package me.lightspeed7.sk8s.telemetry
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -7,25 +7,23 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.sk8s.util.Closeables
-import io.timeli.sk8s.{ AppInfo, Sk8s }
+import me.lightspeed7.sk8s.{ AppInfo, Sk8s }
+import me.lightspeed7.sk8s.util.Closeables
 import org.lyranthe.prometheus.client.registry.{ ProtoFormat, TextFormat }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.util.{ Failure, Success }
 
-class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean, configGen: => String)(implicit appInfo: AppInfo, system: ActorSystem) extends LazyLogging {
+class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean, configGen: => String)(implicit appInfo: AppInfo,
+                                                                                                                    system: ActorSystem)
+    extends LazyLogging {
 
   implicit val ec: ExecutionContext = system.dispatcher
 
   implicit val mat: ActorMaterializer = {
     val mat = ActorMaterializer()
-    Closeables.registerCloseable[AutoCloseable]("Http Server Shutdown", new AutoCloseable {
-      override def close(): Unit = {
-        mat.shutdown()
-      }
-    })
+    Closeables.registerCloseable[AutoCloseable]("Http Server Shutdown", () => mat.shutdown())
     mat
   }
 
@@ -64,12 +62,11 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
   def metricsRoute(implicit appInfo: AppInfo): Route =
     path("metrics") {
       get {
-        val data = io.timeli.sk8s.telemetry.TelemetryRegistry.snapshot
+        val data = TelemetryRegistry.snapshot
 
         val (ct, serialized) = if (protobufFormet) {
           (ContentType.parse(ProtoFormat.contentType).right.get, ProtoFormat.output(data))
-        }
-        else {
+        } else {
           (ContentType.parse(TextFormat.contentType).right.get, TextFormat.output(data))
         }
 
@@ -99,11 +96,8 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
         logger.info(s"Server is listening on ${address.getHostString}:${address.getPort}")
 
         // registerShutdownHook
-        Closeables.registerCloseable[AutoCloseable]("Http Server Shutdown", new AutoCloseable {
-          override def close(): Unit = {
-            Await.result(binding.unbind(), 5 seconds)
-          }
-        })
+        Closeables
+          .registerCloseable[AutoCloseable]("Http Server Shutdown", () => Await.result(binding.unbind(), 5 seconds))
       //
       case Failure(ex) =>
         logger.error(s"Server '${appInfo.appName}' could not be started", ex)

@@ -1,7 +1,7 @@
-package io.timeli.sk8s.services
+package me.lightspeed7.sk8s.services
 
 import akka.actor.ActorSystem
-import com.typesafe.scalalogging.{ LazyLogging, StrictLogging }
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.ExecutionContext
@@ -14,7 +14,8 @@ object CacheConfig {
 }
 
 object TTLCache {
-  def apply[K, V](config: CacheConfig)(implicit akka: ActorSystem): TTLCache[K, V] = apply(config.cacheTtl, config.reaper)
+  def apply[K, V](config: CacheConfig)(implicit akka: ActorSystem): TTLCache[K, V] =
+    apply(config.cacheTtl, config.reaper)
 
   def apply[K, V](cacheTtl: FiniteDuration, reaper: FiniteDuration)(implicit akka: ActorSystem): TTLCache[K, V] = {
     implicit val ec: ExecutionContext = akka.dispatcher
@@ -44,7 +45,7 @@ final case class TTLCache[K, V](ttl: Long) extends LazyLogging {
   }
 
   // Resets the clock for any accessed keys, possible stale value replacement
-  def getWithReset(k: K): Option[V] = {
+  def getWithReset(k: K): Option[V] =
     cache
       .get(k)
       .filterNot(_.expired)
@@ -52,7 +53,6 @@ final case class TTLCache[K, V](ttl: Long) extends LazyLogging {
         v.insertTime = clock()
         v.value
       }
-  }
 
   def contains(k: K): Boolean = cache.contains(k)
 

@@ -1,6 +1,6 @@
-package io.timeli.sk8s.telemetry
+package me.lightspeed7.sk8s.telemetry
 
-import io.timeli.sk8s.AppInfo
+import me.lightspeed7.sk8s.AppInfo
 import org.joda.time.DateTime
 import org.scalatest.{ FunSuite, Matchers }
 

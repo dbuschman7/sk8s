@@ -1,12 +1,12 @@
-package io.timeli.sk8s.http
+package me.lightspeed7.sk8s.http
 
 import java.net.URL
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.sk8s._
 import javax.net.ssl._
+import me.lightspeed7.sk8s.{ Endpoints, ErrorMessage, ServiceAccount, Sk8s }
 import play.api.libs.json.{ JsError, JsSuccess, Json }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -20,7 +20,8 @@ object RestQuery extends LazyLogging {
   //
   // TODO: Use the ca.cert from inside the container
   // /////////////////////////////////////////
-  def queryForEndpoints(svcAccount: ServiceAccount, serviceName: String, namespace: String = "default")(implicit ec: ExecutionContext): Future[Either[ErrorMessage, Endpoints]] = Future {
+  def queryForEndpoints(svcAccount: ServiceAccount, serviceName: String, namespace: String = "default")(
+      implicit ec: ExecutionContext): Future[Either[ErrorMessage, Endpoints]] = Future {
     val trustAll = Array[TrustManager](new TrustManager() {
       def checkServerTrusted(certs: Array[Nothing], authType: String): Unit = {}
 
@@ -47,7 +48,8 @@ object RestQuery extends LazyLogging {
       context
     }
 
-    val path = s"https://${Sk8s.Kubernetes.host}:${Sk8s.Kubernetes.port}/api/v1/namespaces/$namespace/endpoints/$serviceName"
+    val path =
+      s"https://${Sk8s.Kubernetes.host}:${Sk8s.Kubernetes.port}/api/v1/namespaces/$namespace/endpoints/$serviceName"
 
     val ctx = SSLContext.getInstance("SSL")
     ctx.init(null, trustAll, new SecureRandom())
@@ -60,24 +62,27 @@ object RestQuery extends LazyLogging {
     conn.setSSLSocketFactory(trustfulSslContext.getSocketFactory)
     conn.addRequestProperty("Authorization", "Bearer " + svcAccount.token)
 
-    val outData = Try(Source.fromInputStream(conn.getInputStream, "UTF-8").mkString).toOption
-    val errData = Try(Source.fromInputStream(conn.getErrorStream, "UTF-8").mkString).toOption
+    val outData   = Try(Source.fromInputStream(conn.getInputStream, "UTF-8").mkString).toOption
+    val errData   = Try(Source.fromInputStream(conn.getErrorStream, "UTF-8").mkString).toOption
     val code: Int = conn.getResponseCode
     (errData, outData) match {
       case (None, Some(data)) =>
         logger.debug("Endpoints - " + data)
-        import EndpointJson._
+        import me.lightspeed7.sk8s.EndpointJson._
         Json.fromJson[Endpoints](Json.parse(data)) match {
-          case JsError(errs)     => Left(ErrorMessage("Status", "v0", "Failure", errs.mkString("\n"), "Endpoints.JsonParseError", None, 500))
+          case JsError(errs) =>
+            Left(ErrorMessage("Status", "v0", "Failure", errs.mkString("\n"), "Endpoints.JsonParseError", None, 500))
           case JsSuccess(pts, _) => Right(pts)
         }
       case (Some(err), _) =>
         logger.debug("ErrorMessage - " + err)
         Json.fromJson[ErrorMessage](Json.parse(err)) match {
-          case JsError(errs)     => Left(ErrorMessage("Status", "v0", "Failure", errs.mkString("\n"), "ErroMessage.JsonParseError", None, 500))
+          case JsError(errs) =>
+            Left(ErrorMessage("Status", "v0", "Failure", errs.mkString("\n"), "ErroMessage.JsonParseError", None, 500))
           case JsSuccess(pts, _) => Left(pts)
         }
-      case (None, None) => Left(ErrorMessage("Status", "v0", "Failure", "No response from API server", "Connection.noResponse", None, 500))
+      case (None, None) =>
+        Left(ErrorMessage("Status", "v0", "Failure", "No response from API server", "Connection.noResponse", None, 500))
 
     }
   }

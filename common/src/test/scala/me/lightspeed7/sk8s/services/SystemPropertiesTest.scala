@@ -1,8 +1,17 @@
-package me.lightspeed7.sk8s.server.services
+package me.lightspeed7.sk8s.services
 
-import org.scalatest.{FunSuite, Matchers}
+import me.lightspeed7.sk8s.AppInfo
+import org.joda.time.DateTime
+import org.scalatest.{ FunSuite, Matchers }
+import play.api.libs.json.Json
 
 class SystemPropertiesTest extends FunSuite with Matchers {
+
+  ignore("get data") {
+    val props = System.getProperties.getProperty("java.class.path")
+
+    println(props)
+  }
 
   test("Parse Raw test String") {
     sys.props.foreach { case (k, v) => println(f"$k%50s: $v") }
@@ -12,23 +21,21 @@ class SystemPropertiesTest extends FunSuite with Matchers {
 
     val sysProps = new SystemProperties(SysPropData.javaClassPath)
 
-    val libs = sysProps.jarDependencies("symphony-local")
-    libs.size shouldBe 127
-    libs.count(_.scalaVersion.length == 0) shouldBe 56
+    val libs = sysProps.jarDependencies()
+    libs.size shouldBe 44
+    libs.count(_.scalaVersion.length == 0) shouldBe 14
     libs.count(_.scalaVersion == "2.11") shouldBe 0
-    libs.count(_.scalaVersion == "2.12") shouldBe 71
-    libs.count(_.group == "io.timeli") shouldBe 10
+    libs.count(_.scalaVersion == "2.12") shouldBe 30
 
     libs.foreach(println)
 
-    implicit val info = AppInfo("name", "version", DateTime.now)
+    implicit val info: AppInfo = AppInfo("name", "version", DateTime.now)
 
-    val appDeps = sysProps.appDependencies("symphony-local")
+    val appDeps = sysProps.appDependencies()
     val jsonStr = Json.prettyPrint(Json.toJson(appDeps))
     jsonStr.contains("appInfo") shouldBe true
     jsonStr.contains("name") shouldBe true
 
-    jsonStr.contains("io.timeli") shouldBe true
     jsonStr.contains("akka") shouldBe true
 
   }

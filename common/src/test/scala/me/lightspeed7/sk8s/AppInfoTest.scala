@@ -1,4 +1,4 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import org.joda.time.DateTime
 import org.scalatest.FunSuite

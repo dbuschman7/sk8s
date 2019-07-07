@@ -1,9 +1,9 @@
-package io.timeli.sk8s.server
+package me.lightspeed7.sk8s.server
 
 import akka.actor.{ Actor, ActorRef, ActorSystem, Cancellable, Props }
-import io.timeli.sk8s.AppInfo
-import io.timeli.sk8s.logging.StrictJsonLogging
-import io.timeli.sk8s.util.PrettyPrint
+import me.lightspeed7.sk8s.AppInfo
+import me.lightspeed7.sk8s.logging.StrictJsonLogging
+import me.lightspeed7.sk8s.util.PrettyPrint
 import play.api.libs.json.{ JsObject, Json }
 
 import scala.concurrent.duration.FiniteDuration
@@ -59,23 +59,22 @@ object MemoryCronActor extends StrictJsonLogging {
 
   def pretty(in: Long): String = PrettyPrint.fileSizing(in)
 
-  def generateJson(info: MemoryInfo): JsObject = {
+  def generateJson(info: MemoryInfo): JsObject =
     Json.obj(
-      "sk8s" -> "memory",
+      "sk8s"       -> "memory",
       "processors" -> info.processors,
       //
-      "total" -> pretty(info.total),
+      "total"   -> pretty(info.total),
       "totalMB" -> info.total / (1024 * 1024),
       //
-      "free" -> pretty(info.free),
+      "free"   -> pretty(info.free),
       "freeMB" -> info.free / (1024 * 1024),
       //
-      "max" -> pretty(info.max),
+      "max"   -> pretty(info.max),
       "maxMB" -> info.max / (1024 * 1024),
       //
       "percent" -> info.percent //
     )
-  }
 
   def startup(appInfo: AppInfo, interval: Duration = 30 seconds)(implicit akka: ActorSystem): ActorRef = {
     logger.info("Activating MemoryCronActor")
@@ -84,7 +83,7 @@ object MemoryCronActor extends StrictJsonLogging {
 }
 
 case class MemoryInfo(processors: Int, free: Long, max: Long, total: Long) {
-  lazy val used: Long = total - free
+  lazy val used: Long    = total - free
   lazy val percent: Long = used * 100 / max
 }
 
@@ -93,4 +92,3 @@ object MemoryInfo {
 
   def create(): MemoryInfo = MemoryInfo(rt.availableProcessors(), rt.freeMemory(), rt.maxMemory(), rt.totalMemory())
 }
-

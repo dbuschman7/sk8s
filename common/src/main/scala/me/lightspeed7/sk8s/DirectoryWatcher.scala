@@ -1,4 +1,4 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.io.IOException
 import java.nio.file._
@@ -16,16 +16,15 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
 
   private case class Watch(key: WatchKey, path: Path, recursive: Boolean = false)
 
-  private val watchService: WatchService = FileSystems.getDefault.newWatchService()
+  private val watchService: WatchService     = FileSystems.getDefault.newWatchService()
   private val keys: TrieMap[WatchKey, Watch] = TrieMap.empty
 
-  final def trace(msg: => String): Unit = {
+  final def trace(msg: => String): Unit =
     if (debug) println(msg)
-  }
 
   final private def printEvent(event: WatchEvent[_], watch: Watch): Unit = {
     val event_path = event.context().asInstanceOf[Path]
-    val dir = watch.path
+    val dir        = watch.path
 
     import StandardWatchEventKinds._
     event.kind match {
@@ -37,9 +36,8 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
   }
 
   final private def register(dir: Path, recursive: Boolean): Unit = {
-    val key = dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
-      StandardWatchEventKinds.ENTRY_MODIFY,
-      StandardWatchEventKinds.ENTRY_DELETE)
+    val key =
+      dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
 
     if (debug) {
       keys.get(key) match {
@@ -62,7 +60,7 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
    */
   def registerAll(start: Path): Unit = {
 
-    implicit def makeDirVisitor(f: (Path) => Unit): SimpleFileVisitor[Path] = new SimpleFileVisitor[Path] {
+    implicit def makeDirVisitor(f: Path => Unit): SimpleFileVisitor[Path] = new SimpleFileVisitor[Path] {
       override def preVisitDirectory(p: Path, attrs: BasicFileAttributes): FileVisitResult = {
         f(p)
         FileVisitResult.CONTINUE
@@ -76,38 +74,37 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
     trace("Done.")
   }
 
-  private def registerNewChildren(child: Path): Path = try {
-    if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
-      registerAll(child)
+  private def registerNewChildren(child: Path): Path =
+    try {
+      if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
+        registerAll(child)
+      }
+      child
+    } catch {
+      case ioe: IOException =>
+        println("IOException: " + ioe)
+        throw ioe
+      case e: Exception =>
+        println("Exception: " + e)
+        throw e
     }
-    child
-  }
-  catch {
-    case ioe: IOException =>
-      println("IOException: " + ioe)
-      throw ioe
-    case e: Exception =>
-      println("Exception: " + e)
-      throw e
-  }
 
   private def logEvent[T](event: WatchEvent[T], watch: Watch): Path = {
-    val name = event.context().asInstanceOf[Path]
+    val name  = event.context().asInstanceOf[Path]
     val child = watch.path.resolve(name)
     if (debug) printEvent(event, watch)
     child
   }
 
-  def stop(path: Path): Unit = {
+  def stop(path: Path): Unit =
     keys
       .filter(_._2.path == path)
       .foreach { case (key, _) => keys.remove(key) }
-  }
 
   /**
    * The main directory watching thread
    */
-  override def run(): Unit = {
+  override def run(): Unit =
     try {
       //      if (recursive) registerAll(path) else register(path)
 
@@ -134,11 +131,9 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
           }
         }
       }
-    }
-    catch {
+    } catch {
       case ie: InterruptedException => println("InterruptedException: " + ie)
       case ioe: IOException         => println("IOException: " + ioe)
       case e: Exception             => println("Exception: " + e)
     }
-  }
 }

@@ -1,10 +1,10 @@
-package io.timeli.sk8s.util
+package me.lightspeed7.sk8s.util
 
 import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.ActorSystem
-import io.timeli.sk8s
-import io.timeli.sk8s.telemetry.{ BackendServer, BackendServerClient }
+import me.lightspeed7.sk8s.AppInfo
+import me.lightspeed7.sk8s.telemetry.{ BackendServer, BackendServerClient }
 import org.joda.time.DateTime
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
 
@@ -14,10 +14,10 @@ import scala.util.Try
 
 class AsyncRunnerTest extends FunSuite with BeforeAndAfterAll with Matchers {
 
-  implicit val akka: ActorSystem = ActorSystem("Prometheus")
+  implicit val akka: ActorSystem    = ActorSystem("Prometheus")
   implicit val ec: ExecutionContext = akka.dispatcher
 
-  implicit val appInfo: sk8s.AppInfo = sk8s.AppInfo("name", "version", DateTime.now)
+  implicit val appInfo: AppInfo = AppInfo("name", "version", DateTime.now)
 
   val export = new BackendServer(protobufFormet = false, configGen = "Config")
   val client = BackendServerClient()

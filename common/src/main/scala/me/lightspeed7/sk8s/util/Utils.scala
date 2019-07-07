@@ -1,16 +1,18 @@
-package io.timeli.sk8s.util
+package me.lightspeed7.sk8s.util
 
 import java.nio.file.{ Path, Paths, StandardOpenOption }
+import java.util.UUID
 
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.sk8s.telemetry.{ BasicTimer, BasicTimerGauge, TimerLike }
+import me.lightspeed7.sk8s.telemetry.TimerLike
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.io.Source
 import scala.util.{ Failure, Success, Try }
 
 trait FileUtils extends LazyLogging {
-  def getContents(basePath: Path, filename: String): Option[String] = getContents(Paths.get(basePath.toString, filename))
+  def getContents(basePath: Path, filename: String): Option[String] =
+    getContents(Paths.get(basePath.toString, filename))
 
   def getContents(fullPath: Path): Option[String] = {
     logger.debug(s"getContents - path = $fullPath")
@@ -30,9 +32,103 @@ trait FileUtils extends LazyLogging {
 
 }
 
+object String {
+  implicit class StringPimps(s: String) {
+
+    def notEmpty: Option[String] = s match {
+      case "" => None
+      case _  => Option(s)
+    }
+
+    def notBlank: Option[String] = s.notEmpty.flatMap(_ => s.trim.notEmpty)
+
+    def toBytes: Option[Array[Byte]] = s.notEmpty.flatMap(s => s.toBytes)
+
+    def notNull: String = if (s == null) "" else s
+
+    object pad {
+
+      private def doPad(padChar: Char, length: Int) = padChar.toString * (length - notNull.length)
+
+      object left {
+        def apply(padChar: Char, length: Int): String = doPad(padChar, length) + notNull
+      }
+
+      object right {
+        def apply(padChar: Char, length: Int): String = notNull + doPad(padChar, length)
+      }
+
+    }
+
+    def tryParseUUID: Option[UUID] = Try(UUID.fromString(s)).toOption // not the best method to have
+
+    /**
+     * Remove all the characters from a string exception a-z, A-Z, 0-9, and '_'
+     *
+     * @return the cleaned string and an empty string if the input is null
+     */
+    def clean: String = s.notNull.replaceAll("[^a-zA-Z0-9_]", "")
+
+    /**
+     * Turn a string of format "FooBar" into snake case "foo_bar"
+     *
+     * Note: snakify is not reversible
+     *
+     * @return the underscored string
+     */
+    def snakify: String =
+      s.notNull.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
+
+    /**
+     * Turn a string of format "FooBar" into snake case "foo-bar"
+     *
+     * Note: dashify is not reversible
+     *
+     * @return the dashed string
+     */
+    def dashify: String =
+      s.notNull.replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2").replaceAll("([a-z\\d])([A-Z])", "$1-$2").toLowerCase
+
+    /**
+     * Parse a string and return the Long value of that string.<p/>
+     * The string can start with '-' if it is a negative number or '+' for a positive number
+     *
+     * @return the Long value of the input String
+     */
+    def parseNumber: Long = {
+      def cToL(in: Char) = in.toLong - '0'.toLong
+
+      def p(in: List[Char]) = in.takeWhile(Character.isDigit).foldLeft(0L)((acc, c) => (acc * 10L) + cToL(c))
+
+      s.notNull.trim.toList match {
+        case '-' :: xs => -p(xs)
+        case '+' :: xs => p(xs)
+        case xs        => p(xs)
+      }
+    }
+
+    /**
+     * Add commas before the last 3 characters
+     *
+     * @return the string with commas
+     */
+    def commafy: String = {
+      def commaIt(in: List[Char]): List[Char] = in match {
+        case Nil                  => in
+        case _ :: Nil             => in
+        case _ :: _ :: Nil        => in
+        case _ :: _ :: _ :: Nil   => in
+        case x1 :: x2 :: x3 :: xs => x1 :: x2 :: x3 :: ',' :: commaIt(xs)
+      }
+
+      commaIt(s.notNull.toList.reverse).reverse.mkString("")
+    }
+  }
+}
+
 object PrettyPrint {
 
-  private val units = Array[String]("B", "K", "M", "G", "T")
+  private val units  = Array[String]("B", "K", "M", "G", "T")
   private val format = new java.text.DecimalFormat("#,##0.#")
 
   def fileSizing(input: Long): String = {
@@ -55,9 +151,9 @@ object Time {
    * @return nano time for the block of code
    */
   def thisBlock[T](block: => T): (Long, T) = {
-    val t0 = System.nanoTime()
+    val t0     = System.nanoTime()
     val result = block // call-by-name
-    val t1 = System.nanoTime()
+    val t1     = System.nanoTime()
     (t1 - t0, result)
   }
 
@@ -78,11 +174,11 @@ object Time {
     timer.foreach(_.timer.update(time))
 
     // dump the results
-    val micro = time / 1000
-    val millis = micro / 1000
+    val micro        = time / 1000
+    val millis       = micro / 1000
     val rawSecs: Int = (millis.toDouble / 1000).floor.toInt
-    val mins: Int = rawSecs / 60
-    val secs: Int = rawSecs - (mins * 60)
+    val mins: Int    = rawSecs / 60
+    val secs: Int    = rawSecs - (mins * 60)
 
     (mins, secs, millis) match {
       case (m, s, _) if m > 0 => output(s"$label - Elapsed Time: $m mins $s seconds")
@@ -94,9 +190,11 @@ object Time {
     result
   }
 
-  def repeated[T](label: => String, runs: Int = 1, output: String => Unit = in => println(in))(block: => T): Seq[T] = it(label, output) {
-    (1 to runs).map { _ => block }
-  }
+  def repeated[T](label: => String, runs: Int = 1, output: String => Unit = in => println(in))(block: => T): Seq[T] =
+    it(label, output) {
+      (1 to runs).map { _ =>
+        block
+      }
+    }
 
 }
-

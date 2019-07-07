@@ -1,12 +1,11 @@
-package io.timeli.application
+package me.lightspeed7.sk8s
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.context.AppContext
-import io.timeli.sk8s.Sk8s
+import me.lightspeed7.sk8s.util.Closeables
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -14,7 +13,7 @@ import scala.util.{ Failure, Success }
 
 case class ServerConfig(routes: Seq[Route] = Seq.empty, interface: String = "0.0.0.0", port: Int = 9000)
 
-class AppRoutesServer(app: BackendApplication, config: ServerConfig)(implicit appCtx: AppContext) extends LazyLogging {
+class AppRoutesServer(app: BackendApplication, config: ServerConfig)(implicit appCtx: Sk8sContext) extends LazyLogging {
 
   import appCtx._
 
@@ -29,7 +28,7 @@ class AppRoutesServer(app: BackendApplication, config: ServerConfig)(implicit ap
       }
     }
 
-  private def appInfoRoute(implicit appCtx: AppContext): Route =
+  private def appInfoRoute(implicit appCtx: Sk8sContext): Route =
     pathEndOrSingleSlash {
       get {
         complete(StatusCodes.OK -> appCtx.appInfo.toJson.toString())
@@ -58,9 +57,8 @@ class AppRoutesServer(app: BackendApplication, config: ServerConfig)(implicit ap
 
         // registerShutdownHook
         Closeables.registerCloseable[AutoCloseable]("Http Server Shutdown", new AutoCloseable {
-          override def close(): Unit = {
+          override def close(): Unit =
             Await.result(binding.unbind(), 5 seconds)
-          }
         })
       //
       case Failure(ex) =>

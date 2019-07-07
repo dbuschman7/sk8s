@@ -1,0 +1,101 @@
+{
+  "kind" : "Job",
+  "apiVersion" : "batch/v1",
+  "metadata" : {
+    "name" : "sk8s-gesvbldgpzthvcokmbni",
+    "namespace" : "david"
+  },
+  "spec" : {
+    "completions" : 1,
+    "parallelism" : 1,
+    "backoffLimit" : 1,
+    "activeDeadlineSeconds" : 300,
+    "template" : {
+      "metadata" : {
+        "name" : "sk8s-gesvbldgpzthvcokmbni",
+        "labels" : {
+          "app" : "sk8s-gesvbldgpzthvcokmbni",
+          "metrics" : "prometheus"
+        }
+      },
+      "spec" : {
+        "containers" : [ {
+          "name" : "sk8s-gesvbldgpzthvcokmbni",
+          "image" : "docker.io/sk8s/some-container:3.7.190704.texas",
+          "imagePullPolicy" : "IfNotPresent",
+          "ports" : [ ],
+          "env" : [ {
+            "name" : "LOG_LEVEL",
+            "value" : "INFO"
+          }, {
+            "name" : "SK8S_RUN_MODE",
+            "valueFrom" : {
+              "configMapKeyRef" : {
+                "key" : "sk8s-run-mode",
+                "name" : "sk8s-config"
+              }
+            }
+          }, {
+            "name" : "HOST_IP",
+            "valueFrom" : {
+              "fieldRef" : {
+                "fieldPath" : "status.hostIP",
+                "apiVersion" : "v1"
+              }
+            }
+          }, {
+            "name" : "POD_IP",
+            "valueFrom" : {
+              "fieldRef" : {
+                "fieldPath" : "status.podIP",
+                "apiVersion" : "v1"
+              }
+            }
+          }, {
+            "name" : "JAVA_OPTS",
+            "value" : "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 "
+          } ],
+          "resources" : {
+            "limits" : {
+              "cpu" : "3"
+            },
+            "requests" : {
+              "cpu" : "1.0",
+              "memory" : "2148m"
+            }
+          },
+          "livenessProbe" : {
+            "httpGet" : {
+              "port" : 8999,
+              "path" : "/health",
+              "scheme" : "HTTP"
+            },
+            "initialDelaySeconds" : 30,
+            "timeoutSeconds" : 2,
+            "periodSeconds" : 5,
+            "successThreshold" : 1,
+            "failureThreshold" : 5
+          },
+          "readinessProbe" : {
+            "httpGet" : {
+              "port" : 8999,
+              "path" : "/health",
+              "scheme" : "HTTP"
+            },
+            "initialDelaySeconds" : 10,
+            "timeoutSeconds" : 2,
+            "periodSeconds" : 5,
+            "successThreshold" : 1,
+            "failureThreshold" : 5
+          }
+        } ],
+        "automountServiceAccountToken" : false,
+        "restartPolicy" : "Always",
+        "dnsPolicy" : "ClusterFirst",
+        "imagePullSecrets" : [ {
+          "name" : "docker-hub-credentials"
+        } ]
+      }
+    }
+  }
+}

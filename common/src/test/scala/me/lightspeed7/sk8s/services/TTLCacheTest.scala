@@ -1,7 +1,7 @@
-package me.lightspeed7.sk8s.server.services
+package me.lightspeed7.sk8s.services
 
 import akka.actor.ActorSystem
-import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
+import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

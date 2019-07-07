@@ -1,6 +1,6 @@
-package io.timeli.sk8s.server
+package me.lightspeed7.sk8s.server
 
-import io.timeli.sk8s.Sk8s
+import me.lightspeed7.sk8s.Sk8s
 import org.scalactic.source
 import org.scalatest.{ FunSuite, Matchers, Tag }
 
@@ -22,8 +22,7 @@ class MemoryCronActorTest extends FunSuite with Matchers {
 
   lazy val k8sActive: Boolean = Sk8s.isKubernetes()
 
-  protected def testIfNotK8s(testName: String, testTags: Tag*)(testFun: => Any /* Assertion */ )(implicit pos: source.Position): Unit = {
+  protected def testIfNotK8s(testName: String, testTags: Tag*)(testFun: => Any /* Assertion */ )(implicit pos: source.Position): Unit =
     if (!k8sActive) test(testName, testTags: _*)(testFun)(pos)
     else ignore(testName + " !!! K8s REQUIRED ", testTags: _*)(testFun)(pos)
-  }
 }

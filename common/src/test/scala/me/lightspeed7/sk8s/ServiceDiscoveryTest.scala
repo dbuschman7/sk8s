@@ -1,6 +1,6 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
-import io.timeli.sk8s.services.ServiceDiscovery
+import me.lightspeed7.sk8s.services.ServiceDiscovery
 import org.scalatest.{ FunSuite, Matchers }
 
 class ServiceDiscoveryTest extends FunSuite with Matchers {
@@ -8,7 +8,7 @@ class ServiceDiscoveryTest extends FunSuite with Matchers {
   test("Discovery from Environment") {
 
     val discovery = new ServiceDiscovery(Data.envMap)
-    val services = discovery.serviceNames
+    val services  = discovery.serviceNames
 
     services.size shouldBe 28
     services.count(_.contains("_svc")) shouldBe 28 // all are the correct ones found
@@ -339,7 +339,7 @@ object Data {
       |SWAGGER_SVC_SERVICE_PORT=9000
       |SWAGGER_SVC_SERVICE_PORT_SERVER=9000
       |TERM=dumb
-      |TIMELI_ENV=PROD
+      |SK8S_RUN_MODE=PROD
       |UID=2
       |WP_INGRESS_SERVICE_PORT=tcp://10.0.20.206:80
       |WP_INGRESS_SERVICE_PORT_443_TCP=tcp://10.0.20.206:443

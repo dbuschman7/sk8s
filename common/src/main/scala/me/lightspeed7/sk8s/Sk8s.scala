@@ -1,20 +1,22 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.io.File
 import java.nio.file.{ Path, Paths }
 
 import akka.actor.{ ActorRef, ActorSystem }
 import com.typesafe.scalalogging.LazyLogging
-import io.timeli.sk8s.http.RestQuery
-import io.timeli.sk8s.server.{ HealthStatusSummary, MemoryCronActor }
-import io.timeli.sk8s.util.{ EnvironmentSource, FileUtils }
+import me.lightspeed7.sk8s.files.VolumeFiles
+import me.lightspeed7.sk8s.http.RestQuery
+import me.lightspeed7.sk8s.server.{ HealthStatusSummary, MemoryCronActor }
+import me.lightspeed7.sk8s.util.FileUtils
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object Sk8s extends FileUtils {
 
-  def serviceAccount(basePath: Path = Paths.get("/var/run/secrets/")) = ServiceAccount(Paths.get(basePath.toString + "/kubernetes.io/serviceaccount"))
+  def serviceAccount(basePath: Path = Paths.get("/var/run/secrets/")) =
+    ServiceAccount(Paths.get(basePath.toString + "/kubernetes.io/serviceaccount"))
 
   def service(name: String): Service = Service(name.toUpperCase())
 
@@ -22,22 +24,21 @@ object Sk8s extends FileUtils {
 
   def timeZone: String = exec("date +%Z")
 
-  def secrets(name: String, encrypted: Boolean = false, mountPath: Path = Paths.get("/etc")): VolumeFiles = {
+  def secrets(name: String, encrypted: Boolean = false, mountPath: Path = Paths.get("/etc")): VolumeFiles =
     VolumeFiles(name, mountPath, encrypted = encrypted)
-  }
 
-  def configMap(name: String, mountPath: Path = Paths.get("/etc")): VolumeFiles = {
+  def configMap(name: String, mountPath: Path = Paths.get("/etc")): VolumeFiles =
     VolumeFiles(name, mountPath, encrypted = false)
-  }
 
-  def isKubernetes(basePath: Path = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean = new File(basePath.toString).exists()
+  def isKubernetes(basePath: Path = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean =
+    new File(basePath.toString).exists()
 
   //
   object Kubernetes {
 
     val host: String = {
       lazy val k8s = EnvironmentSource.value("KUBERNETES_SERVICE_HOST", "kubernetes.default.svc.cluster.local")
-      val isOSX = sys.props.getOrElse("os.name", "nope").contains("Mac OS X")
+      val isOSX    = sys.props.getOrElse("os.name", "nope").contains("Mac OS X")
       if (isOSX) "10.0.0.1" else k8s
     }
 
@@ -90,7 +91,8 @@ object Sk8s extends FileUtils {
   }
 
   object MemoryCron {
-    def startup(app: AppInfo, interval: Duration = 30 seconds)(implicit akka: ActorSystem): ActorRef = MemoryCronActor.startup(app, interval)
+    def startup(app: AppInfo, interval: Duration = 30 seconds)(implicit akka: ActorSystem): ActorRef =
+      MemoryCronActor.startup(app, interval)
   }
 
 }
@@ -111,20 +113,20 @@ final case class ServiceAccount(basePath: Path) extends FileUtils with LazyLoggi
 
   lazy val crt: String = getContents(basePath, "ca.crt").getOrElse("unknown")
 
-  def endpoints(serviceName: String, namespace: String = "default")(implicit ec: ExecutionContext): Future[Option[Endpoints]] = {
+  def endpoints(serviceName: String, namespace: String = "default")(implicit ec: ExecutionContext): Future[Option[Endpoints]] =
     RestQuery.queryForEndpoints(this, serviceName, namespace).flatMap {
       case Right(pts) => Future successful Some(pts)
-      case Left(err) => err.code match {
-        case 403 =>
-          logger.warn(s"Service($namespace.$serviceName) - unauthorized access")
-          Future successful None // unknowns are services not configured for this cluster, try the next one
-        case 404 =>
-          logger.warn(s"Service($namespace.$serviceName) - unknown service")
-          Future successful None // unknowns are services not configured for this cluster, try the next one
-        case _ => Future failed new Exception(err.toString)
-      }
+      case Left(err) =>
+        err.code match {
+          case 403 =>
+            logger.warn(s"Service($namespace.$serviceName) - unauthorized access")
+            Future successful None // unknowns are services not configured for this cluster, try the next one
+          case 404 =>
+            logger.warn(s"Service($namespace.$serviceName) - unknown service")
+            Future successful None // unknowns are services not configured for this cluster, try the next one
+          case _ => Future failed new Exception(err.toString)
+        }
     }
-  }
 }
 
 //
@@ -132,10 +134,9 @@ final case class ServiceAccount(basePath: Path) extends FileUtils with LazyLoggi
 // ////////////////////////////
 final case class Service(name: String) {
 
-  val host: String = EnvironmentSource.value(s"${name}_SERVICE_HOST").getOrElse("0.0.0.0")
-  val port: Int = EnvironmentSource.valueInt(s"${name}_SERVICE_PORT").getOrElse(0)
-  val secure: Boolean = port == 443
+  val host: String     = EnvironmentSource.value(s"${name}_SERVICE_HOST").getOrElse("0.0.0.0")
+  val port: Int        = EnvironmentSource.valueInt(s"${name}_SERVICE_PORT").getOrElse(0)
+  val secure: Boolean  = port == 443
   val protocol: String = if (secure) "https" else "http"
-  val getUrl: String = s"$protocol://$host:$port"
+  val getUrl: String   = s"$protocol://$host:$port"
 }
-

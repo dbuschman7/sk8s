@@ -1,4 +1,4 @@
-package io.timeli.sk8s.util
+package me.lightspeed7.sk8s.util
 
 import org.scalatest.{ FunSuite, Matchers }
 
@@ -18,11 +18,9 @@ class AutoCloseTest extends FunSuite with Matchers {
   test("Test multi-line for comprehension") {
     var codeCalled: Boolean = false
 
-    val (aR, bR, cR) = for (
-      a <- AutoClose(new DemoCloseable("a123"));
-      b <- AutoClose(new DemoCloseable("b123"));
-      c <- AutoClose(new DemoCloseable("c123"))
-    ) yield {
+    val (aR, bR, cR) = for (a <- AutoClose(new DemoCloseable("a123"));
+                            b <- AutoClose(new DemoCloseable("b123"));
+                            c <- AutoClose(new DemoCloseable("c123"))) yield {
       codeCalled = true
       (a, b, c)
     }
@@ -37,9 +35,8 @@ class AutoCloseTest extends FunSuite with Matchers {
 class DemoCloseable(val s: String) extends AutoCloseable {
   var closed = false
 
-  override def close(): Unit = {
+  override def close(): Unit =
     closed = true
-  }
 }
 
 object DemoCloseable {

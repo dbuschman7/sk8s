@@ -1,9 +1,9 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.io.{ File, PrintWriter }
 import java.nio.file.{ Path, Paths }
 
-import io.timeli.sk8s.util.AutoClose
+import me.lightspeed7.sk8s.util.AutoClose
 import org.scalatest.{ FunSuite, Matchers }
 
 import scala.concurrent.duration._
@@ -12,11 +12,11 @@ import scala.util.Success
 
 class ConfigMapWatcherTest extends FunSuite with Matchers {
 
-  val pwd: Path = Paths.get("sk8s").toAbsolutePath
+  val pwd: Path           = Paths.get("sk8s").toAbsolutePath
   val resourcesPath: Path = Paths.get(pwd.toString + "/target")
-  val configMap: Path = Paths.get(resourcesPath.toString, "configMap")
-  val testFile: Path = Paths.get(configMap.toString, "key.name")
-  val testFile2: Path = Paths.get(configMap.toString, "key.name2")
+  val configMap: Path     = Paths.get(resourcesPath.toString, "configMap")
+  val testFile: Path      = Paths.get(configMap.toString, "key.name")
+  val testFile2: Path     = Paths.get(configMap.toString, "key.name2")
 
   def writeValue(file: File, value: String): Unit = {
     println(s"Writing $value to $file")
@@ -37,7 +37,9 @@ class ConfigMapWatcherTest extends FunSuite with Matchers {
 
     writeValue(testFile.toFile, "value")
 
-    val dirWatcher = new DirectoryWatcher({ (in) => p.complete(Success(true)) }, true)
+    val dirWatcher = new DirectoryWatcher({ (in) =>
+      p.complete(Success(true))
+    }, true)
     val watchThread = new Thread(dirWatcher)
     watchThread.setDaemon(true)
     watchThread.setName("WatcherService")

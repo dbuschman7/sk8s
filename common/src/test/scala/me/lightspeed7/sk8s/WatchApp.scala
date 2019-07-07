@@ -1,19 +1,19 @@
-package io.timeli.sk8s
+package me.lightspeed7.sk8s
 
 import java.io.{ File, PrintWriter }
 import java.nio.file.{ Path, Paths }
 
-import io.timeli.sk8s.util.AutoClose
+import me.lightspeed7.sk8s.util.AutoClose
 
 object WatchApp extends App {
 
   // setup
   // ////////
-  val pwd: Path = Paths.get("sk8s").toAbsolutePath
+  val pwd: Path           = Paths.get("sk8s").toAbsolutePath
   val resourcesPath: Path = Paths.get(pwd.toString + "/target")
-  val configMap: Path = Paths.get(resourcesPath.toString, "configMap")
-  val testFile: Path = Paths.get(configMap.toString, "key.name")
-  val testFile2: Path = Paths.get(configMap.toString, "key.name2")
+  val configMap: Path     = Paths.get(resourcesPath.toString, "configMap")
+  val testFile: Path      = Paths.get(configMap.toString, "key.name")
+  val testFile2: Path     = Paths.get(configMap.toString, "key.name2")
 
   def writeValue(file: File, value: String): Unit = {
     println(s"Writing $value to $file")
@@ -30,7 +30,9 @@ object WatchApp extends App {
   // run
   // ////////
 
-  val dirWatcher = new DirectoryWatcher({ (in) => in.foreach(println) }, true)
+  val dirWatcher = new DirectoryWatcher({ in =>
+    in.foreach(println)
+  }, true)
   val watchThread = new Thread(dirWatcher)
   watchThread.setDaemon(true)
   watchThread.setName("WatcherService")
