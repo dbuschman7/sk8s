@@ -20,4 +20,6 @@ abstract class Sk8sContext(implicit val appInfo: AppInfo, val system: ActorSyste
 
   logger.info("Sk8sContext Stood Up")
 
+  lazy val runMode: RunMode = RunMode.currentRunMode
+
 }

@@ -26,8 +26,14 @@ class SystemPropertiesTest extends FunSuite with Matchers {
     libs.count(_.scalaVersion.length == 0) shouldBe 14
     libs.count(_.scalaVersion == "2.11") shouldBe 0
     libs.count(_.scalaVersion == "2.12") shouldBe 30
-
+    //
     libs.foreach(println)
+
+    val ah = libs.filter(_.artifact == "akka-http")
+    ah.size shouldBe 1
+
+    val ts = libs.filter(_.group == "com.typesafe.akka")
+    ts.size shouldBe 6
 
     implicit val info: AppInfo = AppInfo("name", "version", DateTime.now)
 

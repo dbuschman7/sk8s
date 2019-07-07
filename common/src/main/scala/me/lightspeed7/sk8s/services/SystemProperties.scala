@@ -48,7 +48,7 @@ object JarDependency {
         case Some(sVer) =>
           in.indexOf(sVer) match {
             case n if n < 1 => ("", in)
-            case n          => (in.substring(n + 1), in.substring(1, n))
+            case n          => (in.substring(n + 1), in.substring(0, n))
           }
       }
 
