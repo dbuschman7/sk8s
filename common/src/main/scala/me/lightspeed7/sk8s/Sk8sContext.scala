@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext
 
-abstract class Sk8sContext(implicit val appInfo: AppInfo, val system: ActorSystem, val mat: Materializer) extends LazyLogging {
+final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem, val mat: Materializer) extends LazyLogging {
 
   lazy val internalSdkCalls: Boolean = Sk8s.serviceAccount().isKubernetes
 
@@ -21,5 +21,4 @@ abstract class Sk8sContext(implicit val appInfo: AppInfo, val system: ActorSyste
   logger.info("Sk8sContext Stood Up")
 
   lazy val runMode: RunMode = RunMode.currentRunMode
-
 }

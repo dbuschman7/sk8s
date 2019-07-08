@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s
 
-import akka.actor.{ Actor, ActorSystem, Props }
+import akka.actor.{ ActorSystem, Props }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import ch.qos.logback.classic.LoggerContext
 import com.typesafe.scalalogging.LazyLogging
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.Await
 import scala.concurrent.duration.{ FiniteDuration, _ }
 
-final case class BackendApplication(info: AppInfo, ctx: Sk8sContext) extends LazyLogging with AutoCloseable {
+final case class BackendApplication(info: AppInfo) extends LazyLogging with AutoCloseable {
 
   implicit val appInfo: AppInfo = info
 
@@ -60,13 +60,13 @@ final case class BackendApplication(info: AppInfo, ctx: Sk8sContext) extends Laz
     mat
   }
 
-  implicit val appCtx: Sk8sContext = ctx
+  implicit val appCtx: Sk8sContext = Sk8sContext(appInfo)
 
   protected val backgroundTasks = new BackgroundTasks()(appCtx)
 
   logger.info(s"Kubernetes - ${Sk8s.isKubernetes()}")
 
-  private val _: AppRoutesServer = new AppRoutesServer(this, ServerConfig())(appCtx)
+//  private val _: AppRoutesServer = new AppRoutesServer(this, ServerConfig())(appCtx)
 
   private var returnCode: Int = -1
 
@@ -84,7 +84,7 @@ final case class BackendApplication(info: AppInfo, ctx: Sk8sContext) extends Laz
       Thread.sleep(1000)
     } while (returnCode < 0)
 
-    if (!RunMode.Test.isCurrent && !RunMode.FuncTest.isCurrent) System.exit(returnCode)
+    if (RunMode.currentRunMode.useSystemExit) System.exit(returnCode)
   }
 
   class ShutdownActor extends Sk8sBusActor(BackendApplication.channel) {

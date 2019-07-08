@@ -1,3 +1,6 @@
+import sbtbuildinfo.BuildInfoKey
+import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
+
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
 version in ThisBuild := "0.5.0"
@@ -11,7 +14,8 @@ lazy val global = project
   .in(file("."))
   .settings(settings)
   .settings(
-    publishArtifact := false
+    publishArtifact := false,
+    skip in publish := true
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
@@ -27,7 +31,7 @@ lazy val global = project
 
 lazy val common = project
   .settings(
-    name := "common",
+    name := "sk8s-common",
     settings,
     libraryDependencies ++= commonDependencies
   )
@@ -38,11 +42,11 @@ lazy val common = project
 
 lazy val core = project
   .settings(
-    name := "core",
+    name := "sk8s-core",
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies :+ dependencies.javaxInject
+    libraryDependencies ++= commonDependencies
   )
   .dependsOn(
     common % "test->test;compile->compile"
@@ -50,11 +54,11 @@ lazy val core = project
 
 lazy val play = project
   .settings(
-    name := "play",
+    name := "sk8s-play",
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies ++ dependencies.playLibs
+    libraryDependencies ++= commonDependencies ++ dependencies.playLibs :+ dependencies.javaxInject
   )
   .dependsOn(
     common % "test->test;compile->compile",
@@ -63,7 +67,7 @@ lazy val play = project
 
 lazy val kubernetes = project
   .settings(
-    name := "kubernetes",
+    name := "sk8s-kubernetes",
     settings,
     assemblySettings,
     deploymentSettings,
@@ -76,7 +80,7 @@ lazy val kubernetes = project
 
 lazy val slack = project
   .settings(
-    name := "slack",
+    name := "sk8s-slack",
     settings,
     assemblySettings,
     deploymentSettings,
@@ -92,26 +96,30 @@ lazy val slack = project
 // TEMPLATE APPS
 // //////////////////////////
 lazy val templateBackend = project
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     name := "backend",
     settings,
     assemblySettings,
     publishArtifact := false,
     skip in publish := true,
-    libraryDependencies ++= commonDependencies
+    libraryDependencies ++= commonDependencies,
+    buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
   .dependsOn(
     core % "test->test;compile->compile"
   )
 
 lazy val templateApi = project
+  .enablePlugins(PlayScala, BuildInfoPlugin)
   .settings(
     name := "api",
     settings,
     assemblySettings,
     publishArtifact := false,
     skip in publish := true,
-    libraryDependencies ++= commonDependencies
+    libraryDependencies ++= commonDependencies :+ dependencies.scalaTestPlus,
+    buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
   .dependsOn(
     common % "test->test;compile->compile",
@@ -141,7 +149,8 @@ lazy val dependencies =
     // val logstash       = "net.logstash.logback"       % "logstash-logback-encoder" % logstashV
     val logback               = "ch.qos.logback"                % "logback-classic"           % logbackV withSources ()
     val slf4j                 = "org.slf4j"                     % "jcl-over-slf4j"            % slf4jV withSources ()
-    val akka                  = "com.typesafe.akka"             %% "akka-stream"              % akkaV withSources ()
+    val akkaStream            = "com.typesafe.akka"             %% "akka-stream"              % akkaV withSources ()
+    val akkaSlf4j             = "com.typesafe.akka"             %% "akka-slf4j"               % akkaV withSources ()
     val enumeratum            = "com.beachape"                  %% "enumeratum-play-json"     % "1.5.12" exclude ("org.scala-lang", "scala-library") withSources ()
     val javaxInject           = "javax.inject"                  % "javax.inject"              % "1" withSources ()
     val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.11" withSources ()
@@ -151,6 +160,7 @@ lazy val dependencies =
     val prometheusClientProto = "org.lyranthe.prometheus"       %% "protobuf"                 % "0.9.0-M5" withSources ()
     val scalacheck            = "org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()
     val scalatest             = "org.scalatest"                 %% "scalatest"                % scalatestV withSources ()
+    val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "3.1.2" % "test" withSources ()
     val scalaLogging          = "com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()
     val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.6" withSources ()
     val skuber                = "io.skuber"                     %% "skuber"                   % "2.1.1" withSources ()
@@ -176,7 +186,8 @@ lazy val commonDependencies = Seq(
   dependencies.scalaLogging,
   dependencies.slf4j,
   // dependencies.typesafeConfig,
-  dependencies.akka,
+  dependencies.akkaStream,
+  dependencies.akkaSlf4j,
   dependencies.sttpWithAkkHttp,
   dependencies.playJson,
   dependencies.enumeratum,
@@ -201,7 +212,8 @@ lazy val compilerOptions = Seq(
   "UTF-8", //
   "-feature",
   "-language:postfixOps",
-  "-language:implicitConversions"
+  "-language:implicitConversions",
+  "-language:reflectiveCalls"
   // "-language:existentials",
   // "-language:higherKinds",
 )
@@ -262,4 +274,31 @@ def harnessFilter(name: String): Boolean = !(name endsWith "Harness")
 
 def singleThreadedTests(definedTests: scala.Seq[TestDefinition]): scala.Seq[Tests.Group] = definedTests map { test =>
   Tests.Group(name = test.name, tests = Seq(test), runPolicy = Tests.SubProcess(ForkOptions()))
+}
+
+def buildInfoVars(name: SettingKey[String], version: SettingKey[String], scalaVersion: SettingKey[String], sbtVersion: SettingKey[String]) = {
+
+  import scala.sys.process._
+
+  def commit: String = ("git rev-parse --short HEAD" !!).trim
+
+  def generateBuildInfo(name: BuildInfoKey, version: BuildInfoKey, scalaVersion: BuildInfoKey, sbtVersion: BuildInfoKey): Seq[BuildInfoKey] =
+    Seq(name, version, scalaVersion, sbtVersion) :+ BuildInfoKey.action("buildTime") {
+      System.currentTimeMillis
+    } :+ BuildInfoKey.action("commit") {
+      commit
+    } :+ BuildInfoKey.action("branch") {
+      branch
+    } :+ BuildInfoKey.action("hasUnCommitted") {
+      hasUnCommitted
+    }
+
+  def branch: String = ("git rev-parse --abbrev-ref HEAD" !!).trim
+
+  def hasUnCommitted: Boolean = ("git diff-index --quiet HEAD --" !) != 0
+
+  Seq(
+    buildInfoPackage := "me.lightspeed7.sk8s",
+    buildInfoKeys := generateBuildInfo(BuildInfoKey.action("name")(name.value), version, scalaVersion, sbtVersion)
+  )
 }

@@ -5,7 +5,9 @@ import enumeratum._
 //
 // RunMode
 // ///////////////////////
-sealed abstract class RunMode(val name: String, val description: String, val requiresSecurity: Boolean) extends EnumEntry with Serializable {
+sealed abstract class RunMode(val name: String, val description: String, val requiresSecurity: Boolean, val useSystemExit: Boolean = false)
+    extends EnumEntry
+    with Serializable {
   final def isCurrent: Boolean = this == RunMode.currentRunMode
 }
 
@@ -13,15 +15,15 @@ object RunMode extends Enum[RunMode] with PlayJsonEnum[RunMode] {
 
   import me.lightspeed7.sk8s.util.String._
 
-  case object Test extends RunMode("Test", "Running inside a project build, maven or sbt", false)
+  case object Test extends RunMode("Test", "Running inside a project build, maven or sbt", requiresSecurity = false)
 
-  case object Developer extends RunMode("Developer", "Running on a developer box", false)
+  case object Developer extends RunMode("Developer", "Running on a developer box", requiresSecurity = false)
 
-  case object FuncTest extends RunMode("Functest", "Running in the functional test environment", true)
+  case object FuncTest extends RunMode("Functest", "Running in the functional test environment", requiresSecurity = true)
 
-  case object Staging extends RunMode("Staging", "Running in the staging environment", true)
+  case object Staging extends RunMode("Staging", "Running in the staging environment", requiresSecurity = true, useSystemExit = true)
 
-  case object Production extends RunMode("Production", "Running in the production environment", true)
+  case object Production extends RunMode("Production", "Running in the production environment", requiresSecurity = true, useSystemExit = true)
 
   //
   val values: scala.collection.immutable.IndexedSeq[RunMode] = findValues

@@ -1,0 +1,22 @@
+<configuration>
+
+    <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date %coloredLevel [%thread] %logger{10} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="play" level="INFO" />
+    <logger name="application" level="DEBUG" />
+    <logger name="me.lightspeed7.sk8s" level="DEBUG" />
+
+    <logger name="application" level="${LOG_LEVEL}" />
+    <logger name="me.lightspeed7.sk8s" level="${LOG_LEVEL}" />
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

@@ -1,14 +1,13 @@
 package me.lightspeed7.sk8s
 
 import com.typesafe.scalalogging.LazyLogging
-import javax.inject.Inject
 import me.lightspeed7.sk8s.Sk8s.HealthStatus
 import me.lightspeed7.sk8s.telemetry.BackendServer
 
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }
 
-class BackgroundTasks @Inject()(implicit val ctx: Sk8sContext) extends LazyLogging {
+class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
 
   import ctx._
 
@@ -51,7 +50,7 @@ class BackgroundTasks @Inject()(implicit val ctx: Sk8sContext) extends LazyLoggi
   Sk8s.MemoryCron.startup(appInfo, memoryUpdate)
 
   if (startServer) {
-    Try(new BackendServer(bindAddress, bindPort, protoFormat, BackgroundTasks.getConfig)) match {
+    Try(new BackendServer(bindAddress, bindPort, protoFormat, BackgroundTasks.getConfig)(ctx.appInfo, ctx.system)) match {
       case Failure(th: Throwable) =>
         logger.error("", th)
         HealthStatus.unhealthy("prometheus-server")

@@ -63,9 +63,7 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
 
   }
 
-  implicit lazy val ctx: Sk8sContext = new Sk8sContext() {
-    // nothing here yet
-  }
+  implicit lazy val ctx: Sk8sContext = Sk8sContext(appInfo)
 
   lazy val k8sActive: Boolean = Sk8s.isKubernetes()
 

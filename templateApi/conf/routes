@@ -1,0 +1,11 @@
+# Home
+
+
+# Add here
+
+# Map static resources from the /public folder to the /assets URL path
+### NoDocs ###
+GET   /assets/*file           @controllers.ExternalAssets.at(path = "/public", file)
+
+### NoDocs ###
+GET   /favicon.ico            @controllers.Assets.at(path="/public", file="favicon.ico")

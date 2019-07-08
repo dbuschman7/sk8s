@@ -36,7 +36,7 @@ final case class SlackBot(token: String, channelName: String)(handler: Message =
       if (!channelMatch) {
         client.sendMessage(message.channel, s"I am sorry <@${message.user}>, I am afraid that I cannot do that !") // Think Stanley Kubrick's 2001
       } else {
-        handler(message)
+        handler(message) // process the message
       }
       ()
     }
