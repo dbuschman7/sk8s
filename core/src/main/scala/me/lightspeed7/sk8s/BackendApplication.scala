@@ -66,8 +66,6 @@ final case class BackendApplication(info: AppInfo) extends LazyLogging with Auto
 
   logger.info(s"Kubernetes - ${Sk8s.isKubernetes()}")
 
-//  private val _: AppRoutesServer = new AppRoutesServer(this, ServerConfig())(appCtx)
-
   private var returnCode: Int = -1
 
   def shutdown(): Unit = returnCode = 0

@@ -5,6 +5,7 @@ import java.nio.file.{ Path, Paths }
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.files.{ Sk8sCrypto, VolumeFiles }
 import org.slf4j.Logger
+import play.api.libs.json.Json
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.duration.{ Duration, FiniteDuration }
@@ -30,6 +31,16 @@ trait Variable[T] extends LazyLogging {
   def valueStr: String = if (security && RunMode.currentRunMode.requiresSecurity) "**********" else value.toString
 
   override def toString: String = dump(2)
+
+  def json(indent: Int): String = {
+    val value: String = Try(valueStr) match {
+      case Success(v)                        => v
+      case Failure(_: IllegalStateException) => ""
+      case Failure(ex)                       => throw ex;
+    }
+
+    pad(indent) + s"""{ "name" : "$name", "display": "$displayName",  "security" : $security, "exists" : $exists, "value" : "$value" }"""
+  }
 
   def dump(indent: Int): String = {
     val value: String = Try(valueStr) match {
@@ -245,7 +256,7 @@ object Variables {
   def external[T](name: String, security: Boolean, default: Constant[T], function: () => Option[String])(implicit ct: ClassTag[T]): Variable[T] =
     ExternalVariable(name, security, default, function).register()
 
-  def visitDefinedVariables[T](f: Variable[_] => T): Unit = registered.toSeq.sortBy(m => m._1).map(_._2).map(f)
+  def visitDefinedVariables[T](f: Variable[_] => T): Seq[T] = registered.toSeq.sortBy(m => m._1).map(_._2).map(f)
 
   def dumpConfiguration(writer: String => Unit): Unit = {
     writer("**")
@@ -255,6 +266,17 @@ object Variables {
       writer(v.dump(2))
     }
     writer("*" * (60 + 15))
+  }
+
+  def dumpJson(writer: String => Unit)(implicit appInfo: AppInfo): Unit = {
+    writer(s"""{""")
+    writer(s"""  "runMode" : "${RunMode.currentRunMode}", """)
+    writer(s"""  "appInfo" : ${appInfo.toJson.toString()}, """)
+    val lines: Seq[String] = visitDefinedVariables { v =>
+      v.json(2)
+    }
+    writer(lines.mkString(s"""  "variables" : [\n""", ",\n", "\n  ]"))
+    writer(s"""}""")
   }
 
   def logConfig(logger: Logger): Unit = {

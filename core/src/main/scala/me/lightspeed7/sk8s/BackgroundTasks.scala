@@ -50,10 +50,10 @@ class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
   Sk8s.MemoryCron.startup(appInfo, memoryUpdate)
 
   if (startServer) {
-    Try(new BackendServer(bindAddress, bindPort, protoFormat, BackgroundTasks.getConfig)(ctx.appInfo, ctx.system)) match {
+    Try(new BackendServer(bindAddress, bindPort, protoFormat, BackgroundTasks.getConfig(ctx))(ctx.appInfo, ctx.system)) match {
       case Failure(th: Throwable) =>
         logger.error("", th)
-        HealthStatus.unhealthy("prometheus-server")
+        HealthStatus.unhealthy("backend-server")
       case Success(_) => // just ignore
     }
   }
@@ -67,11 +67,11 @@ object BackgroundTasks {
   val ServerAddressName       = "BACKEND_BIND_ADDRESS"
   val ServerAddressPort       = "BACKEND_BIND_PORT"
 
-  def getConfig: String = {
+  def getConfig(ctx: Sk8sContext): String = {
     val buf = new StringBuilder("\n")
-    Variables.dumpConfiguration({ in: String =>
+    Variables.dumpJson({ in: String =>
       buf.append(in).append("\n")
-    })
+    })(ctx.appInfo)
     buf.toString()
   }
 

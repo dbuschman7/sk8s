@@ -206,6 +206,8 @@ class VariablesTest extends Sk8sFunSuite with Matchers {
 
   test("dump configuration") {
     Variables.dumpConfiguration(in => println(in))
+
+    Variables.dumpJson(in => println(in))
   }
 
   test("DefinedService test") {
