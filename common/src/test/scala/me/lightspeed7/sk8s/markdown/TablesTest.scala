@@ -30,7 +30,9 @@ class TablesTest extends FunSuite with Matchers {
     val output: String = table.generate(data)
     println(output)
 
-    output.lines.map(_.indexOf('|')).toSet shouldBe Set(-1, 24)     // first pipe, one row has none
-    output.lines.map(_.lastIndexOf('|')).toSet shouldBe Set(-1, 35) // first pipe, one row has none
+    import scala.collection.JavaConverters._
+
+    output.split("\\n").map(_.indexOf('|')).toSet shouldBe Set(-1, 24)     // first pipe, one row has none
+    output.split("\\n").map(_.lastIndexOf('|')).toSet shouldBe Set(-1, 35) // first pipe, one row has none
   }
 }
