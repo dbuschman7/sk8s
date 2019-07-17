@@ -2,7 +2,7 @@ package me.lightspeed7.sk8s
 
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.Sk8s.HealthStatus
-import me.lightspeed7.sk8s.telemetry.BackendServer
+import me.lightspeed7.sk8s.server.BackendServer
 
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }

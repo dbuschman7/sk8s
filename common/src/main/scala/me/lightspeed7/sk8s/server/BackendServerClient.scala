@@ -1,4 +1,4 @@
-package me.lightspeed7.sk8s.telemetry
+package me.lightspeed7.sk8s.server
 
 import akka.http.scaladsl.model.MediaTypes
 import com.softwaremill.sttp._
@@ -25,8 +25,8 @@ final case class BackendServerClient(host: String = "localhost", port: Int = 899
 
   def configAsText: Id[Response[String]] = {
     val request = emptyRequest
-      .get(uri"http://localhost:8999/config")
       .header("Accept", MediaTypes.`text/plain`.toString())
+      .get(uri"http://localhost:8999/config")
     request.send()
   }
 

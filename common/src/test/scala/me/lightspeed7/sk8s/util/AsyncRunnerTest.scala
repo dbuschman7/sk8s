@@ -3,7 +3,7 @@ package me.lightspeed7.sk8s.util
 import java.util.concurrent.atomic.AtomicInteger
 
 import me.lightspeed7.sk8s.Sk8sFunSuite
-import me.lightspeed7.sk8s.telemetry.{ BackendServer, BackendServerClient }
+import me.lightspeed7.sk8s.server.{ BackendServer, BackendServerClient }
 import org.scalatest.{ BeforeAndAfterAll, Matchers }
 
 import scala.concurrent.duration._

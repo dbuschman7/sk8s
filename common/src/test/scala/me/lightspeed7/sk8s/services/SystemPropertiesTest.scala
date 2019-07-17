@@ -23,9 +23,9 @@ class SystemPropertiesTest extends FunSuite with Matchers {
 
     val libs = sysProps.jarDependencies()
     libs.size shouldBe 44
-    libs.count(_.scalaVersion.length == 0) shouldBe 14
-    libs.count(_.scalaVersion == "2.11") shouldBe 0
-    libs.count(_.scalaVersion == "2.12") shouldBe 30
+    libs.count(_.scalaVersion.isEmpty) shouldBe 14
+    libs.count(_.scalaVersion.getOrElse("") == "2.11") shouldBe 0
+    libs.count(_.scalaVersion.getOrElse("") == "2.12") shouldBe 30
     //
     libs.foreach(println)
 

@@ -85,6 +85,19 @@ object MemoryCronActor extends StrictJsonLogging {
 case class MemoryInfo(processors: Int, free: Long, max: Long, total: Long) {
   lazy val used: Long    = total - free
   lazy val percent: Long = used * 100 / max
+
+  def toJson: JsObject =
+    Json.obj(
+      "sk8s"       -> "memory",
+      "processors" -> this.processors,
+      //
+      "total" -> this.total,
+      "free"  -> this.free,
+      "max"   -> this.max,
+      //
+      "percentUsed" -> this.percent //
+    )
+
 }
 
 object MemoryInfo {

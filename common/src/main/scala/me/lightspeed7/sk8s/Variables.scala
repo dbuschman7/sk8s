@@ -269,14 +269,11 @@ object Variables {
   }
 
   def dumpJson(writer: String => Unit)(implicit appInfo: AppInfo): Unit = {
-    writer(s"""{""")
-    writer(s"""  "runMode" : "${RunMode.currentRunMode}", """)
-    writer(s"""  "appInfo" : ${appInfo.toJson.toString()}, """)
     val lines: Seq[String] = visitDefinedVariables { v =>
       v.json(2)
     }
     writer(lines.mkString(s"""  "variables" : [\n""", ",\n", "\n  ]"))
-    writer(s"""}""")
+
   }
 
   def logConfig(logger: Logger): Unit = {

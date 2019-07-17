@@ -1,16 +1,16 @@
-package me.lightspeed7.sk8s.telemetry
+package me.lightspeed7.sk8s.server
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.{ AppInfo, Sk8s, Sk8sContext, Variables }
+import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
+import me.lightspeed7.sk8s._
 import org.lyranthe.prometheus.client.registry.{ ProtoFormat, TextFormat }
-import play.api.libs.json.{ JsValue, Json }
 
-import scala.concurrent.duration._
 import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean)(implicit ctx: Sk8sContext) extends LazyLogging {
@@ -42,32 +42,21 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
       }
     }
 
-  def asText: String = {
-    val buf = new StringBuilder("\n")
-    Variables.dumpConfiguration({ in: String =>
-      buf.append(in).append("\n")
-    })
-
-    buf.toString()
-  }
-
-  def asJson: JsValue = {
-    val buf = new StringBuilder("\n")
-    Variables.dumpJson({ in: String =>
-      buf.append(in).append("\n")
-    })(ctx.appInfo)
-
-    Json.parse(buf.toString())
-  }
-
   def configRoute: Route =
     path("config") {
       (get & extract(_.request.headers)) { requestHeaders =>
-        val accepts: String = requestHeaders.find(h => h.is("Accept")).map(_.value().toLowerCase()).getOrElse("application/json").trim
+        val accepts: String = requestHeaders.find(h => h.is("accept")).map(_.value().toLowerCase()).getOrElse("application/json").trim
         if (accepts == "text/plain") {
+          val asText = {
+            val buf = new StringBuilder("\n")
+            Variables.dumpConfiguration({ in: String =>
+              buf.append(in).append("\n")
+            })
+            buf.toString()
+          }
           complete(StatusCodes.OK -> asText) // respond with text
         } else if (accepts == "application/json") {
-          val response = HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, asJson.toString()))
+          val response = HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, JsonConfig.generate.toString()))
           complete(response) // respond with json
         } else {
           complete(StatusCodes.BadRequest -> "Unknown content type requested")

@@ -32,7 +32,7 @@ final class SystemProperties(rawData: String) {
     ApplicationDependencies(appInfo, jarDependencies(extraSplitKeys: _*))
 }
 
-case class JarDependency(group: String, artifact: String, version: String, scalaVersion: String, jar: String)
+case class JarDependency(group: String, artifact: String, version: String, scalaVersion: Option[String], jar: String)
 
 object JarDependency {
 
@@ -58,8 +58,8 @@ object JarDependency {
     val version                  = parts.drop(1).head
     val (scalaVersion, artifact) = stripVersion(parts.drop(2).head)
     val group                    = parts.drop(3).toSeq.reverse.mkString(".")
-
-    JarDependency(group, artifact, version, scalaVersion, jar)
+    import me.lightspeed7.sk8s.util.String._
+    JarDependency(group, artifact, version, scalaVersion.notBlank, jar)
   }
 
   implicit val __json: OFormat[JarDependency] = Json.format[JarDependency]
