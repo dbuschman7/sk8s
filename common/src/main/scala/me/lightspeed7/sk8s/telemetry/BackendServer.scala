@@ -1,31 +1,21 @@
 package me.lightspeed7.sk8s.telemetry
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.{ AppInfo, Sk8s }
-import me.lightspeed7.sk8s.util.Closeables
+import me.lightspeed7.sk8s.{ AppInfo, Sk8s, Sk8sContext, Variables }
 import org.lyranthe.prometheus.client.registry.{ ProtoFormat, TextFormat }
+import play.api.libs.json.{ JsValue, Json }
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext }
+import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
-class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean, configGen: => String)(implicit appInfo: AppInfo,
-                                                                                                                    system: ActorSystem)
-    extends LazyLogging {
+class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean)(implicit ctx: Sk8sContext) extends LazyLogging {
 
-  implicit val ec: ExecutionContext = system.dispatcher
-
-  implicit val mat: ActorMaterializer = {
-    val mat = ActorMaterializer()
-    Closeables.registerCloseable[AutoCloseable]("Http Server Shutdown", () => mat.shutdown())
-    mat
-  }
+  import ctx._
 
   def pingPong: Route =
     path("ping") {
@@ -52,10 +42,36 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
       }
     }
 
+  def asText: String = {
+    val buf = new StringBuilder("\n")
+    Variables.dumpConfiguration({ in: String =>
+      buf.append(in).append("\n")
+    })
+
+    buf.toString()
+  }
+
+  def asJson: JsValue = {
+    val buf = new StringBuilder("\n")
+    Variables.dumpJson({ in: String =>
+      buf.append(in).append("\n")
+    })(ctx.appInfo)
+
+    Json.parse(buf.toString())
+  }
+
   def configRoute: Route =
     path("config") {
-      get {
-        complete(StatusCodes.OK -> configGen)
+      (get & extract(_.request.headers)) { requestHeaders =>
+        val accepts: String = requestHeaders.find(h => h.is("Accept")).map(_.value().toLowerCase()).getOrElse("application/json").trim
+        if (accepts == "text/plain") {
+          complete(StatusCodes.OK -> asText) // respond with text
+        } else if (accepts == "application/json") {
+          val response = HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, asJson.toString()))
+          complete(response) // respond with json
+        } else {
+          complete(StatusCodes.BadRequest -> "Unknown content type requested")
+        }
       }
     }
 
@@ -83,7 +99,7 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
   }
 
   val routes: Route = handleExceptions(myExceptionHandler) {
-    Seq(pingPong, healthRoute, ipRoute, configRoute).foldLeft(metricsRoute) { case (prev, cur) => prev ~ cur }
+    Seq(pingPong, healthRoute, ipRoute, configRoute).foldLeft(metricsRoute(ctx.appInfo)) { case (prev, cur) => prev ~ cur }
   }
 
   logger.info(s"Http Server - $ipAddress:$port")
@@ -96,8 +112,7 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
         logger.info(s"Server is listening on ${address.getHostString}:${address.getPort}")
 
         // registerShutdownHook
-        Closeables
-          .registerCloseable[AutoCloseable]("Http Server Shutdown", () => Await.result(binding.unbind(), 5 seconds))
+        ctx.registerCloseable[AutoCloseable]("Http Server Shutdown", () => Await.result(binding.unbind(), 5 seconds))
       //
       case Failure(ex) =>
         logger.error(s"Server '${appInfo.appName}' could not be started", ex)

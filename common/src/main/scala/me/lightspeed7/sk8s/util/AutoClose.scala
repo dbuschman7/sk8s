@@ -1,7 +1,5 @@
 package me.lightspeed7.sk8s.util
 
-import com.typesafe.scalalogging.LazyLogging
-
 class AutoClose[A <: java.lang.AutoCloseable](protected val c: A) {
 
   // make sure the resource is closed
@@ -21,44 +19,4 @@ class AutoClose[A <: java.lang.AutoCloseable](protected val c: A) {
 
 object AutoClose {
   def apply[A <: java.lang.AutoCloseable](c: A) = new AutoClose(c)
-}
-
-// JVM singleton
-object Closeables extends LazyLogging with AutoCloseable {
-
-  //
-  // Closeable resource handling
-  // ////////////////////////////////////
-  private final case class Closeable(label: String, closeable: AutoCloseable)
-
-  private var closeables: Seq[Closeable] = Seq.empty
-
-  def registerCloseable[T <: AutoCloseable](label: String, closeable: => T): T = synchronized {
-    logger.info(s"Register Closeable - $label")
-    val temp = closeables :+ Closeable(label, closeable)
-    closeables = temp
-    closeable
-  }
-
-  def register[T](label: String, closeable: => T): T = synchronized {
-    logger.info(s"Register Closeable - $label")
-
-    val temp = closeables :+ Closeable(label, new AutoCloseable {
-      override def close(): Unit = closeable
-    })
-
-    closeables = temp
-    closeable
-  }
-
-  def close(): Unit = synchronized {
-    logger.info("Closing AutoCloseables ...")
-    closeables.reverse // opposite of registration
-      .foreach {
-        case Closeable(l, c) =>
-          logger.info(s"Closing - $l")
-          c.close()
-      }
-  }
-
 }

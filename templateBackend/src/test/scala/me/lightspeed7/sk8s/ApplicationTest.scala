@@ -1,29 +1,29 @@
 package me.lightspeed7.sk8s
 
-import akka.actor.ActorSystem
 import com.softwaremill.sttp.{ HttpURLConnectionBackend, Id, SttpBackend }
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.telemetry.BackendServerClient
 import org.scalatest.Matchers
+import play.api.libs.json.{ JsObject, Json }
 
 import scala.concurrent.Future
 
 class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
 
-  Sources.env.asInstanceOf[EnvironmentSource].overrideVariable(BackgroundTasks.ServerStartName, "true")
-
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
-  lazy val client: BackendServerClient = BackendServerClient()(ActorSystem("prometheus"))
+  lazy val client: BackendServerClient = BackendServerClient()(ctx)
 
-  test("returns secondary endpoints") {
+  ignore("returns secondary endpoints") {
 
     try {
-      val app = Future {
-        Application.main(Array())
 
+      Future {
+        Application.main(Array())
       }
-      Thread.sleep(4000)
+
+      println("app stood up - run mode -> " + RunMode.currentRunMode.toString)
+      Thread.sleep(8000)
       println("tests starting ... ")
 
       var response = client.ping
@@ -37,6 +37,15 @@ class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
       val rawResponse = client.metrics
       rawResponse.code shouldBe 200
       rawResponse.body.right.get.length should be > 0
+
+      val configResponse = client.configAsJson
+      configResponse.code shouldBe 200
+      val body: String = configResponse.body.right.get
+      println("Body -> " + body)
+      val jsValue = Json.parse(body)
+
+      println("JsValue -> " + jsValue.getClass.toString)
+      jsValue.isInstanceOf[JsObject] shouldBe true
 
       println("tests completed")
 

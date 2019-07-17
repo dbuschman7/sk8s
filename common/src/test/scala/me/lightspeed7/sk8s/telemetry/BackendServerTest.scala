@@ -1,34 +1,24 @@
 package me.lightspeed7.sk8s.telemetry
 
-import akka.actor.ActorSystem
-import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.Sk8s.HealthStatus
-import me.lightspeed7.sk8s.util.Closeables
+import me.lightspeed7.sk8s.{ AppInfo, Sk8sContext }
 import org.joda.time.DateTime
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{ Await, ExecutionContext }
-import scala.util.Try
-
 class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
-
-  implicit val akka: ActorSystem    = ActorSystem("Prometheus")
-  implicit val ec: ExecutionContext = akka.dispatcher
 
   implicit val appInfo: AppInfo = AppInfo("application", "version", DateTime.now)
 
-  val export = new BackendServer(protobufFormet = false, configGen = "CONFIG")
+  implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
+
+  val export = new BackendServer(protobufFormet = false)
   val client = BackendServerClient()
 
   override def beforeAll(): Unit =
     TelemetryRegistry.counter("metric")
 
-  override def afterAll(): Unit = {
-    client.close()
-    Try(Closeables.close()) // just ignore
-    Await.result(akka.terminate(), Duration.Inf)
-  }
+  override def afterAll(): Unit =
+    ctx.close()
 
   test("Test ping endpoint") {
     val response = client.ping

@@ -1,15 +1,10 @@
 package me.lightspeed7.sk8s
 
-import akka.actor.{ ActorSystem, Props }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.actor.Props
 import ch.qos.logback.classic.LoggerContext
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.actors.{ SK8SBus, Sk8sBusActor }
-import me.lightspeed7.sk8s.util.Closeables
 import org.slf4j.LoggerFactory
-
-import scala.concurrent.Await
-import scala.concurrent.duration.{ FiniteDuration, _ }
 
 final case class BackendApplication(info: AppInfo) extends LazyLogging with AutoCloseable {
 
@@ -20,52 +15,17 @@ final case class BackendApplication(info: AppInfo) extends LazyLogging with Auto
     logger.info(s"Application staring - $appInfo")
   }
 
-  implicit val actorSystem: ActorSystem = {
+  // Do this second
+  implicit val appCtx: Sk8sContext = Sk8sContext.create(appInfo)
 
-    val timeout: FiniteDuration = 10 seconds
-    val actorSystemName         = appInfo.appName
-
-    logger.info(s"Starting up ActorSystem '$actorSystemName' ...")
-    val ac = ActorSystem(actorSystemName)
-    Closeables.registerCloseable(
-      s"ActorSystem '$actorSystemName'",
-      new AutoCloseable {
-        override def close(): Unit = {
-          logger.info(s"Shutting down ActorSystem '$actorSystemName' ...")
-          Await.result(ac.terminate(), timeout)
-          ()
-        }
-      }
-    )
-    ac
-  }
-
-  private val decider: Supervision.Decider = { t =>
-    logger.info("exception during graph, stopping" + t)
-    t.printStackTrace()
-    Supervision.Stop
-  }
-
-  implicit val materializer: ActorMaterializer = {
-    logger.info("Starting up ActorMaterializer ...")
-    val mat = ActorMaterializer(ActorMaterializerSettings(actorSystem).withSupervisionStrategy(decider))
-
-    Closeables.registerCloseable("ActorMaterializer", new AutoCloseable {
-      override def close(): Unit = {
-        logger.info("Shutting down ActorMaterializer ...")
-        mat.shutdown()
-      }
-    })
-
-    mat
-  }
-
-  implicit val appCtx: Sk8sContext = Sk8sContext(appInfo)
-
-  protected val backgroundTasks = new BackgroundTasks()(appCtx)
-
+  logger.info("Starting background tasks ...")
+  new BackgroundTasks()
   logger.info(s"Kubernetes - ${Sk8s.isKubernetes()}")
+  scala.sys.addShutdownHook(shutdown())
 
+  //
+  // return code handling
+  // //////////////////////
   private var returnCode: Int = -1
 
   def shutdown(): Unit = returnCode = 0
@@ -77,7 +37,7 @@ final case class BackendApplication(info: AppInfo) extends LazyLogging with Auto
 
   def runUntilStopped(): Unit = {
     logger.info("Activating Daemon Mode ...")
-    actorSystem.actorOf(Props(new ShutdownActor())) // start up the shutdown actor
+    appCtx.system.actorOf(Props(new ShutdownActor())) // start up the shutdown actor
     do {
       Thread.sleep(1000)
     } while (returnCode < 0)
@@ -98,10 +58,8 @@ final case class BackendApplication(info: AppInfo) extends LazyLogging with Auto
     }
   }
 
-  scala.sys.addShutdownHook(shutdown())
-
   override def close(): Unit = {
-    Closeables.close()
+    appCtx.close()
     shutdown()
   }
 }

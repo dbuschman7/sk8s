@@ -19,6 +19,8 @@ import scala.util.{ Failure, Success, Try }
 
 class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
 
+  RunMode.setTestRunMode()
+
   val now: DateTime = {
     DateTimeZone.setDefault(DateTimeZone.UTC)
     DateTime.now
@@ -28,6 +30,8 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
   implicit val appInfo: AppInfo     = AppInfo(this.getClass.getName, "0.0.0", now)
 
   lazy val actorSystemName: String = UUID.randomUUID().toString
+
+  implicit val rm: RunMode = ctx.runMode
 
   implicit lazy val actorSystem: ActorSystem = {
     println(s"Starting up ActorSystem '$actorSystemName' ...")
@@ -60,7 +64,7 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
     println("Shutting down ActorMaterializer ...")
     materializer.shutdown()
     Await.result(actorSystem.terminate(), Duration.Inf)
-
+    ctx.close()
   }
 
   implicit lazy val ctx: Sk8sContext = Sk8sContext(appInfo)

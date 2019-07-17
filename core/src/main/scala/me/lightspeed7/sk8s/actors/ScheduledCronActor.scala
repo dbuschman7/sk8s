@@ -8,7 +8,8 @@ import scala.concurrent.duration.FiniteDuration
 
 trait ScheduledCronActor extends Actor with LazyLogging {
 
-  protected def ec: ExecutionContext
+  protected val ec: ExecutionContext = this.context.dispatcher
+
   protected def actorClassName: String
 
   private var cronTokenName: String    = "'Not Given'" // fix this in Scala 2.12 with trait parameter

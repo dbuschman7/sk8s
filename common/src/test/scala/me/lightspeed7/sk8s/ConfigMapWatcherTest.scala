@@ -37,7 +37,7 @@ class ConfigMapWatcherTest extends FunSuite with Matchers {
 
     writeValue(testFile.toFile, "value")
 
-    val dirWatcher = new DirectoryWatcher({ (in) =>
+    val dirWatcher = new DirectoryWatcher({ _ =>
       p.complete(Success(true))
     }, true)
     val watchThread = new Thread(dirWatcher)

@@ -2,30 +2,21 @@ package me.lightspeed7.sk8s.util
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import akka.actor.ActorSystem
-import me.lightspeed7.sk8s.AppInfo
+import me.lightspeed7.sk8s.Sk8sFunSuite
 import me.lightspeed7.sk8s.telemetry.{ BackendServer, BackendServerClient }
-import org.joda.time.DateTime
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
+import org.scalatest.{ BeforeAndAfterAll, Matchers }
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext }
 import scala.util.Try
 
-class AsyncRunnerTest extends FunSuite with BeforeAndAfterAll with Matchers {
+class AsyncRunnerTest extends Sk8sFunSuite with BeforeAndAfterAll with Matchers {
 
-  implicit val akka: ActorSystem    = ActorSystem("Prometheus")
-  implicit val ec: ExecutionContext = akka.dispatcher
-
-  implicit val appInfo: AppInfo = AppInfo("name", "version", DateTime.now)
-
-  val export = new BackendServer(protobufFormet = false, configGen = "Config")
+  val export = new BackendServer(protobufFormet = false)
   val client = BackendServerClient()
 
   override def afterAll(): Unit = {
-    client.close()
-    Try(Closeables.close()) // just ignore
-    Await.result(akka.terminate(), Duration.Inf)
+    Try(ctx.close()) // just ignore
+    super.afterAll()
   }
 
   test("Run multiple times test") {
