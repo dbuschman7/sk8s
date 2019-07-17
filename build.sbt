@@ -3,7 +3,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.0"
+version in ThisBuild := "0.5.1"
 
 scalaVersion in ThisBuild := "2.12.7"
 
