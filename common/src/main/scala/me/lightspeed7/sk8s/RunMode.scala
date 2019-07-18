@@ -34,8 +34,8 @@ object RunMode extends Enum[RunMode] with PlayJsonEnum[RunMode] {
     }
   }
 
-  private[sk8s] val SK8S_RUN_MODE_PROP = "sk8s.run.mode"
-  private[sk8s] val SK8S_RUN_MODE_ENV  = "SK8S_RUN_MODE"
+  val SK8S_RUN_MODE_PROP = "sk8s.run.mode"
+  val SK8S_RUN_MODE_ENV  = "SK8S_RUN_MODE"
 
   def currentRunMode: RunMode =
     Seq( // Order is critical
@@ -49,7 +49,7 @@ object RunMode extends Enum[RunMode] with PlayJsonEnum[RunMode] {
 
   def setTestRunMode(): RunMode = setRunMode(if (Sk8s.isKubernetes()) RunMode.FuncTest else RunMode.Test)
 
-  private[sk8s] def setRunMode(mode: RunMode): RunMode = {
+  def setRunMode(mode: RunMode): RunMode = {
     Sources.env.asInstanceOf[EnvironmentSource].overrideVariable(RunMode.SK8S_RUN_MODE_ENV, mode.name)
     mode
   }
