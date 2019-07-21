@@ -3,7 +3,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.2"
+version in ThisBuild := "0.5.3"
 
 scalaVersion in ThisBuild := "2.12.7"
 
@@ -123,7 +123,7 @@ lazy val templateApi = project
   )
   .dependsOn(
     common % "test->test;compile->compile",
-    play
+    play   % "test->test;compile->compile"
   )
 
 //
@@ -166,18 +166,15 @@ lazy val dependencies =
     val skuber                = "io.skuber"                     %% "skuber"                   % "2.1.1" withSources ()
     val sttpWithAkkHttp       = "com.softwaremill.sttp"         %% "akka-http-backend"        % sttpV withSources ()
 
-    def playLibs: Seq[ModuleID] = {
-      val optional = Seq(
-        "com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava"),
-        "com.typesafe.play" %% "play-guice"      % playV withSources () exclude ("com.google.guava", "guava") //
-      )
-      //
+    def playLibs: Seq[ModuleID] =
       Seq( //
+        scalaTestPlus,
+        "com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava"),
+        "com.typesafe.play" %% "play-guice"      % playV withSources () exclude ("com.google.guava", "guava"), //
         "com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava"),
         "com.typesafe.play" %% "play" /*     */  % playV withSources () exclude ("com.google.guava", "guava") exclude ("com.typesafe.akka", "akka-actor") exclude ("org.scala-lang", "scala-library"),
         "com.typesafe.play" %% "play-logback"    % playV withSources () exclude ("com.google.guava", "guava")
-      ) ++ optional
-    }
+      )
   }
 
 lazy val commonDependencies = Seq(
