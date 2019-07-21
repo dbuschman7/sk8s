@@ -9,7 +9,7 @@ class SecretsTest extends FunSuite with Matchers {
 
   import me.lightspeed7.sk8s.files.TestCrypto._
 
-  val pwd: Path               = Paths.get("common").toAbsolutePath
+  val pwd: Path               = Paths.get("core").toAbsolutePath
   val resourcesPath: Path     = Paths.get(pwd.toString + "/src/test/resources")
   val svcAcct: ServiceAccount = Sk8s.serviceAccount(resourcesPath)
 

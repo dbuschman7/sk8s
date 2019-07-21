@@ -3,7 +3,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.3"
+version in ThisBuild := "0.5.4"
 
 scalaVersion in ThisBuild := "2.12.7"
 
@@ -19,7 +19,6 @@ lazy val global = project
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
-    common,
     core,
     play,
     kubernetes,
@@ -29,17 +28,6 @@ lazy val global = project
     templateApi
   )
 
-lazy val common = project
-  .settings(
-    name := "sk8s-common",
-    settings,
-    libraryDependencies ++= commonDependencies
-  )
-  .settings(testOptions in Test := Seq(Tests.Filter(harnessFilter)))
-  .settings(testGrouping in Test := singleThreadedTests((definedTests in Test).value))
-//
-  .disablePlugins(AssemblyPlugin)
-
 lazy val core = project
   .settings(
     name := "sk8s-core",
@@ -48,9 +36,8 @@ lazy val core = project
     deploymentSettings,
     libraryDependencies ++= commonDependencies
   )
-  .dependsOn(
-    common % "test->test;compile->compile"
-  )
+  .settings(testOptions in Test := Seq(Tests.Filter(harnessFilter)))
+  .settings(testGrouping in Test := singleThreadedTests((definedTests in Test).value))
 
 lazy val play = project
   .settings(
@@ -61,8 +48,7 @@ lazy val play = project
     libraryDependencies ++= commonDependencies ++ dependencies.playLibs :+ dependencies.javaxInject
   )
   .dependsOn(
-    common % "test->test;compile->compile",
-    core
+    core % "test->test;compile->compile"
   )
 
 lazy val kubernetes = project
@@ -74,8 +60,7 @@ lazy val kubernetes = project
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.skuber, dependencies.parserCombinators, dependencies.quickLens)
   )
   .dependsOn(
-    common % "test->test;compile->compile",
-    core
+    core % "test->test;compile->compile"
   )
 
 lazy val slack = project
@@ -87,9 +72,8 @@ lazy val slack = project
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.slack)
   )
   .dependsOn(
-    common % "test->test;compile->compile",
-    kubernetes,
-    core
+    core % "test->test;compile->compile",
+    kubernetes
   )
 
 //
@@ -122,8 +106,8 @@ lazy val templateApi = project
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
   .dependsOn(
-    common % "test->test;compile->compile",
-    play   % "test->test;compile->compile"
+    core % "test->test;compile->compile",
+    play % "test->test;compile->compile"
   )
 
 //
