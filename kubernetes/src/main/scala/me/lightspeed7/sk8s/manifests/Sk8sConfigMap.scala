@@ -12,7 +12,7 @@ object Sk8sConfigMap {
       |kind: ConfigMap
       |metadata:
       |  name: sk8s-config
-      |  namespace: $namespace|
+      |  namespace: $namespace
       |data:
       |  cluster-name: $cluster
       |  sk8s-run-mode: ${runMode.name}

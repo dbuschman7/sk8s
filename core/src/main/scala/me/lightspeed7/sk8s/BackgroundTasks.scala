@@ -20,7 +20,6 @@ class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
   lazy val startServer: Boolean = Variables
     .firstValue[Boolean](
       BackgroundTasks.ServerStartName,
-      Variables.maybeSource(Sources.env, "PROMETHEUS_SERVER"),
       Variables.maybeSource(Sources.env, BackgroundTasks.ServerStartName),
       Constant(true)
     )
@@ -29,9 +28,7 @@ class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
   lazy val bindAddress: String = Variables
     .firstValue[String](
       BackgroundTasks.ServerAddressName,
-      Variables.maybeSource(Sources.env, "MY_POD_IP"),
       Variables.maybeSource(Sources.env, BackgroundTasks.ServerAddressName),
-      Variables.maybeSource(Sources.env, "PROMETHEUS_BIND_ADDRESS"),
       Constant("0.0.0.0") //
     )
     .value
@@ -39,7 +36,6 @@ class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
   lazy val bindPort: Int = Variables
     .firstValue[Int](
       BackgroundTasks.ServerAddressPort,
-      Variables.maybeSource(Sources.env, "PROMETHEUS_BIND_PORT"),
       Variables.maybeSource(Sources.env, BackgroundTasks.ServerAddressPort),
       Constant(8999) //
     )

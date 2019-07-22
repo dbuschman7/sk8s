@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.{ FileIO, Framing, Sink }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
-import me.lightspeed7.sk8s.util.AutoClose
+import me.lightspeed7.sk8s.util.{ AutoClose, FileUtils }
 import org.joda.time.{ DateTime, DateTimeZone }
 import org.scalactic.source
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Tag }
@@ -174,6 +174,16 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
   def getLibraryTestFilePath(project: String, pathParts: String*): Path = {
     val parts: Seq[String] = Seq("src", "test", "resources") ++ pathParts
     Paths.get(getProjectBasePath(project).toString, parts.mkString("/")).toAbsolutePath
+  }
+
+  class FileWriter(path: Path) extends FileUtils {
+    def write(data: String*) = writeContents(path)(data: _*)
+  }
+
+  def writeLibraryTestFile(project: String, pathParts: String*): FileWriter = {
+    val parts: Seq[String] = Seq("src", "test", "resources") ++ pathParts
+    val path               = Paths.get(getProjectBasePath(project).toString, parts.mkString("/")).toAbsolutePath
+    new FileWriter(path)
   }
 
   //

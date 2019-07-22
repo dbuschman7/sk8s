@@ -18,9 +18,7 @@ class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
   implicit val config: Sk8sAppConfig = Sk8sAppConfig
     .create(Java11, "sk8s-" + k8sJobId, "david")
     .replicas(3)
-    .major(3)
-    .minor(2)
-    .patch(1)
+    .semVer(3, 2, 1)
     .image(DockerImage("docker.io", Some("sk8s"), "some-container", Some("3.7.190704.texas")))
     .cpu(1.0)
     .memory(2148)

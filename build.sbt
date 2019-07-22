@@ -1,9 +1,11 @@
+import com.typesafe.sbt.packager.docker.Cmd
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.dockerCommands
 import sbtbuildinfo.BuildInfoKey
 import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.4"
+version in ThisBuild := "0.5.5"
 
 scalaVersion in ThisBuild := "2.12.7"
 
@@ -80,7 +82,7 @@ lazy val slack = project
 // TEMPLATE APPS
 // //////////////////////////
 lazy val templateBackend = project
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, DockerPlugin)
   .settings(
     name := "backend",
     settings,
@@ -95,7 +97,7 @@ lazy val templateBackend = project
   )
 
 lazy val templateApi = project
-  .enablePlugins(PlayScala, BuildInfoPlugin)
+  .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin)
   .settings(
     name := "api",
     settings,
@@ -281,5 +283,20 @@ def buildInfoVars(name: SettingKey[String], version: SettingKey[String], scalaVe
   Seq(
     buildInfoPackage := "me.lightspeed7.sk8s",
     buildInfoKeys := generateBuildInfo(BuildInfoKey.action("name")(name.value), version, scalaVersion, sbtVersion)
+  )
+}
+
+def dockerVars(
+    name: SettingKey[String],
+    baseImage: String = "opendjk-11-jre-slim",
+    backend: Boolean = false
+) = {
+  val ports = if (backend) { Seq(8999) } else { Seq(8999, 9000) }
+  Seq(
+    packageName in Docker := name.value,
+    maintainer := "Dave Buschman",
+    dockerBaseImage := baseImage,
+    dockerExposedPorts := ports,
+    dockerCommands += Cmd("ENV", "BACKEND_SERVER true")
   )
 }

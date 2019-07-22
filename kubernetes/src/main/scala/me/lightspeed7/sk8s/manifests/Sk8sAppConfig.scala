@@ -34,6 +34,10 @@ final case class Sk8sAppConfig private (
 
   def patch(patch: Int): Sk8sAppConfig = this.modify(_.version.patch).setTo(patch)
 
+  def semVer(majorV: Int, minorV: Int): Sk8sAppConfig = major(majorV).minor(minorV).patch(0)
+
+  def semVer(majorV: Int, minorV: Int, patchV: Int): Sk8sAppConfig = major(majorV).minor(minorV).patch(patchV)
+
   def image(image: DockerImage): Sk8sAppConfig = this.copy(image = Some(image))
 
   def imageTag(tag: String): Sk8sAppConfig =
@@ -83,6 +87,11 @@ final case class Sk8sAppConfig private (
           createtEnvVar("READ_FROM_TOPIC", topicName) :+
           createtEnvVar("KAFKA_POLLING_INTERVAL_MS", pollingInternvalMs.toString) //
       )
+
+  def withEnvVar(name: String, value: String): Sk8sAppConfig =
+    this
+      .modify(_.envVars)
+      .using(in => in :+ createtEnvVar(name, value))
 
   def createtEnvVar(name: String, value: String): EnvVar = EnvVar(name, EnvVar.StringValue(value))
 

@@ -30,6 +30,16 @@ trait FileUtils extends LazyLogging {
     command !!
   }
 
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit): Unit = {
+    val p = new java.io.PrintWriter(f)
+    try { op(p) } finally { p.close() }
+  }
+
+  def writeContents(fullPath: Path)(data: String*): Unit =
+    printToFile(fullPath.toFile) { p =>
+      data.foreach(p.println)
+    }
+
 }
 
 object String {
