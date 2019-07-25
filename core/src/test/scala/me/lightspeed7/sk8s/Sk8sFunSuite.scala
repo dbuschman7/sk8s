@@ -183,6 +183,7 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
   def writeLibraryTestFile(project: String, pathParts: String*): FileWriter = {
     val parts: Seq[String] = Seq("src", "test", "resources") ++ pathParts
     val path               = Paths.get(getProjectBasePath(project).toString, parts.mkString("/")).toAbsolutePath
+    path.getParent.toFile.mkdirs() // ensure directory exists
     new FileWriter(path)
   }
 

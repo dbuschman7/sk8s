@@ -5,9 +5,9 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.5"
+version in ThisBuild := "0.5.6"
 
-scalaVersion in ThisBuild := "2.12.7"
+scalaVersion in ThisBuild := "2.12.8"
 
 //
 // PROJECTS

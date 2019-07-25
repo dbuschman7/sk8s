@@ -2,14 +2,14 @@ package me.lightspeed7.sk8s.server
 
 import akka.actor.{ Actor, ActorRef, ActorSystem, Cancellable, Props }
 import me.lightspeed7.sk8s.AppInfo
-import me.lightspeed7.sk8s.logging.StrictJsonLogging
+import me.lightspeed7.sk8s.logging.LazyJsonLogging
 import me.lightspeed7.sk8s.util.PrettyPrint
 import play.api.libs.json.{ JsObject, Json }
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ ExecutionContext, ExecutionContextExecutor }
 
-class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: FiniteDuration) extends Actor with StrictJsonLogging {
+class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: FiniteDuration) extends Actor with LazyJsonLogging {
 
   import MemoryCronActor._
 
@@ -53,7 +53,7 @@ class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: Fin
 
 }
 
-object MemoryCronActor extends StrictJsonLogging {
+object MemoryCronActor extends LazyJsonLogging {
 
   import scala.concurrent.duration._
 

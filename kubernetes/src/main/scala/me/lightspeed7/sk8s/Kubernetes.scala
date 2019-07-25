@@ -3,14 +3,14 @@ package me.lightspeed7.sk8s
 import java.nio.charset.StandardCharsets
 import java.nio.file.{ Files, Paths }
 
-import com.typesafe.scalalogging.StrictLogging
+import com.typesafe.scalalogging.{ LazyLogging, StrictLogging }
 import play.api.libs.json.Json
 import skuber._
 import skuber.apps.v1beta1._
 
 import scala.concurrent.Future
 
-class Kubernetes(implicit val appCtx: Sk8sContext) extends StrictLogging {
+class Kubernetes(implicit val appCtx: Sk8sContext) extends LazyLogging {
 
   import appCtx._
 

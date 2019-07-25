@@ -5,7 +5,7 @@ import java.util.UUID
 
 import me.lightspeed7.sk8s.{ DockerImage, Sk8sFunSuite }
 import me.lightspeed7.sk8s.manifests.Common.Java11
-import me.lightspeed7.sk8s.manifests.{ JobStatus, Sk8sAppConfig }
+import me.lightspeed7.sk8s.manifests.{ Budget, JobStatus, Service, Sk8sAppConfig }
 import me.lightspeed7.sk8s.util.AlphaId
 import org.scalatest.Matchers
 import play.api.libs.json.Json
@@ -22,6 +22,7 @@ class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
     .image(DockerImage("docker.io", Some("sk8s"), "some-container", Some("3.7.190704.texas")))
     .cpu(1.0)
     .memory(2148)
+    .withEnvVar("FOO", "bar")
     .withNoServiceAccountToken
 
   test("Generate simple job set with base config") {
@@ -92,6 +93,26 @@ class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
     stsT.isSuccess shouldBe true
 
     val pretty = Json.prettyPrint(Json.toJson(stsT.get))
+    println(pretty)
+    pretty shouldBe expected
+  }
+
+  test("generate Service definition") {
+
+    val expected: String = getFileContents(getLibraryTestFilePath("kubernetes", "sk8s-service.json")).utf8String
+
+    val svc: Service = Service.labelSelector("name", Some("namespace"), 1234, "port")
+    val pretty       = Json.prettyPrint(Json.toJson(svc))
+    println(pretty)
+    pretty shouldBe expected
+  }
+
+  test("generate Budget definition") {
+
+    val expected: String = getFileContents(getLibraryTestFilePath("kubernetes", "sk8s-budget.json")).utf8String
+
+    val svc: Budget = Budget.labelSelector("name", Some("namespace"), maxUnavailable = Some(1))
+    val pretty      = Json.prettyPrint(Json.toJson(svc))
     println(pretty)
     pretty shouldBe expected
   }

@@ -54,6 +54,9 @@
           }, {
             "name" : "JAVA_OPTS",
             "value" : "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 "
+          }, {
+            "name" : "FOO",
+            "value" : "bar"
           } ],
           "resources" : {
             "limits" : {

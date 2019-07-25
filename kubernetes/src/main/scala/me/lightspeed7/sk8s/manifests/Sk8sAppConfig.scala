@@ -95,27 +95,6 @@ final case class Sk8sAppConfig private (
 
   def createtEnvVar(name: String, value: String): EnvVar = EnvVar(name, EnvVar.StringValue(value))
 
-  def defaultVars: List[EnvVar] = {
-
-    val javaOpts: EnvVar = java match {
-      case Java8 =>
-        createtEnvVar(
-          "JAVA_OPTS",
-          s"-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -Xms${request.memoryMb - 100}m -Xmx${request.memoryMb - 100}m  -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
-        )
-      case Java11 =>
-        createtEnvVar("JAVA_OPTS",
-                      "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 ")
-    }
-
-    List(
-      EnvVar("LOG_LEVEL", "INFO"),
-      EnvVar(RunMode.SK8S_RUN_MODE_ENV, EnvVar.ConfigMapKeyRef("sk8s-run-mode", "sk8s-config")),
-      EnvVar("HOST_IP", EnvVar.FieldRef("status.hostIP", "v1")),
-      EnvVar("POD_IP", EnvVar.FieldRef("status.podIP", "v1"))
-    ) :+ javaOpts
-  }
-
   //
   // generators
   // ////////////////////////
@@ -236,5 +215,26 @@ object Sk8sAppConfig {
 
   def create(java: Java, name: String, namespace: String = "default"): Sk8sAppConfig =
     Sk8sAppConfig(java, name, namespace)
+
+  def defaultVars(cfg: Sk8sAppConfig): List[EnvVar] = {
+
+    val javaOpts: EnvVar = cfg.java match {
+      case Java8 =>
+        cfg.createtEnvVar(
+          "JAVA_OPTS",
+          s"-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -Xms${cfg.request.memoryMb - 100}m -Xmx${cfg.request.memoryMb - 100}m  -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
+        )
+      case Java11 =>
+        cfg.createtEnvVar("JAVA_OPTS",
+                          "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 ")
+    }
+
+    List(
+      EnvVar("LOG_LEVEL", "INFO"),
+      EnvVar(RunMode.SK8S_RUN_MODE_ENV, EnvVar.ConfigMapKeyRef("sk8s-run-mode", "sk8s-config")),
+      EnvVar("HOST_IP", EnvVar.FieldRef("status.hostIP", "v1")),
+      EnvVar("POD_IP", EnvVar.FieldRef("status.podIP", "v1"))
+    ) :+ javaOpts
+  }
 
 }

@@ -1,0 +1,20 @@
+{
+  "kind" : "Service",
+  "apiVersion" : "v1",
+  "metadata" : {
+    "name" : "name",
+    "namespace" : "namespace",
+    "labels" : {
+      "app" : "name"
+    }
+  },
+  "spec" : {
+    "ports" : [ {
+      "port" : 1234,
+      "name" : "port"
+    } ],
+    "selector" : {
+      "app" : "name"
+    }
+  }
+}

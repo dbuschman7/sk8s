@@ -80,7 +80,7 @@ object Pod {
       shortName,
       cfg.image.map(_.toString).getOrElse(""),
       cfg.imagePullPolicy,
-      env = cfg.defaultVars,
+      env = Sk8sAppConfig.defaultVars(cfg) ++ cfg.envVars,
       resources = cfg.request.toResource //
     )
 
