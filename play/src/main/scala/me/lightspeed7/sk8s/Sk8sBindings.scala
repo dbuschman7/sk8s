@@ -8,7 +8,7 @@ class Sk8sBindings extends AbstractModule with LazyLogging {
   def generate(appInfo: AppInfo) = {
 
     implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
-    lazy val bTasks = new BackgroundTasks()
+    lazy val bTasks               = new BackgroundTasks()
 
     Seq( //
       //
@@ -23,4 +23,3 @@ class Sk8sBindings extends AbstractModule with LazyLogging {
 
   override def configure(): Unit = throw new RuntimeException("Use generate(appInfo) instead")
 }
-
