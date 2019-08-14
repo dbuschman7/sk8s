@@ -20,7 +20,6 @@ object Sk8sPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     sk8sPlayApp := false,
     sk8sAppInfo := appInfoTask.value,
-    sk8sVersion := "0.5.6",
     (sourceGenerators in Compile) ++= Seq(appInfoTask.taskValue),
     libraryDependencies ++= sk8sDeps(sk8sPlayApp.value, sk8sVersion.value)
   )
