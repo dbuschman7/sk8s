@@ -26,7 +26,7 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
   val now: DateTime           = new DateTime(localNow.toInstant(ZoneOffset.UTC).toEpochMilli)
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
-  implicit val appInfo: AppInfo     = AppInfo(this.getClass.getName, "0.0.0", zonedNow)
+  implicit val appInfo: AppInfo     = AppInfo(this.getClass.getSimpleName, "0.0.0", zonedNow)
 
   lazy val actorSystemName: String = AlphaId.randomAlpha().id
 

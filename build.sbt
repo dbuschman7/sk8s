@@ -5,7 +5,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.6.0"
+version in ThisBuild := "0.6.1"
 
 scalaVersion in ThisBuild := "2.12.8"
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -18,7 +18,8 @@ lazy val global = project
   .settings(settings)
   .settings(
     publishArtifact := false,
-    skip in publish := true
+    skip in publish := true,
+    bintrayRelease := {}
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
@@ -112,7 +113,9 @@ lazy val templateBackend = project
     settings,
     assemblySettings,
     publishArtifact := false,
+    bintrayRelease := {},
     skip in publish := true,
+    skip in bintrayRelease := true,
     libraryDependencies ++= commonDependencies,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
@@ -127,7 +130,9 @@ lazy val templateApi = project
     settings,
     assemblySettings,
     publishArtifact := false,
+    bintrayRelease := {},
     skip in publish := true,
+    skip in bintrayRelease := true,
     libraryDependencies ++= commonDependencies :+ dependencies.scalaTestPlus,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
