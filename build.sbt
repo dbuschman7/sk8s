@@ -8,6 +8,7 @@ organization in ThisBuild := "me.lightspeed7"
 version in ThisBuild := "0.6.0"
 
 scalaVersion in ThisBuild := "2.12.8"
+licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
 //
 // PROJECTS
@@ -88,6 +89,9 @@ lazy val plugin = project
     settings,
 //    version := (version in ThisBuild).value + "-SNAPSHOT",
     sbtPlugin := true,
+    publishMavenStyle := false,
+    bintrayRepository := "sbt-plugins",
+    bintrayOrganization in bintray := None,
     //
     scalacOptions := Seq("-Xfuture", "-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
     scalacOptions += "-language:experimental.macros",
