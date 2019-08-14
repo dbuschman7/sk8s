@@ -1,13 +1,14 @@
 package me.lightspeed7.sk8s
 
+import java.time.{ LocalDateTime, ZonedDateTime }
+
 import com.typesafe.scalalogging.StrictLogging
 import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
 import me.lightspeed7.sk8s.util.AutoClose
-import org.joda.time.DateTime
 
 object Application extends App with StrictLogging {
 
-  for (app <- AutoClose(new BackendApplication(AppInfo(BuildInfo.name, BuildInfo.version, new DateTime(BuildInfo.buildTime))))) {
+  for (app <- AutoClose(new BackendApplication(AppInfo(BuildInfo.name, BuildInfo.version, ZonedDateTime.now)))) {
 
     import app._
 

@@ -5,7 +5,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.5.6"
+version in ThisBuild := "0.6.0"
 
 scalaVersion in ThisBuild := "2.12.8"
 
@@ -26,8 +26,10 @@ lazy val global = project
     kubernetes,
     slack,
     //
-    templateBackend,
-    templateApi
+    plugin, // SBT plugins
+    //
+    templateBackend, // Example App
+    templateApi // Example App
   )
 
 lazy val core = project
@@ -76,6 +78,24 @@ lazy val slack = project
   .dependsOn(
     core % "test->test;compile->compile",
     kubernetes
+  )
+
+lazy val plugin = project
+  .enablePlugins(ScriptedPlugin)
+  .settings(
+    name := "sbt-sk8s",
+    description := "sbt plugin to generate build info and sk8s opinions",
+    settings,
+//    version := (version in ThisBuild).value + "-SNAPSHOT",
+    sbtPlugin := true,
+    //
+    scalacOptions := Seq("-Xfuture", "-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
+    scalacOptions += "-language:experimental.macros",
+    libraryDependencies += "org.scala-lang" % "scala-reflect"    % scalaVersion.value % Provided,
+    libraryDependencies += "org.scala-sbt"  %% "scripted-plugin" % sbtVersion.value,
+    licenses := Seq("MIT License" -> url("https://github.com/sbt/sbt-buildinfo/blob/master/LICENSE")),
+    scriptedLaunchOpts ++= Seq("-Xmx1024M", "-Dplugin.version=" + version.value, "-Dsbt.log.noformat"),
+    scriptedBufferLog := false
   )
 
 //

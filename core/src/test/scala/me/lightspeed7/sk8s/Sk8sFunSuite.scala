@@ -2,14 +2,14 @@ package me.lightspeed7.sk8s
 
 import java.io.File
 import java.nio.file.{ Path, Paths }
-import java.util.UUID
+import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{ FileIO, Framing, Sink }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
-import me.lightspeed7.sk8s.util.{ AutoClose, FileUtils }
-import org.joda.time.{ DateTime, DateTimeZone }
+import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose, FileUtils }
+import org.joda.time.DateTime
 import org.scalactic.source
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Tag }
 
@@ -21,15 +21,14 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
 
   RunMode.setTestRunMode()
 
-  val now: DateTime = {
-    DateTimeZone.setDefault(DateTimeZone.UTC)
-    DateTime.now
-  }
+  val localNow: LocalDateTime = LocalDateTime.now()
+  val zonedNow: ZonedDateTime = localNow.atZone(ZoneOffset.UTC.normalized())
+  val now: DateTime           = new DateTime(localNow.toInstant(ZoneOffset.UTC).toEpochMilli)
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
-  implicit val appInfo: AppInfo     = AppInfo(this.getClass.getName, "0.0.0", now)
+  implicit val appInfo: AppInfo     = AppInfo(this.getClass.getName, "0.0.0", zonedNow)
 
-  lazy val actorSystemName: String = UUID.randomUUID().toString
+  lazy val actorSystemName: String = AlphaId.randomAlpha().id
 
   implicit val rm: RunMode = ctx.runMode
 

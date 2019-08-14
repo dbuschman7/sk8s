@@ -1,12 +1,14 @@
 package me.lightspeed7.sk8s.telemetry
 
+import java.time.{ ZoneOffset, ZonedDateTime }
+
 import me.lightspeed7.sk8s.AppInfo
-import org.joda.time.DateTime
+
 import org.scalatest.{ FunSuite, Matchers }
 
 class PartitionTrackingGaugeTest extends FunSuite with Matchers {
 
-  implicit val appInfo: AppInfo = AppInfo(this.getClass.getName, "0.0.0", DateTime.now)
+  implicit val appInfo: AppInfo = AppInfo(this.getClass.getName, "0.0.0", ZonedDateTime.now(ZoneOffset.UTC.normalized()))
   test("test gauge tracks and resets properly") {
 
     val g = TelemetryRegistry.partitionTracker("test", "my-topic")

@@ -13,7 +13,7 @@ import scala.concurrent.Future
 
 class GlobalModule extends Sk8sBindings {
 
-  implicit val appInfo: AppInfo = AppInfo(BuildInfo.name, BuildInfo.version, ZonedDateTime.now())
+  implicit val appInfo: AppInfo = sk8s.build.appInfo
 
   override def configure(): Unit = {
     generate(appInfo)

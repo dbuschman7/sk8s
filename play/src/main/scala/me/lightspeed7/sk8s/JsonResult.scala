@@ -1,14 +1,16 @@
 package me.lightspeed7.sk8s
 
+import java.time.ZonedDateTime
+
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.json.JsonImplicits
-import org.joda.time.DateTime
+
 import play.api.libs.json.{ JsValue, Json, OFormat }
 import play.api.mvc.{ Result, Results }
 
 import scala.concurrent.ExecutionContext
 
-case class ApplicationInfo(message: String, app: String, version: String, reason: String, startTime: DateTime)
+case class ApplicationInfo(message: String, app: String, version: String, reason: String, startTime: ZonedDateTime)
 
 object ApplicationInfo extends JsonImplicits {
   implicit val _json: OFormat[ApplicationInfo] = Json.format[ApplicationInfo]
@@ -95,7 +97,7 @@ object JsonResult extends LazyLogging {
   }
 
   def applicationRoot(implicit ec: ExecutionContext, appInfo: AppInfo): Result = {
-    val info = ApplicationInfo("App is running", appInfo.appName, appInfo.version, "Info".toString, appInfo.startTime)
+    val info = ApplicationInfo("App is running", appInfo.appName, appInfo.version, "Info", appInfo.startTime)
     val obj  = Json.toJson(info)
     ok(obj).toResult
   }

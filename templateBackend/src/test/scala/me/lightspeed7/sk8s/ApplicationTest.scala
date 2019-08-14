@@ -1,14 +1,13 @@
 package me.lightspeed7.sk8s
 
+import java.time.ZonedDateTime
+
 import com.softwaremill.sttp.{ HttpURLConnectionBackend, Id, SttpBackend }
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.server.BackendServerClient
 import me.lightspeed7.sk8s.util.AutoClose
-import org.joda.time.DateTime
 import org.scalatest.Matchers
 import play.api.libs.json.{ JsObject, Json }
-
-import scala.concurrent.Future
 
 class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
 
@@ -19,7 +18,7 @@ class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
   test("returns secondary endpoints") {
 
     try {
-      for (app <- AutoClose(new BackendApplication(AppInfo(BuildInfo.name, BuildInfo.version, new DateTime(BuildInfo.buildTime))))) {
+      for (app <- AutoClose(new BackendApplication(AppInfo(BuildInfo.name, BuildInfo.version, ZonedDateTime.now())))) {
         import app._
 
         Thread.sleep(8000)

@@ -1,14 +1,16 @@
 package me.lightspeed7.sk8s.server
 
+import java.time.{ ZoneOffset, ZonedDateTime }
+
 import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
 import me.lightspeed7.sk8s.{ AppInfo, Constant, Sk8sContext, Sources, Variables }
-import org.joda.time.DateTime
+
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
 import play.api.libs.json.{ JsValue, Json }
 
 class BackendServerTest extends FunSuite with BeforeAndAfterAll with Matchers {
 
-  implicit val appInfo: AppInfo = AppInfo("application", "version", DateTime.now)
+  implicit val appInfo: AppInfo = AppInfo("application", "version", ZonedDateTime.now(ZoneOffset.UTC.normalized()))
 
   implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
 

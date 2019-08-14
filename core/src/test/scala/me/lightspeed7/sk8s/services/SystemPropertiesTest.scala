@@ -1,7 +1,8 @@
 package me.lightspeed7.sk8s.services
 
+import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
+
 import me.lightspeed7.sk8s.AppInfo
-import org.joda.time.DateTime
 import org.scalatest.{ FunSuite, Matchers }
 import play.api.libs.json.Json
 
@@ -35,7 +36,7 @@ class SystemPropertiesTest extends FunSuite with Matchers {
     val ts = libs.filter(_.group == "com.typesafe.akka")
     ts.size shouldBe 6
 
-    implicit val info: AppInfo = AppInfo("name", "version", DateTime.now)
+    implicit val info: AppInfo = AppInfo("name", "version", ZonedDateTime.now(ZoneOffset.UTC.normalized()))
 
     val appDeps = sysProps.appDependencies()
     val jsonStr = Json.prettyPrint(Json.toJson(appDeps))
