@@ -5,7 +5,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.6.2"
+version in ThisBuild := "0.6.3"
 
 scalaVersion in ThisBuild := "2.12.8"
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -233,18 +233,12 @@ lazy val compilerOptions = Seq(
 lazy val commonSettings = Seq(
   scalacOptions ++= compilerOptions,
   resolvers ++= Seq(
-    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     Resolver.jcenterRepo,
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")
   ),
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  scmInfo := Some(
-    ScmInfo(
-      url("https://github.com/dbuschman7/sk8s/tree/release-" + version.value),
-      "scm:git:https://github.com/dbuschman7/sk8s.git",
-      Some("scm:git:https://github.com/dbuschman7sk8sgit")
-    )),
+  scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git")),
   bintrayReleaseOnPublish in ThisBuild := false
 )
 

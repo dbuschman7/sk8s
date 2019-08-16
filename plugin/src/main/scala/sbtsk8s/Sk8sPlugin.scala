@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter
 
 import sbt.{ Def, _ }
 import Keys.{ libraryDependencies, _ }
-import sbtsk8s.Sk8sPlugin.sk8sDeps
 
 object Sk8sPlugin extends AutoPlugin {
 

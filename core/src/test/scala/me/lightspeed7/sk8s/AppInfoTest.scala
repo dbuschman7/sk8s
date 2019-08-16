@@ -4,7 +4,8 @@ import java.time.format.DateTimeFormatter
 import java.time.{ ZoneOffset, ZonedDateTime }
 
 import org.scalatest.{ FunSuite, Matchers }
-import org.scalatest.Matchers._
+
+import play.api.libs.json.{ JsResult, JsValue, Json }
 
 class AppInfoTest extends FunSuite with Matchers {
 
@@ -19,6 +20,15 @@ class AppInfoTest extends FunSuite with Matchers {
     Option(info.hostname) should not be None
     Option(info.ipAddress) should not be None
     info.buildTime.isBefore(now)
+
+    val json: JsValue = Json.toJson(info)
+    val str: String   = Json.prettyPrint(json)
+    str should not be null
+
+    val infoJs: JsValue              = Json.parse(str)
+    val infoPrime: JsResult[AppInfo] = Json.fromJson[AppInfo](infoJs)
+    infoPrime.isSuccess shouldBe true
+    infoPrime.get shouldBe info
   }
 
   test("ZonedDateTime - serialization round trip") {

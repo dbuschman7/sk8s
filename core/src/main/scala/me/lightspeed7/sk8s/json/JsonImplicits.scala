@@ -1,6 +1,8 @@
 package me.lightspeed7.sk8s.json
 
 import java.nio.file.{ Path, Paths }
+import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -60,7 +62,7 @@ trait JsonImplicits {
   implicit val uidFormat: Format[UUID] = Format(uidReads, uidWrites)
 
   //
-  // DateTimeZone format
+  // Joda DateTimeZone format
   // ////////////////////////////
   implicit val dtzReads: Reads[DateTimeZone] = new Reads[DateTimeZone] {
     def reads(json: JsValue): JsResult[DateTimeZone] = json match {
@@ -80,7 +82,7 @@ trait JsonImplicits {
   implicit val dtzFormat: Format[DateTimeZone] = Format(dtzReads, dtzWrites)
 
   //
-  // DateTime format
+  // Joda DateTime format
   //////////////////////////////
   implicit val dtReads: Reads[DateTime] = new Reads[DateTime] {
     val parsers = Array[DateTimeParser](
@@ -126,7 +128,29 @@ trait JsonImplicits {
   implicit val dtFormat: Format[DateTime] = Format(dtReads, dtWrites)
 
   //
-  // Duration Format
+  // Java Time API - Zoned
+  // /////////////////////////////////////
+  implicit val zdtReads: Reads[ZonedDateTime] = new Reads[ZonedDateTime] {
+    def reads(json: JsValue): JsResult[ZonedDateTime] =
+      json match {
+        case JsNumber(num) => JsError("Unsupported format")
+        case JsString(str) =>
+          Option(str) match {
+            case Some(s) => JsSuccess(ZonedDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+            case None    => JsError(s"Invalid value given for dateTime : '${json.toString()}'")
+          }
+        case _ => JsError("formatted DateTime value expected")
+      }
+  }
+
+  implicit val zdtWrites: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
+    def writes(d: ZonedDateTime): JsValue = JsString(d.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+  }
+
+  implicit val zdtFormat: Format[ZonedDateTime] = Format(zdtReads, zdtWrites)
+
+  //
+  // Scala Duration Format
   // /////////////////////////////////////
   implicit val _DurationReads: Reads[Duration] = new Reads[Duration] {
     def reads(json: JsValue): JsResult[Duration] = json match {
@@ -144,7 +168,7 @@ trait JsonImplicits {
   implicit val _durationFormat: Format[Duration] = Format(_DurationReads, _DurationsWrites)
 
   //
-  // FiniteDuration
+  // Scala FiniteDuration
   // /////////////////////////
   implicit val durReads: Reads[FiniteDuration] = new Reads[FiniteDuration] {
     def reads(json: JsValue): JsResult[FiniteDuration] = json match {
@@ -164,7 +188,7 @@ trait JsonImplicits {
   implicit val durationFormat: Format[FiniteDuration] = Format(durReads, durWrites)
 
   //
-  // Joda Period
+  // Joda Time Period
   // /////////////////////////
   implicit val periodReads: Reads[Period] = new Reads[Period] {
     def reads(json: JsValue): JsResult[Period] = json match {
