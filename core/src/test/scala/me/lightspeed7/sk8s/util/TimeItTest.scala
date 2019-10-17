@@ -8,10 +8,10 @@ class TimeItTest extends FunSuite with Matchers {
   test("Single result") {
     var timerCalled = false
 
-    implicit val TimerOutput = new TimerOutput {
-      override def update(latencyInMillis: Long, count: Int): Unit = {
+    val timer: TimerOutput = new TimerOutput {
+      override def update(latencyInNanos: Long, count: Int): Unit = {
         timerCalled = true
-        latencyInMillis.toInt should be >= 100
+        latencyInNanos.toInt should be >= 100
         count shouldBe 1
       }
     }
@@ -19,17 +19,17 @@ class TimeItTest extends FunSuite with Matchers {
     val result = Time.it("single result") {
       Thread.sleep(100)
       1
-    }(Some(TimerOutput))
+    }(Some(timer))
     timerCalled shouldBe true
   }
 
   test("Sequence result") {
     var timerCalled = false
 
-    implicit val TimerOutput = Some(new TimerOutput {
-      override def update(latencyInMillis: Long, count: Int): Unit = {
+    implicit val timer: Some[TimerOutput] = Some(new TimerOutput {
+      override def update(latencyInNanos: Long, count: Int): Unit = {
         timerCalled = true
-        latencyInMillis.toInt should be >= 100
+        latencyInNanos.toInt should be >= 100
         count shouldBe 5
       }
     })

@@ -149,6 +149,20 @@ object PrettyPrint {
 
   def number(input: Long): String = format.format(input)
 
+  def latency(timeInNanos: Long): String = {
+    val micro        = timeInNanos / 1000
+    val millis       = micro / 1000
+    val rawSecs: Int = (millis.toDouble / 1000).floor.toInt
+    val mins: Int    = rawSecs / 60
+    val secs: Int    = rawSecs - (mins * 60)
+
+    (mins, secs, millis) match {
+      case (m, s, _) if m > 0 => s"$m mins $s seconds"
+      case (_, s, _) if s > 0 => s"$s seconds"
+      case (_, _, m) if m > 0 => s"$millis milliseconds"
+      case (_, _, _)          => s"$micro microseconds"
+    }
+  }
 }
 
 object Time {
@@ -190,22 +204,9 @@ object Time {
       case seq: Seq[_] => seq.length
       case _           => 1
     }
+
     timer.foreach(_.update(time, count))
-
-    // dump the results
-    val micro        = time / 1000
-    val millis       = micro / 1000
-    val rawSecs: Int = (millis.toDouble / 1000).floor.toInt
-    val mins: Int    = rawSecs / 60
-    val secs: Int    = rawSecs - (mins * 60)
-
-    (mins, secs, millis) match {
-      case (m, s, _) if m > 0 => output(s"$label - Elapsed Time: $m mins $s seconds")
-      case (_, s, _) if s > 0 => output(s"$label - Elapsed Time: $s seconds")
-      case (_, _, m) if m > 0 => output(s"$label - Elapsed Time: $millis milliseconds")
-      case (_, _, _)          => output(s"$label - Elapsed Time: $micro microseconds")
-    }
-
+    output(s"$label - Elapsed Time: " + PrettyPrint.latency(time))
     result
   }
 

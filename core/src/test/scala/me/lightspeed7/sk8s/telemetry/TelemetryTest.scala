@@ -4,7 +4,7 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import java.util.concurrent.TimeUnit
 
 import me.lightspeed7.sk8s.AppInfo
-import org.joda.time.DateTime
+import me.lightspeed7.sk8s.util.PrettyPrint
 import org.lyranthe.prometheus.client.registry.ProtoFormat
 import org.scalatest.{ FunSuite, Matchers }
 import org.slf4j.LoggerFactory
@@ -78,6 +78,23 @@ class TelemetryTest extends FunSuite with Matchers {
 
     val timer = TelemetryRegistry.timer("timer2")
     timer.update(1000)
+  }
+
+  test("PrettyPrint latency") {
+    PrettyPrint.latency(1L) shouldBe "0 microseconds"   // no support below micro
+    PrettyPrint.latency(10L) shouldBe "0 microseconds"  // no support below micro
+    PrettyPrint.latency(100L) shouldBe "0 microseconds" // no support below micro
+    PrettyPrint.latency(1000L) shouldBe "1 microseconds"
+    PrettyPrint.latency(10000L) shouldBe "10 microseconds"
+    PrettyPrint.latency(100000L) shouldBe "100 microseconds"
+    PrettyPrint.latency(1000000L) shouldBe "1 milliseconds"
+    PrettyPrint.latency(10000000L) shouldBe "10 milliseconds"
+    PrettyPrint.latency(100000000L) shouldBe "100 milliseconds"
+    PrettyPrint.latency(1000000000L) shouldBe "1 seconds"
+    PrettyPrint.latency(10000000000L) shouldBe "10 seconds"
+    PrettyPrint.latency(100000000000L) shouldBe "1 mins 40 seconds"
+    PrettyPrint.latency(1000000000000L) shouldBe "16 mins 40 seconds"
+    PrettyPrint.latency(10000000000000L) shouldBe "166 mins 40 seconds" // no hours support
   }
 
 }
