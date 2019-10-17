@@ -176,17 +176,21 @@ object Time {
   }
 
   trait TimerOutput {
-    def update(latencyInMillis: Long): Unit
+    def update(latencyInMillis: Long, count: Int): Unit
   }
   final case class TimeItTimer(timer: TimerLike) extends TimerOutput {
-    override def update(latencyInMillis: Long): Unit = timer.update(latencyInMillis)
+    override def update(latencyInMillis: Long, count: Int): Unit = timer.update(latencyInMillis) // ignores count
   }
 
   def it[T](label: => String, output: String => Unit = in => println(in))(block: => T)(implicit timer: Option[TimerOutput] = None): T = {
     // run it
     output(s"$label - Starting  ...")
     val (time, result) = thisBlock(block) // call-by-name
-    timer.foreach(_.update(time))
+    val count = result match {
+      case seq: Seq[_] => seq.length
+      case _           => 1
+    }
+    timer.foreach(_.update(time, count))
 
     // dump the results
     val micro        = time / 1000
