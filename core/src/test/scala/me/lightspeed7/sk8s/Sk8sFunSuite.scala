@@ -1,21 +1,21 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{Path, Paths}
-import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
+import java.nio.file.{ Path, Paths }
+import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import me.lightspeed7.sk8s.files.Sk8sFileIO
-import me.lightspeed7.sk8s.util.{AlphaId, AutoClose}
+import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
 import org.joda.time.DateTime
 import org.scalactic.source
-import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
+import org.scalatest.{ BeforeAndAfterAll, FunSuite, Tag }
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.util.{ Failure, Success, Try }
 
 class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
 

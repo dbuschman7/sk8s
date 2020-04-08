@@ -1,18 +1,18 @@
 package me.lightspeed7.sk8s.files
 
 import java.io.File
-import java.nio.file.{Path, Paths, StandardOpenOption}
+import java.nio.file.{ Path, Paths, StandardOpenOption }
 
 import akka.stream
-import akka.stream.{Materializer, scaladsl}
-import akka.stream.scaladsl.{Framing, Sink}
+import akka.stream.{ scaladsl, Materializer }
+import akka.stream.scaladsl.{ Framing, Sink }
 import akka.util.ByteString
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 //
 // File based helpers
@@ -62,15 +62,19 @@ object Sk8sFileIO extends LazyLogging {
   }
 
   //
-  def getFileContents(file: File)(implicit timeout: FiniteDuration, mat:Materializer): ByteString = await(stream.scaladsl.FileIO.fromPath(file.toPath).runFold(ByteString.empty)(_ ++ _))
+  def getFileContents(file: File)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+    await(stream.scaladsl.FileIO.fromPath(file.toPath).runFold(ByteString.empty)(_ ++ _))
 
-  def getFileContents(path: Path)(implicit timeout: FiniteDuration, mat:Materializer): ByteString = await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
+  def getFileContents(path: Path)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+    await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
 
-  def getPathContents(path: Path)(implicit timeout: FiniteDuration, mat:Materializer): ByteString = await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
+  def getPathContents(path: Path)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+    await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
 
-  def getPathLines(path: Path, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat:Materializer): Seq[String] = getFileLines(path.toFile)
+  def getPathLines(path: Path, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat: Materializer): Seq[String] =
+    getFileLines(path.toFile)
 
-  def getFileLines(file: File, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat:Materializer): Seq[String] = {
+  def getFileLines(file: File, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat: Materializer): Seq[String] = {
     val f = scaladsl.FileIO
       .fromPath(file.toPath)
       .via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = maxLineLength, allowTruncation = true))

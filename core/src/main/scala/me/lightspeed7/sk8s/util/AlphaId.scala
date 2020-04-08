@@ -22,10 +22,10 @@ object AlphaId {
   implicit val __volumeRefJson: Format[AlphaId] = Format(__alphaIdReads, __alphaIdWrites)
   implicit val __json: OFormat[AlphaId]         = Json.format[AlphaId]
 
-  private val numericLetters:Seq[Char] = '0' to '9'
-  private val upperLetters: Seq[Char] = 'A' to 'Z'
-  private val lowerLetters: Seq[Char] = 'a' to 'z'
-  private val allLetters: Seq[Char]   = upperLetters ++ lowerLetters
+  private val numericLetters: Seq[Char] = '0' to '9'
+  private val upperLetters: Seq[Char]   = 'A' to 'Z'
+  private val lowerLetters: Seq[Char]   = 'a' to 'z'
+  private val allLetters: Seq[Char]     = upperLetters ++ lowerLetters
 
   val defaultLength = 20
 
@@ -49,25 +49,21 @@ object AlphaId {
   /**
    * Alpha numeric id with no alpha in the first position
    */
-  def randomAlphaWithNumerics(length:Int = defaultLength): AlphaId = {
+  def randomAlphaWithNumerics(length: Int = defaultLength): AlphaId = {
     require(length >= 1)
     AlphaId(randomStringFromCharList(1, allLetters) ++ randomStringFromCharList(length - 1, allLetters ++ numericLetters))
   }
 
-  def randomUpperAlphaWithNumerics(length:Int = defaultLength): AlphaId = {
+  def randomUpperAlphaWithNumerics(length: Int = defaultLength): AlphaId = {
     require(length >= 1)
     AlphaId(randomStringFromCharList(1, upperLetters) ++ randomStringFromCharList(length - 1, upperLetters ++ numericLetters))
   }
 
-  def randomLowerAlphaWithNumerics(length:Int = defaultLength): AlphaId = {
+  def randomLowerAlphaWithNumerics(length: Int = defaultLength): AlphaId = {
     require(length >= 1)
     AlphaId(randomStringFromCharList(1, lowerLetters) ++ randomStringFromCharList(length - 1, lowerLetters ++ numericLetters))
   }
 
 }
 
-object AlphaNumericId {
-
-
-
-}
+object AlphaNumericId {}

@@ -118,6 +118,20 @@ object PrettyPrint {
 
   def number(input: Long): String = format.format(input)
 
+  def latency(timeInNanos: Long): String = {
+    val micro        = timeInNanos / 1000
+    val millis       = micro / 1000
+    val rawSecs: Int = (millis.toDouble / 1000).floor.toInt
+    val mins: Int    = rawSecs / 60
+    val secs: Int    = rawSecs - (mins * 60)
+
+    (mins, secs, millis) match {
+      case (m, s, _) if m > 0 => s"$m mins $s seconds"
+      case (_, s, _) if s > 0 => s"$s seconds"
+      case (_, _, m) if m > 0 => s"$millis milliseconds"
+      case (_, _, _)          => s"$micro microseconds"
+    }
+  }
 }
 
 object Time {
@@ -144,28 +158,24 @@ object Time {
     }
   }
 
-  final case class TimeItTimer(timer: TimerLike)
+  trait TimerOutput {
+    def update(latencyInMillis: Long, count: Int): Unit
+  }
+  final case class TimeItTimer(timer: TimerLike) extends TimerOutput {
+    override def update(latencyInMillis: Long, count: Int): Unit = timer.update(latencyInMillis) // ignores count
+  }
 
-  def it[T](label: => String, output: String => Unit = in => println(in))(block: => T)(implicit timer: Option[TimeItTimer] = None): T = {
+  def it[T](label: => String, output: String => Unit = in => println(in))(block: => T)(implicit timer: Option[TimerOutput] = None): T = {
     // run it
     output(s"$label - Starting  ...")
     val (time, result) = thisBlock(block) // call-by-name
-    timer.foreach(_.timer.update(time))
-
-    // dump the results
-    val micro        = time / 1000
-    val millis       = micro / 1000
-    val rawSecs: Int = (millis.toDouble / 1000).floor.toInt
-    val mins: Int    = rawSecs / 60
-    val secs: Int    = rawSecs - (mins * 60)
-
-    (mins, secs, millis) match {
-      case (m, s, _) if m > 0 => output(s"$label - Elapsed Time: $m mins $s seconds")
-      case (_, s, _) if s > 0 => output(s"$label - Elapsed Time: $s seconds")
-      case (_, _, m) if m > 0 => output(s"$label - Elapsed Time: $millis milliseconds")
-      case (_, _, _)          => output(s"$label - Elapsed Time: $micro microseconds")
+    val count = result match {
+      case seq: Seq[_] => seq.length
+      case _           => 1
     }
 
+    timer.foreach(_.update(time, count))
+    output(s"$label - Elapsed Time: " + PrettyPrint.latency(time))
     result
   }
 
