@@ -1,19 +1,18 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ActorRef, ActorSystem}
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.files.VolumeFiles
+import me.lightspeed7.sk8s.files.{Sk8sFileIO, VolumeFiles}
 import me.lightspeed7.sk8s.http.RestQuery
-import me.lightspeed7.sk8s.server.{ HealthStatusSummary, MemoryCronActor }
-import me.lightspeed7.sk8s.util.FileUtils
+import me.lightspeed7.sk8s.server.{HealthStatusSummary, MemoryCronActor}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
-object Sk8s extends FileUtils {
+object Sk8s {
 
   def serviceAccount(basePath: Path = Paths.get("/var/run/secrets/")) =
     ServiceAccount(Paths.get(basePath.toString + "/kubernetes.io/serviceaccount"))
@@ -22,7 +21,7 @@ object Sk8s extends FileUtils {
 
   def ku8sService: Service = service("kubernetes")
 
-  def timeZone: String = exec("date +%Z")
+  def timeZone: String = Sk8sFileIO.exec("date +%Z")
 
   def secrets(name: String, encrypted: Boolean = false, mountPath: Path = Paths.get("/etc")): VolumeFiles =
     VolumeFiles(name, mountPath, encrypted = encrypted)
@@ -103,15 +102,15 @@ final case class HostAndPort(host: String, port: Int) {
   def asString: String = s"$host:$port"
 }
 
-final case class ServiceAccount(basePath: Path) extends FileUtils with LazyLogging {
+final case class ServiceAccount(basePath: Path) extends LazyLogging {
 
   lazy val isKubernetes: Boolean = new File(basePath.toString, "token").exists()
 
-  lazy val namespace: String = getContents(basePath, "namespace").getOrElse("unknown")
+  lazy val namespace: String = Sk8sFileIO.getContents(basePath, "namespace").getOrElse("unknown")
 
-  lazy val token: String = getContents(basePath, "token").getOrElse("unknown")
+  lazy val token: String = Sk8sFileIO.getContents(basePath, "token").getOrElse("unknown")
 
-  lazy val crt: String = getContents(basePath, "ca.crt").getOrElse("unknown")
+  lazy val crt: String = Sk8sFileIO.getContents(basePath, "ca.crt").getOrElse("unknown")
 
   def endpoints(serviceName: String, namespace: String = "default")(implicit ec: ExecutionContext): Future[Option[Endpoints]] =
     RestQuery.queryForEndpoints(this, serviceName, namespace).flatMap {

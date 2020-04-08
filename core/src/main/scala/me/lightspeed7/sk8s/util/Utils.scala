@@ -1,46 +1,11 @@
 package me.lightspeed7.sk8s.util
 
-import java.nio.file.{ Path, Paths, StandardOpenOption }
 import java.util.UUID
 
-import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.telemetry.TimerLike
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.io.Source
-import scala.util.{ Failure, Success, Try }
-
-trait FileUtils extends LazyLogging {
-  def getContents(basePath: Path, filename: String): Option[String] =
-    getContents(Paths.get(basePath.toString, filename))
-
-  def getContents(fullPath: Path): Option[String] = {
-    logger.debug(s"getContents - path = $fullPath")
-    // use new Java nio parts to get a read-only access files read correctly.
-    Try(Source.fromInputStream(java.nio.file.Files.newInputStream(fullPath, StandardOpenOption.READ), "UTF-8").mkString) match {
-      case Success(value) => Some(value)
-      case Failure(ex) =>
-        logger.warn(s"Unable to fetch $fullPath - ${ex.getMessage}")
-        None
-    }
-  }
-
-  def exec(command: String): String = {
-    import sys.process._
-    command !!
-  }
-
-  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit): Unit = {
-    val p = new java.io.PrintWriter(f)
-    try { op(p) } finally { p.close() }
-  }
-
-  def writeContents(fullPath: Path)(data: String*): Unit =
-    printToFile(fullPath.toFile) { p =>
-      data.foreach(p.println)
-    }
-
-}
+import scala.util.Try
 
 object String {
   implicit class StringPimps(s: String) {
@@ -133,6 +98,10 @@ object String {
 
       commaIt(s.notNull.toList.reverse).reverse.mkString("")
     }
+
+    def stripQuotes: String = s.replaceAll("^[\"']|[\"']$", "")
+
+    def stripBracing: String = s.replaceAll("^[({\\[]|[)}\\]]$", "")
   }
 }
 

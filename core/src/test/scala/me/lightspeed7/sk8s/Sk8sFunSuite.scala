@@ -1,21 +1,21 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{ Path, Paths }
-import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
+import java.nio.file.{Path, Paths}
+import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.{ FileIO, Framing, Sink }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
-import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose, FileUtils }
+import me.lightspeed7.sk8s.files.Sk8sFileIO
+import me.lightspeed7.sk8s.util.{AlphaId, AutoClose}
 import org.joda.time.DateTime
 import org.scalactic.source
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Tag }
+import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
 
@@ -128,39 +128,24 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
   //
   // File-based helpers
   // ///////////////////////////////
-  def findTreeFiles(keyWords: String*): Array[File] = findTreeFiles(Paths.get(".").toAbsolutePath.toFile, keyWords: _*)
+  def findTreeFiles(keyWords: String*): Array[File] = findTreeFiles(Paths.get(".").toAbsolutePath.toFile)
 
-  def findTreeFiles(baseDir: File, keyWords: String*): Array[File] = {
-    val these = baseDir.listFiles
-    val good = these.filter { f =>
-      val fStr = f.toString
-      keyWords.forall(kw => fStr.contains(kw))
-    }
-    good ++ these.filter(_.isDirectory).flatMap(findTreeFiles(_, keyWords: _*))
-  }
+  def findTreeFiles(baseDir: File, keyWords: String*): Array[File] = Sk8sFileIO.findTreeFiles(baseDir, keyWords: _*)
 
   def getProjectBasePath(project: String): Path = {
     val t = Paths.get(".").toAbsolutePath.toString.replace("/.", "")
     if (t.contains(project)) Paths.get(t) else Paths.get(t, project)
   }
 
-  def getFileContents(file: File): ByteString = await(FileIO.fromFile(file).runFold(ByteString.empty)(_ ++ _))
+  def getFileContents(file: File): ByteString = Sk8sFileIO.getFileContents(file)
 
-  def getFileContents(path: Path): ByteString = await(FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
+  def getFileContents(path: Path): ByteString = Sk8sFileIO.getFileContents(path)
 
-  def getPathContents(path: Path): ByteString = await(FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
+  def getPathContents(path: Path): ByteString = Sk8sFileIO.getPathContents(path)
 
-  def getPathLines(path: Path, maxLineLength: Int = 10000): Seq[String] = getFileLines(path.toFile)
+  def getPathLines(path: Path, maxLineLength: Int = 10000): Seq[String] = Sk8sFileIO.getPathLines(path, maxLineLength)
 
-  def getFileLines(file: File, maxLineLength: Int = 10000): Seq[String] = {
-    val f = FileIO
-      .fromFile(file)
-      .via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = maxLineLength, allowTruncation = true))
-      .map(_.utf8String)
-      .runWith(Sink.seq)
-
-    await(f)
-  }
+  def getFileLines(file: File, maxLineLength: Int = 10000): Seq[String] = Sk8sFileIO.getFileLines(file, maxLineLength)
 
   def getProjectFilePath(project: String, pathParts: String*): Path =
     Paths.get(getProjectBasePath(project).toString, pathParts.mkString("/")).toAbsolutePath
@@ -175,8 +160,8 @@ class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
     Paths.get(getProjectBasePath(project).toString, parts.mkString("/")).toAbsolutePath
   }
 
-  class FileWriter(path: Path) extends FileUtils {
-    def write(data: String*) = writeContents(path)(data: _*)
+  class FileWriter(path: Path) {
+    def write(data: String*): Unit = Sk8sFileIO.writeContents(path)(data: _*)
   }
 
   def writeLibraryTestFile(project: String, pathParts: String*): FileWriter = {

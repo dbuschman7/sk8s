@@ -27,4 +27,21 @@ class StringPimpsTest extends FunSuite with Matchers {
     "foo".pad.left('-', 5) should be("--foo")
     "foo".pad.right('-', 5) should be("foo--")
   }
+
+  test("strip quotes") {
+    """"foo"""".stripQuotes shouldBe "foo"
+    """"fo"oo"""".stripQuotes shouldBe """fo"oo"""
+
+    """'foo'""".stripQuotes shouldBe "foo"
+  }
+
+  test("strip bracing") {
+    """(foo)""".stripBracing shouldBe "foo"
+    """{fo)oo}""".stripBracing shouldBe """fo)oo"""
+
+    """[foo]""".stripBracing shouldBe "foo"
+
+    """]foo{""".stripBracing shouldBe "]foo{"
+
+  }
 }

@@ -39,6 +39,14 @@ class AlphaIdTest extends Sk8sFunSuite with Matchers {
     printIt(AlphaId.randomAlpha(300)).id.length shouldBe 300
   }
 
+  test("Alpha upper with numerics") {
+    val id = AlphaId.randomUpperAlphaWithNumerics(50)
+    val numDigits = id.id.filter(_.isDigit).length
+    println("NumDigits = " + numDigits)
+    numDigits should be > 0
+  }
+
+
   def printIt(in: AlphaId): AlphaId = {
     println(in)
     in
