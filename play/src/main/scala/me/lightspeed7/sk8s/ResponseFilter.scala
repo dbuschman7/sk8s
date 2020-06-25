@@ -3,6 +3,7 @@ package me.lightspeed7.sk8s
 import javax.inject.Inject
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.telemetry.{ BasicCounter, BasicTimer, TelemetryRegistry }
 import play.api.Logger
 import play.api.mvc.{ Filter, RequestHeader, ResponseHeader, Result }
@@ -11,7 +12,7 @@ import play.api.routing.Router
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util._
 
-class ResponseFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter {
+class ResponseFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter with LazyLogging {
 
   implicit val mat: ActorMaterializer = ActorMaterializer()
   implicit val ex: ExecutionContext   = akka.dispatcher
@@ -42,7 +43,7 @@ class ResponseFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo)
 
     if (!found) {
       val origin = Try(requestHeader.headers("Origin")).toOption.getOrElse("unknown")
-      Logger.info(s"($origin)$action took ${requestTime}ms on path ${requestHeader.path} and returned ${responseHeader.status}")
+      logger.info(s"($origin)$action took ${requestTime}ms on path ${requestHeader.path} and returned ${responseHeader.status}")
       requests.increment()
       requestTimes.update(requestTime)
       if (action == "failure") {

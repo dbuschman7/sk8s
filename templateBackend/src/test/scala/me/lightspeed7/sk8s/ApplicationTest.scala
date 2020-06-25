@@ -6,7 +6,7 @@ import com.softwaremill.sttp.{ HttpURLConnectionBackend, Id, SttpBackend }
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.server.BackendServerClient
 import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{ JsObject, Json }
 
 class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
@@ -14,6 +14,10 @@ class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
   lazy val client: BackendServerClient = BackendServerClient()(ctx)
+
+  test("get alphaId") {
+    (1 to 10).map(_ -> AlphaId.randomLowerAlphaWithNumerics(20)).foreach(println)
+  }
 
   test("returns secondary endpoints") {
 

@@ -49,7 +49,7 @@ class Initialize @Inject()( //
   // finish
   //
   // Go to : http://patorjk.com/software/taag/#p=display&f=Big%20Money-sw&t=Type%20App%20Name
-  Logger.info("""
+  logger.info("""
       |  ______                       _______             __        __  __
       | /      \                     /       \           /  |      /  |/  |
       |/$$$$$$  |  ______    ______  $$$$$$$  | __    __ $$ |____  $$ |$$/   _______
@@ -64,6 +64,6 @@ class Initialize @Inject()( //
       |          $$/       $$/
     """.stripMargin)
 
-  Variables.logConfig(play.api.Logger.underlyingLogger)
+  Variables.logConfig(logger.underlying.underlying)
 
 }

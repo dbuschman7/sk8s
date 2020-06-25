@@ -5,9 +5,9 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.6.8"
+version in ThisBuild := "0.7.0"
 
-scalaVersion in ThisBuild := "2.12.8"
+scalaVersion in ThisBuild := "2.12.10"
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
 //
@@ -149,17 +149,17 @@ lazy val dependencies =
   new {
     val logbackV = "1.2.3"
     // val logstashV        = "4.11"
-    val scalaLoggingV = "3.7.2"
-    val slf4jV        = "1.7.25"
+    val scalaLoggingV = "3.9.2"
+    val slf4jV        = "1.7.30"
     // val typesafeConfigV  = "1.3.1"
     // val pureconfigV      = "0.8.0"
     // val monocleV         = "1.4.0"
-    val akkaV       = "2.5.23"
-    val playV       = "2.6.23"
-    val playJsonV   = "2.6.13"
-    val sttpV       = "1.5.7"
-    val scalatestV  = "3.0.4"
-    val scalacheckV = "1.13.5"
+    val akkaV       = "2.5.31"
+    val playV       = "2.7.4"
+    val playJsonV   = "2.7.4"
+    val sttpV       = "1.7.2"
+    val scalatestV  = "3.1.1"
+    val scalacheckV = "1.14.3"
 
     // val logstash       = "net.logstash.logback"       % "logstash-logback-encoder" % logstashV
     val logback               = "ch.qos.logback"                % "logback-classic"           % logbackV withSources ()
@@ -175,7 +175,7 @@ lazy val dependencies =
     val prometheusClientProto = "org.lyranthe.prometheus"       %% "protobuf"                 % "0.9.0-M5" withSources ()
     val scalacheck            = "org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()
     val scalatest             = "org.scalatest"                 %% "scalatest"                % scalatestV withSources ()
-    val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "3.1.2" % "test" withSources ()
+    val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "5.0.0" % "test" withSources ()
     val scalaLogging          = "com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()
     val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.6" withSources ()
     val skuber                = "io.skuber"                     %% "skuber"                   % "2.1.1" withSources ()
@@ -311,7 +311,7 @@ def buildInfoVars(name: SettingKey[String], version: SettingKey[String], scalaVe
 
 def dockerVars(
     name: SettingKey[String],
-    baseImage: String = "opendjk-11-jre-slim",
+    baseImage: String = "sk8s-java-base:latest",
     backend: Boolean = false
 ) = {
   val ports = if (backend) { Seq(8999) } else { Seq(8999, 9000) }
