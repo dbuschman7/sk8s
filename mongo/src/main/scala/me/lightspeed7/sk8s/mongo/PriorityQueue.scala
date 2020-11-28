@@ -34,7 +34,7 @@ final class PriorityQueue[T <: QueueItem](collectionName: String)(implicit mCtx:
   import org.mongodb.scala.model.Filters._
   import org.mongodb.scala.model.Sorts._
   import org.mongodb.scala.model.Updates._
-1
+
   val coll: MongoCollection[T] = {
     import org.bson.codecs.configuration.CodecRegistries.fromRegistries
     import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
