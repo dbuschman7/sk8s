@@ -1,8 +1,8 @@
 package me.lightspeed7.sk8s
 
-import javax.inject.Inject
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ Materializer, SystemMaterializer }
+import javax.inject.Inject
 import me.lightspeed7.sk8s.telemetry.{ BasicCounter, TelemetryRegistry }
 import play.api.mvc.{ Filter, RequestHeader, Result }
 
@@ -10,9 +10,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 class TelemetryFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter {
 
+  implicit val mat: Materializer    = SystemMaterializer(akka).materializer
   implicit val ex: ExecutionContext = akka.dispatcher
-
-  val mat = ActorMaterializer()
 
   var requests: BasicCounter = TelemetryRegistry.counter("Requests")
 

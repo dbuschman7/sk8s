@@ -2,7 +2,8 @@ package me.lightspeed7.sk8s.actors
 
 import akka.actor.{ actorRef2Scala, ActorRef, ActorSystem, Props }
 import akka.event.{ EventBus, LookupClassification }
-import akka.pattern.BackoffSupervisor
+import akka.pattern.{ BackoffOpts, BackoffSupervisor }
+import me.lightspeed7.sk8s.actors.SK8SBus.BackoffMax
 import me.lightspeed7.sk8s.{ Constant, Sources, Variables }
 import org.slf4j.{ Logger, LoggerFactory }
 
@@ -54,15 +55,16 @@ object SK8SBus {
     Variables.source[Duration](Sources.env, "DAEMON_BACKOFF_MAX_TIMEOUT", Constant(60 seconds), security = false)
 
   def runDaemon(actorName: String, actorProps: Props)(implicit akka: ActorSystem): ActorRef = {
-    val supervisor = BackoffSupervisor.props(
-      actorProps,
-      childName = actorName,
-      minBackoff = BackoffMin.value.asInstanceOf[FiniteDuration],
-      maxBackoff = BackoffMax.value.asInstanceOf[FiniteDuration],
-      randomFactor = 0.2
-    ) // adds 20% "noise" to vary the intervals slightly
 
-    akka.actorOf(supervisor, name = actorName + "-Supervisor")
+    val opts = BackoffOpts.onFailure(
+      actorProps,
+      actorName,
+      BackoffMin.value.asInstanceOf[FiniteDuration],
+      BackoffMax.value.asInstanceOf[FiniteDuration],
+      randomFactor = 0.2 // adds 20% "noise" to vary the intervals slightly
+    )
+
+    akka.actorOf(BackoffSupervisor.props(opts), name = actorName + "-Supervisor")
   }
 
 }

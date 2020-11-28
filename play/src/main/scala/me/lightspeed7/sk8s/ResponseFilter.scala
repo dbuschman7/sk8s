@@ -1,11 +1,10 @@
 package me.lightspeed7.sk8s
 
-import javax.inject.Inject
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ Materializer, SystemMaterializer }
 import com.typesafe.scalalogging.LazyLogging
+import javax.inject.Inject
 import me.lightspeed7.sk8s.telemetry.{ BasicCounter, BasicTimer, TelemetryRegistry }
-import play.api.Logger
 import play.api.mvc.{ Filter, RequestHeader, ResponseHeader, Result }
 import play.api.routing.Router
 
@@ -14,8 +13,8 @@ import scala.util._
 
 class ResponseFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter with LazyLogging {
 
-  implicit val mat: ActorMaterializer = ActorMaterializer()
-  implicit val ex: ExecutionContext   = akka.dispatcher
+  implicit val mat: Materializer    = SystemMaterializer(akka).materializer
+  implicit val ex: ExecutionContext = akka.dispatcher
 
   val exclusionPaths: Seq[String]  = Seq("/", "/favicon.ico")
   val exclusionStarts: Seq[String] = Seq("/telemetry", "/health", "/assets", "/webjars", "/metrics", "/ip", "/ping", "/config")
