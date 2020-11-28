@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s
 
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 class Sk8sContextTest extends Sk8sFunSuite with Matchers {
 

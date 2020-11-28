@@ -9,12 +9,6 @@ trait PlayServerFunSuite extends Sk8sFunSuite with GuiceOneServerPerSuite {
 
   def beforeAllForSuite(): Unit
 
-  def spiedCollector[T](channel: String): SpiedChannelState[T] = {
-    val state = new SpiedChannelState[T]()
-    actorSystem.actorOf(Props(classOf[SpiedChannelActor[T]], channel, state), s"spied-$channel")
-    state
-  }
-
   //
   // Startup
   // //////////////////

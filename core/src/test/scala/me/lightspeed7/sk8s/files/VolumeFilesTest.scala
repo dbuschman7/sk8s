@@ -1,8 +1,9 @@
 package me.lightspeed7.sk8s.files
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class VolumeFilesTest extends FunSuite with Matchers {
+class VolumeFilesTest extends AnyFunSuite with Matchers {
 
   import TestCrypto._
   import me.lightspeed7.sk8s.util.String._

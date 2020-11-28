@@ -1,8 +1,9 @@
 package me.lightspeed7.sk8s.util
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class AutoCloseTest extends FunSuite with Matchers {
+class AutoCloseTest extends AnyFunSuite with Matchers {
 
   test("Test Single for comprehension") {
     var codeCalled: Boolean = false

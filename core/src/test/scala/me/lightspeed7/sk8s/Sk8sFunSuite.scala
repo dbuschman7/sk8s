@@ -11,13 +11,14 @@ import me.lightspeed7.sk8s.files.Sk8sFileIO
 import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
 import org.joda.time.DateTime
 import org.scalactic.source
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Tag }
+import org.scalatest.{ BeforeAndAfterAll, Tag }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
+import org.scalatest.funsuite.AnyFunSuite
 
-class Sk8sFunSuite extends FunSuite with BeforeAndAfterAll {
+class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   RunMode.setTestRunMode()
 

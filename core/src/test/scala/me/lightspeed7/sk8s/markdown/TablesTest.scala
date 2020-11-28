@@ -1,10 +1,11 @@
 package me.lightspeed7.sk8s.markdown
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 final case class TestData(col1: String, col2: Int, col3: String)
 
-class TablesTest extends FunSuite with Matchers {
+class TablesTest extends AnyFunSuite with Matchers {
 
   test("Basic Table Test ") {
 

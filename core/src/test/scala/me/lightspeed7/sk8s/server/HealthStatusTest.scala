@@ -1,9 +1,11 @@
 package me.lightspeed7.sk8s.server
 
-import org.scalatest.{ BeforeAndAfterAll, FunSuiteLike, Matchers }
+import org.scalatest.BeforeAndAfterAll
 import play.api.libs.json.{ JsBoolean, JsString }
+import org.scalatest.funsuite.AnyFunSuiteLike
+import org.scalatest.matchers.should.Matchers
 
-class HealthStatusTest extends FunSuiteLike with Matchers with BeforeAndAfterAll {
+class HealthStatusTest extends AnyFunSuiteLike with Matchers with BeforeAndAfterAll {
 
   test("Health Check") {
     HealthStatus.healthy("tag1")

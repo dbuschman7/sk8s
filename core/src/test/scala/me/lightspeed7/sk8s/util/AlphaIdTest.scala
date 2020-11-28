@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.util
 
 import me.lightspeed7.sk8s.Sk8sFunSuite
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 class AlphaIdTest extends Sk8sFunSuite with Matchers {
 
@@ -36,6 +36,7 @@ class AlphaIdTest extends Sk8sFunSuite with Matchers {
     printIt(AlphaId.randomAlpha(3)).id.length shouldBe 3
     printIt(AlphaId.randomLowerAlpha(10)).id.length shouldBe 10
     printIt(AlphaId.randomUpperAlpha(20)).id.length shouldBe 20
+    printIt(AlphaId.randomLowerAlpha(15)).id.length shouldBe 15
     printIt(AlphaId.randomAlpha(300)).id.length shouldBe 300
   }
 

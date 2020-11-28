@@ -1,8 +1,9 @@
 package me.lightspeed7.sk8s.util
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class StringPimpsTest extends FunSuite with Matchers {
+class StringPimpsTest extends AnyFunSuite with Matchers {
 
   import String._
 

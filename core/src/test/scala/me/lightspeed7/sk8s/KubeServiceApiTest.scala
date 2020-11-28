@@ -3,13 +3,14 @@ package me.lightspeed7.sk8s
 import java.nio.file.{ Path, Paths }
 
 import me.lightspeed7.sk8s.http.RestQuery
-import org.scalatest.{ FunSuite, Matchers }
 import play.api.libs.json.{ JsResult, Json }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class KubeServiceApiTest extends FunSuite with Matchers {
+class KubeServiceApiTest extends AnyFunSuite with Matchers {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

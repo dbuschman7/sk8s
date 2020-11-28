@@ -3,11 +3,11 @@ package me.lightspeed7.sk8s
 import java.time.format.DateTimeFormatter
 import java.time.{ ZoneOffset, ZonedDateTime }
 
-import org.scalatest.{ FunSuite, Matchers }
-
 import play.api.libs.json.{ JsResult, JsValue, Json }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class AppInfoTest extends FunSuite with Matchers {
+class AppInfoTest extends AnyFunSuite with Matchers {
 
   val now = ZonedDateTime.now(ZoneOffset.UTC.normalized())
   test("Generate AppInfo Object") {

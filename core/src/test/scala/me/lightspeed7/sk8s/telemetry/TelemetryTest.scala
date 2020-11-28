@@ -6,13 +6,14 @@ import java.util.concurrent.TimeUnit
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.util.PrettyPrint
 import org.lyranthe.prometheus.client.registry.ProtoFormat
-import org.scalatest.{ FunSuite, Matchers }
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class TelemetryTest extends FunSuite with Matchers {
+class TelemetryTest extends AnyFunSuite with Matchers {
 
   implicit val appInfo: AppInfo = AppInfo("TelemetryTestApp", "0.0.0", ZonedDateTime.now(ZoneOffset.UTC.normalized()))
 

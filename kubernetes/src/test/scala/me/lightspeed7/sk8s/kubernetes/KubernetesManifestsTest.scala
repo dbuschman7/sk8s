@@ -7,7 +7,7 @@ import me.lightspeed7.sk8s.{ DockerImage, Sk8sFunSuite }
 import me.lightspeed7.sk8s.manifests.Common.Java11
 import me.lightspeed7.sk8s.manifests.{ Budget, JobStatus, Service, Sk8sAppConfig }
 import me.lightspeed7.sk8s.util.AlphaId
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
 class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {

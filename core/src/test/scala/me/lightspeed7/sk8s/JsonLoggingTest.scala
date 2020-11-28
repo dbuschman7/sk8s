@@ -5,11 +5,13 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.classic.{ Level, LoggerContext }
 import ch.qos.logback.core.AppenderBase
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
+import org.scalatest.BeforeAndAfterAll
 import org.slf4j.{ Logger, LoggerFactory }
 import play.api.libs.json.Json
 
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 // Helpers
 final case class Foo(bar: String, baz: Int)
@@ -18,7 +20,7 @@ object Foo {
   implicit val _json = Json.format[Foo]
 }
 
-class JsonLoggingTest extends FunSuite with BeforeAndAfterAll with Matchers with LazyJsonLogging {
+class JsonLoggingTest extends AnyFunSuite with BeforeAndAfterAll with Matchers with LazyJsonLogging {
 
   val context  = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
   val appender = new MapAppender

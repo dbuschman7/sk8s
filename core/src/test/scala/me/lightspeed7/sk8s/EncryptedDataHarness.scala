@@ -1,8 +1,9 @@
 package me.lightspeed7.sk8s
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class EncryptedDataHarness extends FunSuite with Matchers {
+class EncryptedDataHarness extends AnyFunSuite with Matchers {
 
   //
   // DO NOT COMMIT ACTUAL USERNAMES AND PASSWORDS HERE

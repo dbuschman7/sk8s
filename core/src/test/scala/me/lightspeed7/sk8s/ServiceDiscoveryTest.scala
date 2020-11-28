@@ -1,9 +1,10 @@
 package me.lightspeed7.sk8s
 
 import me.lightspeed7.sk8s.services.ServiceDiscovery
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class ServiceDiscoveryTest extends FunSuite with Matchers {
+class ServiceDiscoveryTest extends AnyFunSuite with Matchers {
 
   test("Discovery from Environment") {
 

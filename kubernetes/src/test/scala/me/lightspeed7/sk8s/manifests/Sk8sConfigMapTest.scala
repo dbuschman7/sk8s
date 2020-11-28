@@ -1,9 +1,10 @@
 package me.lightspeed7.sk8s.manifests
 
 import me.lightspeed7.sk8s.RunMode
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class Sk8sConfigMapTest extends FunSuite with Matchers {
+class Sk8sConfigMapTest extends AnyFunSuite with Matchers {
 
   test("generate example config map") {
 

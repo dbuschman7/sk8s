@@ -2,10 +2,11 @@ package me.lightspeed7.sk8s
 
 import java.util.Properties
 
-import org.scalatest.{ Assertion, Matchers }
+import org.scalatest.Assertion
 
 import scala.concurrent.duration._
 import scala.util.Try
+import org.scalatest.matchers.should.Matchers
 
 class VariablesTest extends Sk8sFunSuite with Matchers {
 

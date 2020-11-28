@@ -1,9 +1,10 @@
 package me.lightspeed7.sk8s.util
 
 import me.lightspeed7.sk8s.util.Time.TimerOutput
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class TimeItTest extends FunSuite with Matchers {
+class TimeItTest extends AnyFunSuite with Matchers {
 
   test("Single result") {
     var timerCalled = false

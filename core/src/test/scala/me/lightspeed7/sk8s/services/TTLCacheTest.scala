@@ -1,12 +1,14 @@
 package me.lightspeed7.sk8s.services
 
 import akka.actor.ActorSystem
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Matchers }
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class TTLCacheTest extends FunSuite with Matchers with BeforeAndAfterAll {
+class TTLCacheTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
 
   implicit val akka: ActorSystem = ActorSystem("TTLCACHE")
 

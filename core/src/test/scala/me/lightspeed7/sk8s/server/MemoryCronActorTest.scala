@@ -2,9 +2,11 @@ package me.lightspeed7.sk8s.server
 
 import me.lightspeed7.sk8s.Sk8s
 import org.scalactic.source
-import org.scalatest.{ FunSuite, Matchers, Tag }
+import org.scalatest.Tag
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class MemoryCronActorTest extends FunSuite with Matchers {
+class MemoryCronActorTest extends AnyFunSuite with Matchers {
 
   testIfNotK8s("Generate info") {
     val info = MemoryInfo.create()

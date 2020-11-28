@@ -1,8 +1,9 @@
 package me.lightspeed7.sk8s
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class EnvironmentSourceTest extends FunSuite with Matchers {
+class EnvironmentSourceTest extends AnyFunSuite with Matchers {
 
   EnvironmentSource.overrideVariable("ENV_INT", "12345")
 

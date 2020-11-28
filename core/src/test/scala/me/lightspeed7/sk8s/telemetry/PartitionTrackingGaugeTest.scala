@@ -4,9 +4,10 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 
 import me.lightspeed7.sk8s.AppInfo
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class PartitionTrackingGaugeTest extends FunSuite with Matchers {
+class PartitionTrackingGaugeTest extends AnyFunSuite with Matchers {
 
   implicit val appInfo: AppInfo = AppInfo(this.getClass.getName, "0.0.0", ZonedDateTime.now(ZoneOffset.UTC.normalized()))
   test("test gauge tracks and resets properly") {

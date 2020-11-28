@@ -3,10 +3,11 @@ package me.lightspeed7.sk8s.services
 import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
 
 import me.lightspeed7.sk8s.AppInfo
-import org.scalatest.{ FunSuite, Matchers }
 import play.api.libs.json.Json
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class SystemPropertiesTest extends FunSuite with Matchers {
+class SystemPropertiesTest extends AnyFunSuite with Matchers {
 
   ignore("get data") {
     val props = System.getProperties.getProperty("java.class.path")

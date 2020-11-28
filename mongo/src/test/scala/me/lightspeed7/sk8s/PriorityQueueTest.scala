@@ -3,7 +3,7 @@ package me.lightspeed7.sk8s
 import java.time.{ OffsetDateTime, ZoneOffset }
 
 import me.lightspeed7.sk8s.mongo.{ MongoContext, PriorityQueue, QueueItem }
-import org.bson.codecs.configuration.CodecRegistry
+import org.bson.codecs.configuration.{ CodecProvider, CodecRegistry }
 import org.mongodb.scala.bson.codecs.Macros
 import org.scalatest.matchers.must.Matchers
 import os.{ Path, RelPath }
@@ -73,8 +73,7 @@ object WorkItem extends JsonImplicitsAmmonite {
 object WorkItemQueue {
 
   import org.bson.codecs.configuration.CodecRegistries.fromProviders
-  import org.mongodb.scala.bson.codecs.Macros._
-  val codec                            = Macros.createCodecProviderIgnoreNone[WorkItem]
+  val codec: CodecProvider             = Macros.createCodecProviderIgnoreNone[WorkItem]
   implicit val registry: CodecRegistry = fromProviders(new AmmoniteCodecs(), new JavaTimeCodecs(), codec)
 
   def createQueue(collection: String)(implicit mCtx: MongoContext): PriorityQueue[WorkItem] =

@@ -3,9 +3,10 @@ package me.lightspeed7.sk8s
 import java.nio.file.{ Path, Paths }
 
 import me.lightspeed7.sk8s.files.VolumeFiles
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class SecretsTest extends FunSuite with Matchers {
+class SecretsTest extends AnyFunSuite with Matchers {
 
   import me.lightspeed7.sk8s.files.TestCrypto._
 

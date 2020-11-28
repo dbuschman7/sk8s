@@ -4,13 +4,14 @@ import java.io.{ File, PrintWriter }
 import java.nio.file.{ Path, Paths }
 
 import me.lightspeed7.sk8s.util.AutoClose
-import org.scalatest.{ FunSuite, Matchers }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Promise }
 import scala.util.Success
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class ConfigMapWatcherTest extends FunSuite with Matchers {
+class ConfigMapWatcherTest extends AnyFunSuite with Matchers {
 
   val pwd: Path           = Paths.get("sk8s").toAbsolutePath
   val resourcesPath: Path = Paths.get(pwd.toString + "/target")

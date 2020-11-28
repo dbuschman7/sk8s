@@ -4,10 +4,11 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import me.lightspeed7.sk8s.Sk8sFunSuite
 import me.lightspeed7.sk8s.server.{ BackendServer, BackendServerClient }
-import org.scalatest.{ BeforeAndAfterAll, Matchers }
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration._
 import scala.util.Try
+import org.scalatest.matchers.should.Matchers
 
 class AsyncRunnerTest extends Sk8sFunSuite with BeforeAndAfterAll with Matchers {
 
