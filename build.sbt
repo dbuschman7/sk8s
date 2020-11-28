@@ -5,7 +5,7 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.7.0"
+version in ThisBuild := "0.8.0"
 
 scalaVersion in ThisBuild := "2.12.10"
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -26,6 +26,7 @@ lazy val global = project
     core,
     play,
     kubernetes,
+    mongo,
     slack,
     //
     plugin, // SBT plugins
@@ -64,6 +65,18 @@ lazy val kubernetes = project
     assemblySettings,
     deploymentSettings,
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.skuber, dependencies.parserCombinators, dependencies.quickLens)
+  )
+  .dependsOn(
+    core % "test->test;compile->compile"
+  )
+
+lazy val mongo = project
+  .settings(
+    name := "sk8s-mongodb",
+    settings,
+    assemblySettings,
+    deploymentSettings,
+    libraryDependencies ++= commonDependencies ++ Seq(dependencies.mongoScalaDB) :+ dependencies.ammoniteOps % "test"
   )
   .dependsOn(
     core % "test->test;compile->compile"
@@ -147,37 +160,39 @@ lazy val templateApi = project
 
 lazy val dependencies =
   new {
-    val logbackV = "1.2.3"
-    // val logstashV        = "4.11"
-    val scalaLoggingV = "3.9.2"
-    val slf4jV        = "1.7.30"
-    // val typesafeConfigV  = "1.3.1"
-    // val pureconfigV      = "0.8.0"
-    // val monocleV         = "1.4.0"
-    val akkaV       = "2.5.31"
-    val playV       = "2.7.4"
-    val playJsonV   = "2.7.4"
-    val sttpV       = "1.7.2"
-    val scalatestV  = "3.1.1"
-    val scalacheckV = "1.14.3"
+    val akkaV               = "2.5.31"
+    val ammoniteOpsVer      = "2.1.4"
+    val logbackV            = "1.2.3"
+    val mongodbScalaVersion = "2.9.0"
+    val playV               = "2.7.4"
+    val playJsonV           = "2.7.4"
+    val sttpV               = "1.7.2"
+    val scalaLoggingV       = "3.9.2"
+    val scalatestV          = "3.1.1"
+    val scalacheckV         = "1.14.3"
+    val slf4jV              = "1.7.30"
 
-    // val logstash       = "net.logstash.logback"       % "logstash-logback-encoder" % logstashV
-    val logback               = "ch.qos.logback"                % "logback-classic"           % logbackV withSources ()
-    val slf4j                 = "org.slf4j"                     % "jcl-over-slf4j"            % slf4jV withSources ()
-    val akkaStream            = "com.typesafe.akka"             %% "akka-stream"              % akkaV withSources ()
-    val akkaSlf4j             = "com.typesafe.akka"             %% "akka-slf4j"               % akkaV withSources ()
-    val enumeratum            = "com.beachape"                  %% "enumeratum-play-json"     % "1.5.12" exclude ("org.scala-lang", "scala-library") withSources ()
-    val javaxInject           = "javax.inject"                  % "javax.inject"              % "1" withSources ()
-    val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.11" withSources ()
+    val ammoniteOps = "com.lihaoyi" %% "ammonite-ops" % ammoniteOpsVer
+
+    val logback     = "ch.qos.logback"    % "logback-classic"       % logbackV withSources ()
+    val akkaStream  = "com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()
+    val akkaSlf4j   = "com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()
+    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.5.12" exclude ("org.scala-lang", "scala-library") withSources ()
+    val javaxInject = "javax.inject"      % "javax.inject"          % "1" withSources ()
+
+    val mongoScalaDB = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaVersion withSources ()
+
     val parserCombinators     = "org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.1" withSources ()
     val playJson              = "com.typesafe.play"             %% "play-json"                % playJsonV withSources () exclude ("org.scala-lang", "scala-library")
     val prometheusClient      = "org.lyranthe.prometheus"       %% "client"                   % "0.9.0-M5" withSources ()
     val prometheusClientProto = "org.lyranthe.prometheus"       %% "protobuf"                 % "0.9.0-M5" withSources ()
+    val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.11" withSources ()
     val scalacheck            = "org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()
     val scalatest             = "org.scalatest"                 %% "scalatest"                % scalatestV withSources ()
     val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "5.0.0" % "test" withSources ()
     val scalaLogging          = "com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()
     val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.6" withSources ()
+    val slf4j                 = "org.slf4j"                     % "jcl-over-slf4j"            % slf4jV withSources ()
     val skuber                = "io.skuber"                     %% "skuber"                   % "2.1.1" withSources ()
     val sttpWithAkkHttp       = "com.softwaremill.sttp"         %% "akka-http-backend"        % sttpV withSources ()
 
