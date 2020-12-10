@@ -9,6 +9,7 @@ import me.lightspeed7.sk8s.manifests.{ Budget, JobStatus, Service, Sk8sAppConfig
 import me.lightspeed7.sk8s.util.AlphaId
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
+import skuber.EnvVar
 
 class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
 
@@ -116,4 +117,5 @@ class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
     println(pretty)
     pretty shouldBe expected
   }
+
 }

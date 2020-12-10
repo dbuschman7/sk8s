@@ -3,7 +3,6 @@ package me.lightspeed7.sk8s.telemetry
 import java.time.{ ZoneOffset, ZonedDateTime }
 
 import me.lightspeed7.sk8s.AppInfo
-
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 

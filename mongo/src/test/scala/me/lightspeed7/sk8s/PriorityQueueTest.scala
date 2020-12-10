@@ -49,8 +49,18 @@ class PriorityQueueTest extends Sk8sFunSuite with Matchers {
     await(queue.next("dave")).isDefined mustBe false
 
     await(queue.markDone(item1)) mustBe true
-//    await(queue.markDone(item2)) mustBe true
+    await(queue.markError(item2, "test error 1")) mustBe true
     await(queue.markDone(item3)) mustBe true
+    //
+    // now we can get the next one
+    val item2b: WorkItem = await(queue.next("dave")).get
+    await(queue.markError(item2b, "test error 2")) mustBe true
+    val item2c: WorkItem = await(queue.next("dave")).get // last time to get this task
+    await(queue.markError(item2c, "test error 3")) mustBe true
+
+    // now the task is not handed out
+    await(queue.next("dave")).isDefined mustBe false
+    await(queue.next("dave")).isDefined mustBe false
   }
 }
 
@@ -58,6 +68,8 @@ final case class WorkItem private[sk8s] (_id: String,
                                          priority: Int,
                                          baseDir: Path,
                                          filePath: os.RelPath,
+                                         attempts: Int = 0,
+                                         errors: Seq[String] = Seq(),
                                          override val createdOn: OffsetDateTime,
                                          override val startedOn: Option[OffsetDateTime],
                                          override val completedOn: Option[OffsetDateTime])
@@ -67,7 +79,7 @@ object WorkItem extends JsonImplicitsAmmonite {
   implicit val _json: OFormat[WorkItem] = Json.format[WorkItem]
 
   def create(_id: String, priority: Int, baseDir: Path, filePath: os.RelPath) =
-    WorkItem(_id, priority, baseDir, filePath, OffsetDateTime.now(ZoneOffset.UTC), None, None)
+    WorkItem(_id, priority, baseDir, filePath, 0, Seq(), OffsetDateTime.now(ZoneOffset.UTC), None, None)
 }
 
 object WorkItemQueue {

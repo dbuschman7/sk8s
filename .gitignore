@@ -36,6 +36,7 @@ target
 .target
 .tmpBin
 version.txt
+.bsp/
 
 # Play
 logs

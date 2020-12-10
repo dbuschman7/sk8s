@@ -2,6 +2,7 @@ package me.lightspeed7.sk8s.mongo
 import java.time.{ OffsetDateTime, ZoneOffset }
 
 import com.mongodb.client.model.{ FindOneAndUpdateOptions, ReturnDocument }
+import javafx.stage.Stage
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.bson.conversions.Bson
@@ -16,6 +17,10 @@ abstract class QueueItem extends Product {
 
   def priority: Int
 
+  def attempts: Int
+
+  def errors: Seq[String]
+
   def assigned: Option[String] = None
 
   def createdOn: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC)
@@ -25,10 +30,14 @@ abstract class QueueItem extends Product {
   def completedOn: Option[OffsetDateTime] = None
 }
 
+case class JobError(message: Stage, date: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC))
+
 //
 // Priority Queue
 // //////////////////////////////////
-final class PriorityQueue[T <: QueueItem](collectionName: String)(implicit mCtx: MongoContext, registry: CodecRegistry, ct: ClassTag[T]) {
+final class PriorityQueue[T <: QueueItem](collectionName: String, attempts: Int = 3)(implicit mCtx: MongoContext,
+                                                                                     registry: CodecRegistry,
+                                                                                     ct: ClassTag[T]) {
 
   import mCtx.sk8s._
   import org.mongodb.scala.model.Filters._
@@ -46,7 +55,7 @@ final class PriorityQueue[T <: QueueItem](collectionName: String)(implicit mCtx:
   }
 
   def next(assigned: String): Future[Option[T]] = {
-    val filter: Bson                     = combine(exists("assigned", exists = false), exists("completedOn", exists = false))
+    val filter: Bson                     = combine(exists("assigned", exists = false), exists("completedOn", exists = false), lt("attempts", attempts))
     val sort: Bson                       = orderBy(descending("priority"), ascending("createdOn"))
     val update: Bson                     = combine(currentDate("startedOn"), set("assigned", assigned))
     val options: FindOneAndUpdateOptions = new FindOneAndUpdateOptions().sort(sort).returnDocument(ReturnDocument.AFTER)
@@ -56,11 +65,20 @@ final class PriorityQueue[T <: QueueItem](collectionName: String)(implicit mCtx:
 
   def push(obj: T)(implicit read: Writes[T]): Future[Boolean] = coll.insertOne(obj).toFuture().map(_ => true)
 
+  def markError(obj: T, message: String): Future[Boolean] = markError(obj._id, message)
+
+  def markError(id: String, message: String): Future[Boolean] = {
+    val filter: Bson           = equal("_id", id)
+    val update: Bson           = combine(addToSet("errors", message), inc("failed", 1), inc("attempts", 1), unset("assigned"))
+    val options: UpdateOptions = new UpdateOptions().upsert(false)
+    coll.updateOne(filter, update, options).toFuture().map(_ => true)
+  }
+
   def markDone(obj: T): Future[Boolean] = markDone(obj._id)
 
   def markDone(id: String): Future[Boolean] = {
     val filter: Bson           = equal("_id", id)
-    val update: Bson           = combine(currentDate("completedOn"), unset("assigned"))
+    val update: Bson           = combine(currentDate("completedOn"), unset("assigned"), inc("attempts", 1))
     val options: UpdateOptions = new UpdateOptions().upsert(false)
     coll.updateOne(filter, update, options).toFuture().map(_ => true)
   }

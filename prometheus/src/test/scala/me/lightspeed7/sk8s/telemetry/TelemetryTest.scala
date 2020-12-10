@@ -6,12 +6,12 @@ import java.util.concurrent.TimeUnit
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.util.PrettyPrint
 import org.lyranthe.prometheus.client.registry.ProtoFormat
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Random
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
 
 class TelemetryTest extends AnyFunSuite with Matchers {
 
@@ -41,10 +41,10 @@ class TelemetryTest extends AnyFunSuite with Matchers {
     val logger = LoggerFactory.getLogger("foo")
     logger.error("Logged IllegalStateException exception to follow - expected", new IllegalStateException("exception"))
 
-    EventTelemetry.markEvent("eventName", "label1" -> "value1")
+    TelemetryRegistry.Events.markEvent("eventName", "label1" -> "value1")
 
     // test results
-    val metrics = TelemetryRegistry.snapshot.toSeq
+    val metrics = TelemetryRegistry.rawSnapshot(false).toSeq
 
     println()
     metrics.foreach(println)

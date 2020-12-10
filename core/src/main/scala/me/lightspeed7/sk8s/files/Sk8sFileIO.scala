@@ -49,7 +49,7 @@ object Sk8sFileIO extends LazyLogging {
     }
 
   //
-  def await[T](f: Future[T])(implicit timeout: FiniteDuration): T = Await.result(f, timeout)
+  def await[T](f: Future[T])(implicit timeout: Duration): T = Await.result(f, timeout)
 
   //
   def findTreeFiles(baseDir: File, keyWords: String*): Array[File] = {
@@ -62,19 +62,19 @@ object Sk8sFileIO extends LazyLogging {
   }
 
   //
-  def getFileContents(file: File)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+  def getFileContents(file: File)(implicit timeout: Duration, mat: Materializer): ByteString =
     await(stream.scaladsl.FileIO.fromPath(file.toPath).runFold(ByteString.empty)(_ ++ _))
 
-  def getFileContents(path: Path)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+  def getFileContents(path: Path)(implicit timeout: Duration, mat: Materializer): ByteString =
     await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
 
-  def getPathContents(path: Path)(implicit timeout: FiniteDuration, mat: Materializer): ByteString =
+  def getPathContents(path: Path)(implicit timeout: Duration, mat: Materializer): ByteString =
     await(scaladsl.FileIO.fromPath(path).runFold(ByteString.empty)(_ ++ _))
 
-  def getPathLines(path: Path, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat: Materializer): Seq[String] =
+  def getPathLines(path: Path, maxLineLength: Int = 10000)(implicit timeout: Duration, mat: Materializer): Seq[String] =
     getFileLines(path.toFile)
 
-  def getFileLines(file: File, maxLineLength: Int = 10000)(implicit timeout: FiniteDuration, mat: Materializer): Seq[String] = {
+  def getFileLines(file: File, maxLineLength: Int = 10000)(implicit timeout: Duration, mat: Materializer): Seq[String] = {
     val f = scaladsl.FileIO
       .fromPath(file.toPath)
       .via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = maxLineLength, allowTruncation = true))

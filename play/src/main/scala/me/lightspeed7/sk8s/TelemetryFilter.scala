@@ -2,7 +2,7 @@ package me.lightspeed7.sk8s
 
 import akka.actor.ActorSystem
 import akka.stream.{ Materializer, SystemMaterializer }
-import javax.inject.Inject
+import com.google.inject.Inject
 import me.lightspeed7.sk8s.telemetry.{ BasicCounter, TelemetryRegistry }
 import play.api.mvc.{ Filter, RequestHeader, Result }
 

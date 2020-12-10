@@ -3,6 +3,7 @@
 
 # Add here
 GET   /                       @controllers.Application.index
+GET   /secured                @controllers.Application.secured
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###

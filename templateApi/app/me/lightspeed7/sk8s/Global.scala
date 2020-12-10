@@ -4,9 +4,10 @@ import java.io.File
 import java.nio.file.{ Path, Paths }
 import java.time.ZonedDateTime
 
+import controllers.{ AuthContextProvider, JwtToken }
 import javax.inject.Inject
+import me.lightspeed7.sk8s.auth.{ AuthContext, RolesRegistry }
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
-import play.api._
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future
@@ -16,9 +17,14 @@ class GlobalModule extends Sk8sBindings {
   implicit val appInfo: AppInfo = AppInfo(BuildInfo.name, BuildInfo.version, ZonedDateTime.now())
 
   override def configure(): Unit = {
+    RolesRegistry.loadPresets()
+    //
     generate(appInfo)
     //
+    bind(classOf[AuthContext[JwtToken]]).toProvider(classOf[AuthContextProvider]).asEagerSingleton()
+    //
     bind(classOf[Initialize]).asEagerSingleton() // initialize actors
+
   }
 
 }

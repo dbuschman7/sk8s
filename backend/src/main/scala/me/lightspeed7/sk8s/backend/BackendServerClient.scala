@@ -1,4 +1,4 @@
-package me.lightspeed7.sk8s.server
+package me.lightspeed7.sk8s.backend
 
 import akka.http.scaladsl.model.MediaTypes
 import com.softwaremill.sttp._

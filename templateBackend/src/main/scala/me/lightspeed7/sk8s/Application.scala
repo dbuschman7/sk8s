@@ -3,6 +3,7 @@ package me.lightspeed7.sk8s
 import java.time.{ LocalDateTime, ZonedDateTime }
 
 import com.typesafe.scalalogging.StrictLogging
+import me.lightspeed7.sk8s.backend.BackendApplication
 import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
 import me.lightspeed7.sk8s.util.AutoClose
 

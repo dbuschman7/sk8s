@@ -1,14 +1,13 @@
-package me.lightspeed7.sk8s.server
+package me.lightspeed7.sk8s.backend
 
 import java.time.{ ZoneOffset, ZonedDateTime }
 
-import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
-import me.lightspeed7.sk8s.{ AppInfo, Constant, Sk8sContext, Sources, Variables }
-
+import me.lightspeed7.sk8s._
+import me.lightspeed7.sk8s.server.HealthStatus
 import org.scalatest.BeforeAndAfterAll
-import play.api.libs.json.{ JsValue, Json }
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.{ JsValue, Json }
 
 class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers {
 
@@ -16,13 +15,12 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
 
   implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
 
-  val export = new BackendServer(protobufFormet = false)
+  val export = new BackendServer()
   val client = BackendServerClient()
 
-  override def beforeAll(): Unit = {
-    TelemetryRegistry.counter("metric")
+  override def beforeAll(): Unit =
+//    TelemetryRegistry.counter("metric")
     Variables.source[String](Sources.env, "A_STRING", Constant("A_VALUE"))
-  }
 
   override def afterAll(): Unit =
     ctx.close()
@@ -73,20 +71,20 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
       .getOrElse("oops") shouldBe "text/plain; charset=UTF-8"
 
   }
-
-  test("Test metrics endpoint") {
-    val response = client.metrics
-    response.code shouldBe 200
-    val body    = response.body.right.get
-    val bodyStr = new String(body)
-    println(bodyStr)
-    bodyStr.length should be > 1200
-
-    val found = bodyStr.split("\n").filter(_.startsWith("sk8s_application_metric")).toList
-    println(found)
-    found.size shouldBe 1
-
-  }
+//
+//  test("Test metrics endpoint") {
+//    val response = client.metrics
+//    response.code shouldBe 200
+//    val body    = response.body.right.get
+//    val bodyStr = new String(body)
+//    println(bodyStr)
+//    bodyStr.length should be > 1200
+//
+//    val found = bodyStr.split("\n").filter(_.startsWith("sk8s_application_metric")).toList
+//    println(found)
+//    found.size shouldBe 1
+//
+//  }
 
   test("Test TEXT config endpoint") {
     val response = client.configAsText

@@ -6,12 +6,24 @@ import java.time.ZonedDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
+import enumeratum.{ Enum, EnumEntry, EnumFormats }
 import org.joda.time.{ DateTime, DateTimeZone, Period }
 import org.joda.time.format.{ DateTimeFormat, DateTimeFormatterBuilder, DateTimeParser }
 import play.api.libs.json.{ Format, JsError, JsNumber, JsResult, JsString, JsSuccess, JsValue, JsonValidationError, Reads, Writes }
 
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import scala.util.{ Failure, Success, Try }
+
+trait NamedEnumEntry extends EnumEntry {
+  def name: String
+}
+
+trait InsensitivePlayJsonEnum[A <: EnumEntry] {
+  self: Enum[A] =>
+  implicit val jsonFormat: Format[A] = EnumFormats.formats(this, insensitive = true)
+
+  def find(in: String): Option[A]
+}
 
 object JsonImplicits extends JsonImplicits
 

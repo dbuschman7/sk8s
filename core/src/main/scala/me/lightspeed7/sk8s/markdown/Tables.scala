@@ -51,3 +51,32 @@ final case class PreFormattedBuild[T](title: String, columns: Seq[ColumnData[T]]
   }
 
 }
+
+final case class CsvTable[T](columns: Seq[ColumnData[T]] = Seq()) {
+
+  def column(label: String)(
+      value: T => String
+  ): CsvTable[T] =
+    this.copy(columns = columns :+ ColumnData(label, rightJustified = false, value))
+
+  def collate(in: Seq[Seq[String]]): Seq[String] = {
+    val heads: Seq[String] = in.flatMap(_.headOption)
+    if (heads.isEmpty) heads
+    else {
+      val tails: Seq[Seq[String]] = in.map { s =>
+        if (s.isEmpty) Seq() else s.tail
+      }
+      heads.mkString(", ") +: collate(tails)
+    }
+  }
+
+  def generate(in: Seq[T]): String = {
+    val cols: Seq[FormattedColumn[T]] = columns.map(FormattedColumn(_, in))
+
+    val header: String    = cols.map(in => "\"" + in.header + "\"").mkString(", ")
+    val rows: Seq[String] = collate(cols.map(_.rows))
+
+    (header +: rows).mkString("\n", "\n", "\n")
+  }
+
+}

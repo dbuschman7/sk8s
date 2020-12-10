@@ -2,13 +2,14 @@ package me.lightspeed7.sk8s
 
 import com.google.inject.AbstractModule
 import com.typesafe.scalalogging.LazyLogging
+import me.lightspeed7.sk8s.backend.BackgroundTasks
 
 class Sk8sBindings extends AbstractModule with LazyLogging {
 
   def generate(appInfo: AppInfo) = {
 
     implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
-    lazy val bTasks               = new BackgroundTasks()
+    lazy val bTasks               = BackgroundTasks.standup
 
     Seq( //
       //

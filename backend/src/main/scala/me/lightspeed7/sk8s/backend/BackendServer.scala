@@ -1,19 +1,18 @@
-package me.lightspeed7.sk8s.server
+package me.lightspeed7.sk8s.backend
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
 import me.lightspeed7.sk8s._
-import org.lyranthe.prometheus.client.registry.{ ProtoFormat, TextFormat }
+import me.lightspeed7.sk8s.server.JsonConfig
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
-class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFormet: Boolean)(implicit ctx: Sk8sContext) extends LazyLogging {
+class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999)(implicit ctx: Sk8sContext) extends LazyLogging {
 
   import ctx._
 
@@ -64,21 +63,6 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
       }
     }
 
-  def metricsRoute(implicit appInfo: AppInfo): Route =
-    path("metrics") {
-      get {
-        val data = TelemetryRegistry.snapshot
-
-        val (ct, serialized) = if (protobufFormet) {
-          (ContentType.parse(ProtoFormat.contentType).right.get, ProtoFormat.output(data))
-        } else {
-          (ContentType.parse(TextFormat.contentType).right.get, TextFormat.output(data))
-        }
-
-        complete(HttpResponse(entity = HttpEntity(ct, serialized)))
-      }
-    }
-
   val myExceptionHandler = ExceptionHandler {
     case _: ArithmeticException =>
       extractUri { uri =>
@@ -88,7 +72,7 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999, protobufFor
   }
 
   val routes: Route = handleExceptions(myExceptionHandler) {
-    Seq(pingPong, healthRoute, ipRoute, configRoute).foldLeft(metricsRoute(ctx.appInfo)) { case (prev, cur) => prev ~ cur }
+    pingPong ~ healthRoute ~ ipRoute ~ configRoute
   }
 
   logger.info(s"Http Server - $ipAddress:$port")

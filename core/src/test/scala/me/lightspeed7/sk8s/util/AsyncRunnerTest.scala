@@ -3,17 +3,13 @@ package me.lightspeed7.sk8s.util
 import java.util.concurrent.atomic.AtomicInteger
 
 import me.lightspeed7.sk8s.Sk8sFunSuite
-import me.lightspeed7.sk8s.server.{ BackendServer, BackendServerClient }
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.util.Try
-import org.scalatest.matchers.should.Matchers
 
 class AsyncRunnerTest extends Sk8sFunSuite with BeforeAndAfterAll with Matchers {
-
-  val export = new BackendServer(protobufFormet = false)
-  val client = BackendServerClient()
 
   override def afterAll(): Unit = {
     Try(ctx.close()) // just ignore

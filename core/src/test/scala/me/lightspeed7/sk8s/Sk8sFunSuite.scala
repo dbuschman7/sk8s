@@ -6,7 +6,7 @@ import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
 
 import akka.actor.ActorSystem
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
-import akka.util.ByteString
+import akka.util.{ ByteString, Timeout }
 import me.lightspeed7.sk8s.files.Sk8sFileIO
 import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
 import org.joda.time.DateTime
@@ -71,7 +71,8 @@ class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   lazy val k8sActive: Boolean = Sk8s.isKubernetes()
 
-  implicit val timeout: FiniteDuration = 10 seconds
+  implicit val timeout: Duration    = 10 seconds
+  implicit val akkaTimeout: Timeout = Timeout(10 seconds)
 
   private var closeables: Seq[(String, AutoCloseable)] = Seq.empty
 
