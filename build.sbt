@@ -257,9 +257,6 @@ lazy val commonDependencies = Seq(
   dependencies.enumeratum,
   dependencies.joda,
   //
-//  dependencies.prometheusClient,
-//  dependencies.prometheusClientProto,
-  //
   dependencies.scalatest  % "test",
   dependencies.scalacheck % "test"
 )

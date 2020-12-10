@@ -71,20 +71,6 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
       .getOrElse("oops") shouldBe "text/plain; charset=UTF-8"
 
   }
-//
-//  test("Test metrics endpoint") {
-//    val response = client.metrics
-//    response.code shouldBe 200
-//    val body    = response.body.right.get
-//    val bodyStr = new String(body)
-//    println(bodyStr)
-//    bodyStr.length should be > 1200
-//
-//    val found = bodyStr.split("\n").filter(_.startsWith("sk8s_application_metric")).toList
-//    println(found)
-//    found.size shouldBe 1
-//
-//  }
 
   test("Test TEXT config endpoint") {
     val response = client.configAsText

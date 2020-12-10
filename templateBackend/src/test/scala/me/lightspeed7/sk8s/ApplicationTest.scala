@@ -36,10 +36,6 @@ class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
         response.code shouldBe 200
         response.body.right.get shouldBe "OK"
 
-//        val rawResponse = client.metrics
-//        rawResponse.code shouldBe 200
-//        rawResponse.body.right.get.length should be > 0
-
         val configResponse = client.configAsJson
         configResponse.code shouldBe 200
         val body: String = configResponse.body.right.get
