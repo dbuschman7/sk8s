@@ -60,7 +60,7 @@ lazy val backend = project
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp,
+    libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp
   )
   .dependsOn(
     core       % "test->test;compile->compile",
@@ -73,7 +73,9 @@ lazy val play = project
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies ++ dependencies.playLibs ++ Seq(dependencies.javaxInject, dependencies.jwtPlayJson, dependencies.playJson)
+    libraryDependencies ++= commonDependencies ++ dependencies.playLibs ++ Seq(dependencies.javaxInject,
+                                                                               dependencies.jwtPlayJson,
+                                                                               dependencies.playJson)
   )
   .dependsOn(
     core       % "test->test;compile->compile",
@@ -195,7 +197,7 @@ lazy val templateApi = project
 lazy val dependencies =
   new {
     val akkaV               = "2.5.31"
-    val akkaHttpV               = "10.1.10"
+    val akkaHttpV           = "10.1.10"
     val ammoniteOpsVer      = "2.1.4"
     val logbackV            = "1.2.3"
     val mongodbScalaVersion = "2.9.0"
@@ -211,7 +213,7 @@ lazy val dependencies =
 
     val logback     = "ch.qos.logback"    % "logback-classic"       % logbackV withSources ()
     val akkaStream  = "com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()
-    val akkaHttp  = "com.typesafe.akka" %% "akka-http"          % akkaHttpV withSources ()
+    val akkaHttp    = "com.typesafe.akka" %% "akka-http"            % akkaHttpV withSources ()
     val akkaSlf4j   = "com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()
     val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.6.1" exclude ("org.scala-lang", "scala-library") withSources ()
     val javaxInject = "javax.inject"      % "javax.inject"          % "1" withSources ()

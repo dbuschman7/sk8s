@@ -4,11 +4,12 @@ import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.{ Constant, Sk8sContext, Sources, Variable, Variables }
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.{ Document, MongoClient, MongoCollection, MongoDatabase }
+import sun.util.logging.resources.logging
 
 import scala.reflect.ClassTag
 import scala.util.Try
 
-final class MongoContext private (mongoClient: MongoClient, dbName: String)(implicit val sk8s: Sk8sContext) extends AutoCloseable {
+final class MongoContext private (mongoClient: MongoClient, dbName: String)(implicit val sk8s: Sk8sContext) extends AutoCloseable with LazyLogging {
 
   val database: MongoDatabase = mongoClient.getDatabase(dbName)
 
@@ -22,7 +23,10 @@ final class MongoContext private (mongoClient: MongoClient, dbName: String)(impl
     coll
   }
 
-  override def close(): Unit = ???
+  override def close(): Unit = {
+    logger.info(s"MongoContext - ${database.name} : shutting down ...")
+    mongoClient.close()
+  }
 }
 
 object MongoContext extends LazyLogging {
@@ -48,8 +52,7 @@ object MongoContext extends LazyLogging {
   def fromEnv[T <: Product](database: String)(implicit sk8s: Sk8sContext): Try[MongoContext] = Try {
     val url = mongoUrl.value
     logger.debug(("URL - " + url))
-    val client = sk8s.registerCloseable("MongoClient", MongoClient(url))
-    new MongoContext(client, database)
+    sk8s.registerCloseable("MongoClient", new MongoContext(MongoClient(url), database))
   }
 
 }

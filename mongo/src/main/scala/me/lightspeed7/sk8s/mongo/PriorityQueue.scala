@@ -2,7 +2,6 @@ package me.lightspeed7.sk8s.mongo
 import java.time.{ OffsetDateTime, ZoneOffset }
 
 import com.mongodb.client.model.{ FindOneAndUpdateOptions, ReturnDocument }
-import javafx.stage.Stage
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.bson.conversions.Bson
@@ -30,7 +29,7 @@ abstract class QueueItem extends Product {
   def completedOn: Option[OffsetDateTime] = None
 }
 
-case class JobError(message: Stage, date: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC))
+case class JobError(message: String, date: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC))
 
 //
 // Priority Queue
