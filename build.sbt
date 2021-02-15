@@ -7,7 +7,13 @@ name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
 version in ThisBuild := "0.7.0"
 
-scalaVersion in ThisBuild := "2.12.10"
+lazy val scala212 = "2.12.12"
+lazy val scala213 = "2.13.4"
+
+scalaVersion := scala212
+
+lazy val supportedScalaVersions = List(scala213, scala212)
+
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
 //
@@ -20,6 +26,7 @@ lazy val global = project
     publishArtifact := false,
     skip in publish := true,
     bintrayRelease := {}
+    //  crossScalaVersions := supportedScalaVersions,
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
@@ -27,6 +34,7 @@ lazy val global = project
     play,
     kubernetes,
     mongo,
+    prometheus,
     slack,
     //
     plugin, // SBT plugins
@@ -46,16 +54,33 @@ lazy val core = project
   .settings(testOptions in Test := Seq(Tests.Filter(harnessFilter)))
   .settings(testGrouping in Test := singleThreadedTests((definedTests in Test).value))
 
+lazy val backend = project
+  .settings(
+    name := "sk8s-backend",
+    settings,
+    assemblySettings,
+    deploymentSettings,
+    libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp
+  )
+  .dependsOn(
+    core       % "test->test;compile->compile",
+    prometheus % "test->test;compile->compile"
+  )
+
 lazy val play = project
   .settings(
     name := "sk8s-play",
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies ++ dependencies.playLibs :+ dependencies.javaxInject
+    libraryDependencies ++= commonDependencies ++ dependencies.playLibs ++ Seq(dependencies.javaxInject,
+                                                                               dependencies.jwtPlayJson,
+                                                                               dependencies.playJson)
   )
   .dependsOn(
-    core % "test->test;compile->compile"
+    core       % "test->test;compile->compile",
+    backend    % "test->test;compile->compile",
+    prometheus % "test->test;compile->compile"
   )
 
 lazy val kubernetes = project
@@ -82,6 +107,18 @@ lazy val mongo = project
     core % "test->test;compile->compile"
   )
 
+lazy val prometheus = project
+  .settings(
+    name := "sk8s-prometheus",
+    settings,
+    assemblySettings,
+    deploymentSettings,
+    libraryDependencies ++= commonDependencies ++ Seq(dependencies.prometheusClient, dependencies.prometheusClientProto, dependencies.akkaHttp)
+  )
+  .dependsOn(
+    core % "test->test;compile->compile"
+  )
+
 lazy val slack = project
   .settings(
     name := "sk8s-slack",
@@ -91,8 +128,8 @@ lazy val slack = project
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.slack)
   )
   .dependsOn(
-    core % "test->test;compile->compile",
-    kubernetes
+    core       % "test->test;compile->compile",
+    kubernetes % "test->test;compile->compile"
   )
 
 lazy val plugin = project
@@ -133,7 +170,7 @@ lazy val templateBackend = project
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
   .dependsOn(
-    core % "test->test;compile->compile"
+    backend % "test->test;compile->compile"
   )
 
 lazy val templateApi = project
@@ -150,7 +187,6 @@ lazy val templateApi = project
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
   .dependsOn(
-    core % "test->test;compile->compile",
     play % "test->test;compile->compile"
   )
 
@@ -161,10 +197,11 @@ lazy val templateApi = project
 lazy val dependencies =
   new {
     val akkaV               = "2.5.31"
-    val ammoniteOpsVer      = "2.1.4"
+    val akkaHttpV           = "10.1.10"
+    val ammoniteOpsVer      = "2.3.8"
     val logbackV            = "1.2.3"
     val mongodbScalaVersion = "2.9.0"
-    val playV               = "2.7.7"
+    val playV               = "2.7.9"
     val playJsonV           = "2.7.4"
     val sttpV               = "1.7.2"
     val scalaLoggingV       = "3.9.2"
@@ -176,10 +213,13 @@ lazy val dependencies =
 
     val logback     = "ch.qos.logback"    % "logback-classic"       % logbackV withSources ()
     val akkaStream  = "com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()
+    val akkaHttp    = "com.typesafe.akka" %% "akka-http"            % akkaHttpV withSources ()
     val akkaSlf4j   = "com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()
-    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.5.12" exclude ("org.scala-lang", "scala-library") withSources ()
+    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.6.1" exclude ("org.scala-lang", "scala-library") withSources ()
     val javaxInject = "javax.inject"      % "javax.inject"          % "1" withSources ()
 
+    val joda         = "joda-time"         % "joda-time"           % "2.10.8"
+    val jwtPlayJson  = "com.pauldijou"     %% "jwt-play-json"      % "4.3.0"
     val mongoScalaDB = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaVersion withSources ()
 
     val parserCombinators     = "org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.1" withSources ()
@@ -215,12 +255,9 @@ lazy val commonDependencies = Seq(
   // dependencies.typesafeConfig,
   dependencies.akkaStream,
   dependencies.akkaSlf4j,
-  dependencies.sttpWithAkkHttp,
   dependencies.playJson,
   dependencies.enumeratum,
-  //
-  dependencies.prometheusClient,
-  dependencies.prometheusClientProto,
+  dependencies.joda,
   //
   dependencies.scalatest  % "test",
   dependencies.scalacheck % "test"
@@ -263,9 +300,7 @@ lazy val commonSettings = Seq(
 
 lazy val scalafmtSettings =
   Seq(
-    scalafmtOnCompile := true,
-    scalafmtTestOnCompile := true,
-    scalafmtVersion := "1.2.0"
+    scalafmtOnCompile := true
   )
 
 lazy val assemblySettings = Seq(

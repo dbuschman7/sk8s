@@ -1,10 +1,10 @@
 package me.lightspeed7.sk8s
 
-import java.time.{ Instant, OffsetDateTime, ZoneId }
+import java.time.{Instant, OffsetDateTime, ZoneId}
 
-import org.bson.codecs.configuration.{ CodecProvider, CodecRegistry }
-import org.bson.codecs.{ Codec, DecoderContext, EncoderContext }
-import org.bson.{ BsonReader, BsonWriter }
+import org.bson.codecs.configuration.{CodecProvider, CodecRegistry}
+import org.bson.codecs.{Codec, DecoderContext, EncoderContext}
+import org.bson.{BsonReader, BsonWriter}
 
 import scala.collection.concurrent
 

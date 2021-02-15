@@ -1,17 +1,17 @@
 package me.lightspeed7.sk8s.manifests
 
-import play.api.libs.json.{ Json, OFormat }
-import skuber.Pod.Affinity.{ PodAffinityTerm, PodAntiAffinity }
-import skuber.{ ConfigMap, EnvVar }
+import play.api.libs.json.{Json, OFormat}
+import skuber.Pod.Affinity.{PodAffinityTerm, PodAntiAffinity}
+import skuber.{ConfigMap, EnvVar}
 
 //
 // Stateful Set
 // ///////////////////////////////////
 case class StatefulSet(
-    kind: String = "StatefulSet",
-    apiVersion: String = "apps/v1",
-    metadata: Common.Metadata,
-    spec: StatefulSet.Spec //
+  kind: String = "StatefulSet",
+  apiVersion: String = "apps/v1",
+  metadata: Common.Metadata,
+  spec: StatefulSet.Spec //
 ) {
 
   import com.softwaremill.quicklens._
@@ -51,7 +51,9 @@ case class StatefulSet(
 
   def withAntiAffinity(implicit cfg: Sk8sAppConfig): StatefulSet = {
     val anti: PodAntiAffinity =
-      PodAntiAffinity.apply(List(PodAffinityTerm(spec.selector.map(_.toLabelSelector(this)), topologyKey = "kubernetes.io/hostname")))
+      PodAntiAffinity.apply(
+        List(PodAffinityTerm(spec.selector.map(_.toLabelSelector(this)), topologyKey = "kubernetes.io/hostname"))
+      )
     this
       .modify(_.spec.template.spec.affinity)
       .setTo(Option(Common.Affinity(podAntiAffinity = Some(anti))))
@@ -63,7 +65,7 @@ case class StatefulSet(
     val mnt = Volumes.VolumeMount(vol.name, mountDir)
 
     this
-    // add vol
+      // add vol
       .modify(_.spec.template.spec.volumes)
       .using { in =>
         Option(in.getOrElse(List()) :+ vol)
@@ -81,7 +83,7 @@ case class StatefulSet(
     val mnt = Volumes.VolumeMount(vol.name, mountDir)
 
     this
-    // add vol
+      // add vol
       .modify(_.spec.template.spec.volumes)
       .using { in =>
         Option(in.getOrElse(List()) :+ vol)
@@ -93,30 +95,31 @@ case class StatefulSet(
       }
   }
 
-  def withServiceAccount(name: Option[String]): StatefulSet = name match {
-    case None =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(Some(false))
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(None)
-    case Some(acctName) =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(None)
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(Some(acctName))
-  }
+  def withServiceAccount(name: Option[String]): StatefulSet =
+    name match {
+      case None =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(Some(false))
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(None)
+      case Some(acctName) =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(None)
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(Some(acctName))
+    }
 
 }
 
 object StatefulSet {
 
   case class Spec(
-      replicas: Int = 1,
-      serviceName: String,
-      selector: Option[Common.Selector] = None,
-      template: Pod.Template //
+    replicas: Int = 1,
+    serviceName: String,
+    selector: Option[Common.Selector] = None,
+    template: Pod.Template //
   )
 
   def apply(name: String, namespace: String)(implicit cfg: Sk8sAppConfig): StatefulSet = {

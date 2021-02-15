@@ -37,7 +37,11 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
 
   final private def register(dir: Path, recursive: Boolean): Unit = {
     val key =
-      dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
+      dir.register(watchService,
+                   StandardWatchEventKinds.ENTRY_CREATE,
+                   StandardWatchEventKinds.ENTRY_MODIFY,
+                   StandardWatchEventKinds.ENTRY_DELETE
+      )
 
     if (debug) {
       keys.get(key) match {
@@ -51,26 +55,29 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
   }
 
   /**
-   * Register a particular file or directory to be watched
-   */
+    * Register a particular file or directory to be watched
+    */
   def register(dir: Path): Unit = register(dir, recursive = false)
 
   /**
-   * Recursively register directories
-   */
+    * Recursively register directories
+    */
   def registerAll(start: Path): Unit = {
 
-    implicit def makeDirVisitor(f: Path => Unit): SimpleFileVisitor[Path] = new SimpleFileVisitor[Path] {
-      override def preVisitDirectory(p: Path, attrs: BasicFileAttributes): FileVisitResult = {
-        f(p)
-        FileVisitResult.CONTINUE
+    implicit def makeDirVisitor(f: Path => Unit): SimpleFileVisitor[Path] =
+      new SimpleFileVisitor[Path] {
+        override def preVisitDirectory(p: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          f(p)
+          FileVisitResult.CONTINUE
+        }
       }
-    }
 
     trace("Scanning " + start + "...")
-    Files.walkFileTree(start, (f: Path) => {
-      register(f, recursive = true)
-    })
+    Files.walkFileTree(start,
+                       (f: Path) => {
+                         register(f, recursive = true)
+                       }
+    )
     trace("Done.")
   }
 
@@ -102,8 +109,8 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
       .foreach { case (key, _) => keys.remove(key) }
 
   /**
-   * The main directory watching thread
-   */
+    * The main directory watching thread
+    */
   override def run(): Unit =
     try {
       //      if (recursive) registerAll(path) else register(path)

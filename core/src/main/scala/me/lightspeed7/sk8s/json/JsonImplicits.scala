@@ -1,17 +1,29 @@
 package me.lightspeed7.sk8s.json
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 import java.time.format.DateTimeFormatter
 import java.time.ZonedDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-import org.joda.time.{ DateTime, DateTimeZone, Period }
-import org.joda.time.format.{ DateTimeFormat, DateTimeFormatterBuilder, DateTimeParser }
-import play.api.libs.json.{ Format, JsError, JsNumber, JsResult, JsString, JsSuccess, JsValue, JsonValidationError, Reads, Writes }
+import enumeratum.{Enum, EnumEntry, EnumFormats}
+import org.joda.time.{DateTime, DateTimeZone, Period}
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder, DateTimeParser}
+import play.api.libs.json.{Format, JsError, JsNumber, JsResult, JsString, JsSuccess, JsValue, JsonValidationError, Reads, Writes}
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
-import scala.util.{ Failure, Success, Try }
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.{Failure, Success, Try}
+
+trait NamedEnumEntry extends EnumEntry {
+  def name: String
+}
+
+trait InsensitivePlayJsonEnum[A <: EnumEntry] {
+  self: Enum[A] =>
+  implicit val jsonFormat: Format[A] = EnumFormats.formats(this, insensitive = true)
+
+  def find(in: String): Option[A]
+}
 
 object JsonImplicits extends JsonImplicits
 
@@ -21,18 +33,20 @@ trait JsonImplicits {
   // Path
   // ///////////////////////////
   implicit val pathReads: Reads[Path] = new Reads[Path] {
-    def reads(json: JsValue): JsResult[Path] = json match {
-      case JsString(s) =>
-        Option(s) match {
-          case Some(s) =>
-            Try(Paths.get(s)) match {
-              case Success(p)  => JsSuccess(p)
-              case Failure(ex) => JsError(s"${ex.getMessage} : '${json.toString()}'")
-            }
-          case None => JsError(s"Invalid value given for Path : '${json.toString()}'")
-        }
-      case _ => JsError("String value expected")
-    }
+
+    def reads(json: JsValue): JsResult[Path] =
+      json match {
+        case JsString(s) =>
+          Option(s) match {
+            case Some(s) =>
+              Try(Paths.get(s)) match {
+                case Success(p)  => JsSuccess(p)
+                case Failure(ex) => JsError(s"${ex.getMessage} : '${json.toString()}'")
+              }
+            case None => JsError(s"Invalid value given for Path : '${json.toString()}'")
+          }
+        case _ => JsError("String value expected")
+      }
   }
 
   implicit val pathWrites: Writes[Path] = new Writes[Path] {
@@ -45,14 +59,16 @@ trait JsonImplicits {
   // UUID format
   // ///////////////////////////
   implicit val uidReads: Reads[UUID] = new Reads[UUID] {
-    def reads(json: JsValue): JsResult[UUID] = json match {
-      case JsString(s) =>
-        Option(s) match {
-          case Some(s) => JsSuccess(UUID.fromString(s))
-          case None    => JsError(s"Invalid value given for UUID : '${json.toString()}'")
-        }
-      case _ => JsError("String value expected")
-    }
+
+    def reads(json: JsValue): JsResult[UUID] =
+      json match {
+        case JsString(s) =>
+          Option(s) match {
+            case Some(s) => JsSuccess(UUID.fromString(s))
+            case None    => JsError(s"Invalid value given for UUID : '${json.toString()}'")
+          }
+        case _ => JsError("String value expected")
+      }
   }
 
   implicit val uidWrites: Writes[UUID] = new Writes[UUID] {
@@ -65,14 +81,16 @@ trait JsonImplicits {
   // Joda DateTimeZone format
   // ////////////////////////////
   implicit val dtzReads: Reads[DateTimeZone] = new Reads[DateTimeZone] {
-    def reads(json: JsValue): JsResult[DateTimeZone] = json match {
-      case JsString(s) =>
-        Option(s) match {
-          case Some(s) => JsSuccess(DateTimeZone.forID(s))
-          case None    => JsError(s"Invalid value given for timeZone : '${json.toString()}'")
-        }
-      case _ => JsError("String value expected")
-    }
+
+    def reads(json: JsValue): JsResult[DateTimeZone] =
+      json match {
+        case JsString(s) =>
+          Option(s) match {
+            case Some(s) => JsSuccess(DateTimeZone.forID(s))
+            case None    => JsError(s"Invalid value given for timeZone : '${json.toString()}'")
+          }
+        case _ => JsError("String value expected")
+      }
   }
 
   implicit val dtzWrites: Writes[DateTimeZone] = new Writes[DateTimeZone] {
@@ -85,6 +103,7 @@ trait JsonImplicits {
   // Joda DateTime format
   //////////////////////////////
   implicit val dtReads: Reads[DateTime] = new Reads[DateTime] {
+
     val parsers = Array[DateTimeParser](
       DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ").getParser,
       DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").getParser,
@@ -104,7 +123,8 @@ trait JsonImplicits {
           Option(str) match {
             case Some(s) =>
               s forall Character.isDigit match {
-                case true => Try(new DateTime(s.toLong)).fold(err => JsError(JsonValidationError(Seq(err.getMessage))), JsSuccess(_))
+                case true =>
+                  Try(new DateTime(s.toLong)).fold(err => JsError(JsonValidationError(Seq(err.getMessage))), JsSuccess(_))
                 case false =>
                   Try(formatter.withOffsetParsed().parseDateTime(s)) match {
                     case Success(dt) =>
@@ -131,6 +151,7 @@ trait JsonImplicits {
   // Java Time API - Zoned
   // /////////////////////////////////////
   implicit val zdtReads: Reads[ZonedDateTime] = new Reads[ZonedDateTime] {
+
     def reads(json: JsValue): JsResult[ZonedDateTime] =
       json match {
         case JsNumber(num) => JsError("Unsupported format")
@@ -153,15 +174,18 @@ trait JsonImplicits {
   // Scala Duration Format
   // /////////////////////////////////////
   implicit val _DurationReads: Reads[Duration] = new Reads[Duration] {
-    def reads(json: JsValue): JsResult[Duration] = json match {
-      case JsNumber(s) =>
-        Option(s) match {
-          case Some(millis) => JsSuccess(FiniteDuration.apply(millis.toLong, TimeUnit.MILLISECONDS).asInstanceOf[Duration])
-          case None         => JsError(s"Invalid value given for duration : '${json.toString()}'")
-        }
-      case _ => JsError("Long value expected")
-    }
+
+    def reads(json: JsValue): JsResult[Duration] =
+      json match {
+        case JsNumber(s) =>
+          Option(s) match {
+            case Some(millis) => JsSuccess(FiniteDuration.apply(millis.toLong, TimeUnit.MILLISECONDS).asInstanceOf[Duration])
+            case None         => JsError(s"Invalid value given for duration : '${json.toString()}'")
+          }
+        case _ => JsError("Long value expected")
+      }
   }
+
   implicit val _DurationsWrites: Writes[Duration] = new Writes[Duration] {
     def writes(dur: Duration): JsValue = JsNumber(dur.toMillis)
   }
@@ -171,14 +195,16 @@ trait JsonImplicits {
   // Scala FiniteDuration
   // /////////////////////////
   implicit val durReads: Reads[FiniteDuration] = new Reads[FiniteDuration] {
-    def reads(json: JsValue): JsResult[FiniteDuration] = json match {
-      case JsNumber(s) =>
-        Option(s) match {
-          case Some(s) => JsSuccess(FiniteDuration(s.toLong, TimeUnit.MILLISECONDS))
-          case None    => JsError(s"Invalid value given for duration : '${json.toString()}'")
-        }
-      case _ => JsError("Long value expected")
-    }
+
+    def reads(json: JsValue): JsResult[FiniteDuration] =
+      json match {
+        case JsNumber(s) =>
+          Option(s) match {
+            case Some(s) => JsSuccess(FiniteDuration(s.toLong, TimeUnit.MILLISECONDS))
+            case None    => JsError(s"Invalid value given for duration : '${json.toString()}'")
+          }
+        case _ => JsError("Long value expected")
+      }
   }
 
   implicit val durWrites: Writes[FiniteDuration] = new Writes[FiniteDuration] {
@@ -191,14 +217,16 @@ trait JsonImplicits {
   // Joda Time Period
   // /////////////////////////
   implicit val periodReads: Reads[Period] = new Reads[Period] {
-    def reads(json: JsValue): JsResult[Period] = json match {
-      case JsString(s) =>
-        Option(s) match {
-          case Some(s) => JsSuccess(Period.parse(s))
-          case None    => JsError(s"Invalid value given for IOS8601 period : '${json.toString()}'")
-        }
-      case _ => JsError("String value expected for IOS8601 period")
-    }
+
+    def reads(json: JsValue): JsResult[Period] =
+      json match {
+        case JsString(s) =>
+          Option(s) match {
+            case Some(s) => JsSuccess(Period.parse(s))
+            case None    => JsError(s"Invalid value given for IOS8601 period : '${json.toString()}'")
+          }
+        case _ => JsError("String value expected for IOS8601 period")
+      }
   }
 
   implicit val periodWrites: Writes[Period] = new Writes[Period] {

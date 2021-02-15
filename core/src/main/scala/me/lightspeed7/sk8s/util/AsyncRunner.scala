@@ -8,7 +8,9 @@ import scala.concurrent.duration._
 
 object AsyncRunner extends LazyLogging {
 
-  def runFor[T](runTime: FiniteDuration, refreshInterval: FiniteDuration = 2 seconds)(block: => Unit)(implicit akka: ActorSystem): Unit = {
+  def runFor[T](runTime: FiniteDuration, refreshInterval: FiniteDuration = 2 seconds)(
+    block: => Unit
+  )(implicit akka: ActorSystem): Unit = {
     implicit val ec: ExecutionContext = akka.dispatcher
 
     val stopTime: Long = System.currentTimeMillis() + runTime.toMillis

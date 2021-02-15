@@ -71,7 +71,8 @@ class VariablesTest extends Sk8sFunSuite with Matchers {
     val p   = new Properties()
     val src = Sources.registerProperties("props", p)
 
-    val multi = Variables.multiSource[Boolean]("bools", Constant(false), (src, "bool1", false), (src, "bool2", true), (src, "bool3", false))
+    val multi =
+      Variables.multiSource[Boolean]("bools", Constant(false), (src, "bool1", false), (src, "bool2", true), (src, "bool3", false))
     multi.value should be(false) // default from first since none defined
 
     p.setProperty("bool2", "true")
@@ -99,8 +100,8 @@ class VariablesTest extends Sk8sFunSuite with Matchers {
 
     val multi = Variables.runMode[String](
       "Detect Run Mode",
-      "default", //
-      (Developer, Constant("developer")), //
+      "default",                            //
+      (Developer, Constant("developer")),   //
       (Production, Constant("production")), //
       Staging -> Constant("staging"), //
       Test    -> Constant("test") //
@@ -225,7 +226,7 @@ class VariablesTest extends Sk8sFunSuite with Matchers {
         serviceFullName,
         maybeSource(Sources.env, serviceFullName),
         maybeSource(Sources.env, envVarKey.getOrElse("UNKNOWN_URL")), //
-        external //
+        external                                                      //
       )
     }
 

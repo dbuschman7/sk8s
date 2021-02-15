@@ -4,19 +4,19 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 import me.lightspeed7.sk8s.util.AlphaId
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 import skuber.EnvVar
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 //
 // Single Job
 // ///////////////////////////////////
 case class Job(
-    kind: String = "Job",
-    apiVersion: String = "batch/v1",
-    metadata: Common.Metadata,
-    spec: Job.Spec
+  kind: String = "Job",
+  apiVersion: String = "batch/v1",
+  metadata: Common.Metadata,
+  spec: Job.Spec
 ) {
 
   import com.softwaremill.quicklens._
@@ -47,20 +47,21 @@ case class Job(
       .modify(_.spec.template.spec.imagePullSecrets)
       .using(in => in :+ Pod.TemplateSpec.Names(creds))
 
-  def withServiceAccount(name: Option[String]): Job = name match {
-    case None =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(Some(false))
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(None)
-    case Some(acctName) =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(None)
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(Some(acctName))
-  }
+  def withServiceAccount(name: Option[String]): Job =
+    name match {
+      case None =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(Some(false))
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(None)
+      case Some(acctName) =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(None)
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(Some(acctName))
+    }
 
   def withSecretMount(secretName: String, volumeName: String, mountDir: String, defaultMode: Int = 420): Job = {
 
@@ -68,7 +69,7 @@ case class Job(
     val mnt = Volumes.VolumeMount(vol.name, mountDir)
 
     this
-    // add vol
+      // add vol
       .modify(_.spec.template.spec.volumes)
       .using { in =>
         Option(in.getOrElse(List()) :+ vol)
@@ -87,11 +88,11 @@ object Job {
   implicit val __json: OFormat[Job] = Json.format[Job]
 
   case class Spec(
-      completions: Int = 1, // number of times to run
-      parallelism: Int = 1, // number of pods that can run in parallel
-      backoffLimit: Int = 1, // number of retries before throwing error
-      activeDeadlineSeconds: Int = 300, // time to allow job to run
-      template: Pod.Template
+    completions: Int = 1,             // number of times to run
+    parallelism: Int = 1,             // number of pods that can run in parallel
+    backoffLimit: Int = 1,            // number of retries before throwing error
+    activeDeadlineSeconds: Int = 300, // time to allow job to run
+    template: Pod.Template
   )
 
   object Spec {

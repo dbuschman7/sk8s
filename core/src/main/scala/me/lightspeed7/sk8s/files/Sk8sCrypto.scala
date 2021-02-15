@@ -3,9 +3,9 @@ package me.lightspeed7.sk8s.files
 import java.util.Base64
 
 import com.typesafe.scalalogging.LazyLogging
-import javax.crypto.{ Cipher => JCipher }
+import javax.crypto.{Cipher => JCipher}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 trait Sk8sCrypto extends LazyLogging {
 
@@ -39,6 +39,7 @@ trait Sk8sCrypto extends LazyLogging {
             None
         }
       }
+
   private def pad(input: String): String = {
     val temp = input + "|" + padding
     temp.substring(0, (temp.length() / 16) * 16)

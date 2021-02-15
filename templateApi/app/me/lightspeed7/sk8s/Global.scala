@@ -1,12 +1,13 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 import java.time.ZonedDateTime
 
+import controllers.{AuthContextProvider, JwtToken}
 import javax.inject.Inject
+import me.lightspeed7.sk8s.auth.{AuthContext, RolesRegistry}
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
-import play.api._
 import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.Future
@@ -16,19 +17,25 @@ class GlobalModule extends Sk8sBindings {
   implicit val appInfo: AppInfo = AppInfo(BuildInfo.name, BuildInfo.version, ZonedDateTime.now())
 
   override def configure(): Unit = {
+    RolesRegistry.loadPresets()
+    //
     generate(appInfo)
     //
+    bind(classOf[AuthContext[JwtToken]]).toProvider(classOf[AuthContextProvider]).asEagerSingleton()
+    //
     bind(classOf[Initialize]).asEagerSingleton() // initialize actors
+
   }
 
 }
 
-class Initialize @Inject()( //
-                           /*    */ val lifecycle: ApplicationLifecycle,
-                           implicit val appCtx: Sk8sContext)
-    extends LazyJsonLogging {
+class Initialize @Inject() ( //
+                            /*    */ val lifecycle: ApplicationLifecycle,
+                            implicit val appCtx: Sk8sContext
+) extends LazyJsonLogging {
 
-  def isKubernetes(basePath: Path = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean = new File(basePath.toString).exists()
+  def isKubernetes(basePath: Path = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")): Boolean =
+    new File(basePath.toString).exists()
 
   if (isKubernetes()) {
     logger.info(s"Kubernetes - ${Sk8s.serviceAccount().isKubernetes}")
@@ -50,18 +57,18 @@ class Initialize @Inject()( //
   //
   // Go to : http://patorjk.com/software/taag/#p=display&f=Big%20Money-sw&t=Type%20App%20Name
   logger.info("""
-      |  ______                       _______             __        __  __
-      | /      \                     /       \           /  |      /  |/  |
-      |/$$$$$$  |  ______    ______  $$$$$$$  | __    __ $$ |____  $$ |$$/   _______
-      |$$ |__$$ | /      \  /      \ $$ |__$$ |/  |  /  |$$      \ $$ |/  | /       |
-      |$$    $$ |/$$$$$$  |/$$$$$$  |$$    $$/ $$ |  $$ |$$$$$$$  |$$ |$$ |/$$$$$$$/
-      |$$$$$$$$ |$$ |  $$ |$$ |  $$ |$$$$$$$/  $$ |  $$ |$$ |  $$ |$$ |$$ |$$ |
-      |$$ |  $$ |$$ |__$$ |$$ |__$$ |$$ |      $$ \__$$ |$$ |__$$ |$$ |$$ |$$ \_____
-      |$$ |  $$ |$$    $$/ $$    $$/ $$ |      $$    $$/ $$    $$/ $$ |$$ |$$       |
-      |$$/   $$/ $$$$$$$/  $$$$$$$/  $$/        $$$$$$/  $$$$$$$/  $$/ $$/  $$$$$$$/
-      |          $$ |      $$ |
-      |          $$ |      $$ |
-      |          $$/       $$/
+    |  ______                       _______             __        __  __
+    | /      \                     /       \           /  |      /  |/  |
+    |/$$$$$$  |  ______    ______  $$$$$$$  | __    __ $$ |____  $$ |$$/   _______
+    |$$ |__$$ | /      \  /      \ $$ |__$$ |/  |  /  |$$      \ $$ |/  | /       |
+    |$$    $$ |/$$$$$$  |/$$$$$$  |$$    $$/ $$ |  $$ |$$$$$$$  |$$ |$$ |/$$$$$$$/
+    |$$$$$$$$ |$$ |  $$ |$$ |  $$ |$$$$$$$/  $$ |  $$ |$$ |  $$ |$$ |$$ |$$ |
+    |$$ |  $$ |$$ |__$$ |$$ |__$$ |$$ |      $$ \__$$ |$$ |__$$ |$$ |$$ |$$ \_____
+    |$$ |  $$ |$$    $$/ $$    $$/ $$ |      $$    $$/ $$    $$/ $$ |$$ |$$       |
+    |$$/   $$/ $$$$$$$/  $$$$$$$/  $$/        $$$$$$/  $$$$$$$/  $$/ $$/  $$$$$$$/
+    |          $$ |      $$ |
+    |          $$ |      $$ |
+    |          $$/       $$/
     """.stripMargin)
 
   Variables.logConfig(logger.underlying.underlying)

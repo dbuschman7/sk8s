@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s
 
-import java.io.{ File, PrintWriter }
-import java.nio.file.{ Path, Paths }
+import java.io.{File, PrintWriter}
+import java.nio.file.{Path, Paths}
 
 import me.lightspeed7.sk8s.util.AutoClose
 
@@ -31,8 +31,10 @@ object WatchApp extends App {
   // ////////
 
   val dirWatcher = new DirectoryWatcher({ in =>
-    in.foreach(println)
-  }, true)
+                                          in.foreach(println)
+                                        },
+                                        true
+  )
   val watchThread = new Thread(dirWatcher)
   watchThread.setDaemon(true)
   watchThread.setName("WatcherService")

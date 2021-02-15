@@ -45,16 +45,16 @@ object DockerImage extends RegexParsers {
   private val nameParser: Parser[String] = nameRegex ^^ (_.trim)
 
   private val part3: Parser[DockerImage] = nameParser ~ slash ~ nameParser ~ slash ~ nameParser ~ colon ~ tagParser ^^ {
-    case registry ~ _ ~ org ~ _ ~ repo ~ _ ~ tag => DockerImage(registry, Option(org), repo, Option(tag))
-  }
+      case registry ~ _ ~ org ~ _ ~ repo ~ _ ~ tag => DockerImage(registry, Option(org), repo, Option(tag))
+    }
 
   private val part2: Parser[DockerImage] = nameParser ~ slash ~ nameParser ~ colon ~ tagParser ^^ {
-    case org ~ _ ~ repo ~ _ ~ tag => DockerImage("docker.io", Option(org), repo, Option(tag))
-  }
+      case org ~ _ ~ repo ~ _ ~ tag => DockerImage("docker.io", Option(org), repo, Option(tag))
+    }
 
   private val part1: Parser[DockerImage] = nameParser ~ slash ~ nameParser ^^ {
-    case org ~ _ ~ repo => DockerImage("docker.io", Option(org), repo, Option("latest"))
-  }
+      case org ~ _ ~ repo => DockerImage("docker.io", Option(org), repo, Option("latest"))
+    }
 
   //
   private val grammar: Parser[DockerImage] = part3 | part2 | part1

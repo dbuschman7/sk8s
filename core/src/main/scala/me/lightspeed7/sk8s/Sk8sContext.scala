@@ -1,13 +1,15 @@
 package me.lightspeed7.sk8s
 
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Materializer, Supervision }
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Materializer, Supervision}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext }
+import scala.concurrent.{Await, ExecutionContext}
 
-final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem, val mat: Materializer) extends AutoCloseable with LazyLogging {
+final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem, val mat: Materializer)
+    extends AutoCloseable
+    with LazyLogging {
 
   lazy val internalSdkCalls: Boolean = Sk8s.serviceAccount().isKubernetes
 
@@ -30,36 +32,43 @@ final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem,
 
   private var closeables: Seq[Closeable] = Seq.empty
 
-  def registerCloseable[T <: AutoCloseable](label: String, closeable: => T): T = synchronized {
-    logger.info(s"Register Closeable - $label")
-    val temp = closeables :+ Closeable(label, closeable)
-    closeables = temp
-    closeable
-  }
+  def registerCloseable[T <: AutoCloseable](label: String, closeable: => T): T =
+    synchronized {
+      logger.info(s"Register Closeable - $label")
+      val temp = closeables :+ Closeable(label, closeable)
+      closeables = temp
+      closeable
+    }
 
-  def register[T](label: String, closeable: => T): T = synchronized {
-    logger.info(s"Register Closeable - $label")
+  def register[T](label: String, closeable: => T): T =
+    synchronized {
+      logger.info(s"Register Closeable - $label")
 
-    val temp = closeables :+ Closeable(label, new AutoCloseable {
-      override def close(): Unit = closeable
-    })
+      val temp = closeables :+ Closeable(label,
+                                         new AutoCloseable {
+                                           override def close(): Unit = closeable
+                                         }
+        )
 
-    closeables = temp
-    closeable
-  }
+      closeables = temp
+      closeable
+    }
 
-  def close(): Unit = synchronized {
-    logger.info("Closing AutoCloseables ...")
-    closeables.reverse // opposite of registration
-      .foreach {
-        case Closeable(l, c) =>
-          logger.info(s"Closing - $l")
-          c.close()
-      }
-  }
+  def close(): Unit =
+    synchronized {
+      logger.info("Closing AutoCloseables ...")
+      closeables.reverse // opposite of registration
+        .foreach {
+          case Closeable(l, c) =>
+            logger.info(s"Closing - $l")
+            c.close()
+        }
+    }
 
 }
+
 object Sk8sContext extends LazyLogging {
+
   def create(appInfo: AppInfo): Sk8sContext = {
 
     val timeout: FiniteDuration = 10 seconds
@@ -102,12 +111,14 @@ object Sk8sContext extends LazyLogging {
       }
     )
 
-    ctx.registerCloseable("ActorMaterializer", new AutoCloseable {
-      override def close(): Unit = {
-        logger.info("Shutting down ActorMaterializer ...")
-        materializer.shutdown()
-      }
-    })
+    ctx.registerCloseable("ActorMaterializer",
+                          new AutoCloseable {
+                            override def close(): Unit = {
+                              logger.info("Shutting down ActorMaterializer ...")
+                              materializer.shutdown()
+                            }
+                          }
+    )
 
     //
     ctx

@@ -2,11 +2,11 @@ package me.lightspeed7.sk8s
 
 import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.classic.{ Level, LoggerContext }
+import ch.qos.logback.classic.{Level, LoggerContext}
 import ch.qos.logback.core.AppenderBase
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
 import org.scalatest.BeforeAndAfterAll
-import org.slf4j.{ Logger, LoggerFactory }
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
 import scala.collection.mutable

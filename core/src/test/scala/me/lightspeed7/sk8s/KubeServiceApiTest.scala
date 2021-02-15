@@ -1,9 +1,9 @@
 package me.lightspeed7.sk8s
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 import me.lightspeed7.sk8s.http.RestQuery
-import play.api.libs.json.{ JsResult, Json }
+import play.api.libs.json.{JsResult, Json}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

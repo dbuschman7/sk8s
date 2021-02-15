@@ -1,11 +1,11 @@
-package me.lightspeed7.sk8s
+package me.lightspeed7.sk8s.backend
 
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.Sk8s.HealthStatus
-import me.lightspeed7.sk8s.server.BackendServer
+import me.lightspeed7.sk8s._
 
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
 
@@ -41,13 +41,11 @@ class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
     )
     .value
 
-  lazy val protoFormat: Boolean = Variables.source[Boolean](Sources.env, "PROMETHEUS_PROTOBUF", Constant(false)).value
-
   Sk8s.MemoryCron.startup(appInfo, memoryUpdate)
 
   if (startServer) {
     logger.info("Staring backend server ...")
-    Try(new BackendServer(bindAddress, bindPort, protoFormat)(ctx)) match {
+    Try(new BackendServer(bindAddress, bindPort)(ctx)) match {
       case Failure(th: Throwable) =>
         logger.error("", th)
         HealthStatus.unhealthy("backend-server")
@@ -64,4 +62,14 @@ object BackgroundTasks {
   val ServerAddressName       = "BACKEND_BIND_ADDRESS"
   val ServerAddressPort       = "BACKEND_BIND_PORT"
 
+  var singleton: Option[BackgroundTasks] = None
+
+  def standup(implicit ctx: Sk8sContext): BackgroundTasks =
+    synchronized {
+      if (singleton.isEmpty) {
+        val bTasks = new BackgroundTasks()
+        singleton = Some(bTasks)
+      }
+      singleton.get
+    }
 }

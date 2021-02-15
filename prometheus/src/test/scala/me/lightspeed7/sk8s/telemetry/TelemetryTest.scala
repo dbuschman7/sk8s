@@ -1,17 +1,17 @@
 package me.lightspeed7.sk8s.telemetry
 
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.concurrent.TimeUnit
 
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.util.PrettyPrint
 import org.lyranthe.prometheus.client.registry.ProtoFormat
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Random
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
 
 class TelemetryTest extends AnyFunSuite with Matchers {
 
@@ -41,10 +41,10 @@ class TelemetryTest extends AnyFunSuite with Matchers {
     val logger = LoggerFactory.getLogger("foo")
     logger.error("Logged IllegalStateException exception to follow - expected", new IllegalStateException("exception"))
 
-    EventTelemetry.markEvent("eventName", "label1" -> "value1")
+    TelemetryRegistry.Events.markEvent("eventName", "label1" -> "value1")
 
     // test results
-    val metrics = TelemetryRegistry.snapshot.toSeq
+    val metrics = TelemetryRegistry.rawSnapshot(false).toSeq
 
     println()
     metrics.foreach(println)
@@ -60,7 +60,9 @@ class TelemetryTest extends AnyFunSuite with Matchers {
     val binary: Array[Byte] = ProtoFormat.output(metrics.iterator)
     binary.length should be > 1600
 
-    ProtoFormat.contentType should be("application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited")
+    ProtoFormat.contentType should be(
+      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited"
+    )
   }
 
   //

@@ -1,9 +1,9 @@
 package me.lightspeed7.sk8s
 
-import org.bson.codecs.configuration.{ CodecProvider, CodecRegistry }
-import org.bson.codecs.{ Codec, DecoderContext, EncoderContext }
-import org.bson.{ BsonReader, BsonWriter }
-import os.{ Path, RelPath }
+import org.bson.codecs.configuration.{CodecProvider, CodecRegistry}
+import org.bson.codecs.{Codec, DecoderContext, EncoderContext}
+import org.bson.{BsonReader, BsonWriter}
+import os.{Path, RelPath}
 
 import scala.collection.concurrent
 

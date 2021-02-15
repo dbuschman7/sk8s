@@ -1,9 +1,9 @@
 package me.lightspeed7.sk8s
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Paths }
+import java.nio.file.{Files, Paths}
 
-import com.typesafe.scalalogging.{ LazyLogging, StrictLogging }
+import com.typesafe.scalalogging.{LazyLogging, StrictLogging}
 import play.api.libs.json.Json
 import skuber._
 import skuber.apps.v1beta1._

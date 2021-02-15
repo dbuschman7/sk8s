@@ -1,21 +1,21 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{ Path, Paths }
-import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
+import java.nio.file.{Path, Paths}
+import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
 
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
-import akka.util.ByteString
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.util.{ByteString, Timeout}
 import me.lightspeed7.sk8s.files.Sk8sFileIO
-import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
+import me.lightspeed7.sk8s.util.{AlphaId, AutoClose}
 import org.joda.time.DateTime
 import org.scalactic.source
-import org.scalatest.{ BeforeAndAfterAll, Tag }
+import org.scalatest.{BeforeAndAfterAll, Tag}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 import org.scalatest.funsuite.AnyFunSuite
 
 class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
@@ -71,7 +71,8 @@ class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   lazy val k8sActive: Boolean = Sk8s.isKubernetes()
 
-  implicit val timeout: FiniteDuration = 10 seconds
+  implicit val timeout: Duration    = 10 seconds
+  implicit val akkaTimeout: Timeout = Timeout(10 seconds)
 
   private var closeables: Seq[(String, AutoCloseable)] = Seq.empty
 
@@ -101,11 +102,12 @@ class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
 
     def toValueTry(implicit timeout: FiniteDuration = t): Try[T] = Await.ready[T](item, timeout).value.get
 
-    def resultOrFail(implicit timeout: FiniteDuration = t): T = Await.ready[T](item, timeout).value match {
-      case Some(Success(v))  => v
-      case Some(Failure(ex)) => fail(ex.getMessage, ex)
-      case None              => fail("Future failed to complete")
-    }
+    def resultOrFail(implicit timeout: FiniteDuration = t): T =
+      Await.ready[T](item, timeout).value match {
+        case Some(Success(v))  => v
+        case Some(Failure(ex)) => fail(ex.getMessage, ex)
+        case None              => fail("Future failed to complete")
+      }
 
     def toUnit: Unit = {
       Await.result(item, timeout)
@@ -175,11 +177,15 @@ class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
   //
   // Run this test only if we are in the K8S environment
   // ///////////////////////////////////////////////////////////
-  protected def testIfK8s(testName: String, testTags: Tag*)(testFun: => Any /* Assertion */ )(implicit pos: source.Position): Unit =
+  protected def testIfK8s(testName: String, testTags: Tag*)(
+    testFun: => Any /* Assertion */
+  )(implicit pos: source.Position): Unit =
     if (k8sActive) test(testName, testTags: _*)(testFun)(pos)
     else ignore(testName + " !!! K8s REQUIRED ", testTags: _*)(testFun)(pos)
 
-  protected def testIfNotK8s(testName: String, testTags: Tag*)(testFun: => Any /* Assertion */ )(implicit pos: source.Position): Unit =
+  protected def testIfNotK8s(testName: String, testTags: Tag*)(
+    testFun: => Any /* Assertion */
+  )(implicit pos: source.Position): Unit =
     if (!k8sActive) test(testName, testTags: _*)(testFun)(pos)
     else ignore(testName + " !!! K8s REQUIRED ", testTags: _*)(testFun)(pos)
 }

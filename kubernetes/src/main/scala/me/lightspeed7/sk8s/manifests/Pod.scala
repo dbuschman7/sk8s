@@ -1,14 +1,14 @@
 package me.lightspeed7.sk8s.manifests
 
 import me.lightspeed7.sk8s.manifests.Pod.TemplateSpec
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 import skuber.EnvVar
 
 case class Pod(
-    kind: String = "Pod",
-    apiVersion: String = "v1",
-    metadata: Common.Metadata,
-    spec: TemplateSpec
+  kind: String = "Pod",
+  apiVersion: String = "v1",
+  metadata: Common.Metadata,
+  spec: TemplateSpec
 ) {
 
   import com.softwaremill.quicklens._
@@ -53,20 +53,21 @@ case class Pod(
         Seq(cnts.head.modify(_.env).using(in => in ++ envVars))
       }
 
-  def withServiceAccount(name: Option[String]): Pod = name match {
-    case None =>
-      this
-        .modify(_.spec.automountServiceAccountToken)
-        .setTo(Some(false))
-        .modify(_.spec.serviceAccountName)
-        .setTo(None)
-    case Some(acctName) =>
-      this
-        .modify(_.spec.automountServiceAccountToken)
-        .setTo(None)
-        .modify(_.spec.serviceAccountName)
-        .setTo(Some(acctName))
-  }
+  def withServiceAccount(name: Option[String]): Pod =
+    name match {
+      case None =>
+        this
+          .modify(_.spec.automountServiceAccountToken)
+          .setTo(Some(false))
+          .modify(_.spec.serviceAccountName)
+          .setTo(None)
+      case Some(acctName) =>
+        this
+          .modify(_.spec.automountServiceAccountToken)
+          .setTo(None)
+          .modify(_.spec.serviceAccountName)
+          .setTo(Some(acctName))
+    }
 
 }
 
@@ -90,8 +91,8 @@ object Pod {
   }
 
   case class Template(
-      metadata: Common.Metadata,
-      spec: TemplateSpec //
+    metadata: Common.Metadata,
+    spec: TemplateSpec //
   )
 
   object Template {
@@ -99,14 +100,14 @@ object Pod {
   }
 
   case class TemplateSpec(
-      affinity: Option[Common.Affinity] = None,
-      containers: Seq[Container],
-      serviceAccountName: Option[String] = None,
-      automountServiceAccountToken: Option[Boolean] = None,
-      restartPolicy: String = "Always",
-      dnsPolicy: String = "ClusterFirst",
-      imagePullSecrets: Seq[TemplateSpec.Names] = Seq(),
-      volumes: Option[List[Volumes.Volume]] = None //
+    affinity: Option[Common.Affinity] = None,
+    containers: Seq[Container],
+    serviceAccountName: Option[String] = None,
+    automountServiceAccountToken: Option[Boolean] = None,
+    restartPolicy: String = "Always",
+    dnsPolicy: String = "ClusterFirst",
+    imagePullSecrets: Seq[TemplateSpec.Names] = Seq(),
+    volumes: Option[List[Volumes.Volume]] = None //
   )
 
   object TemplateSpec {

@@ -2,26 +2,26 @@ package me.lightspeed7.sk8s.manifests
 
 import java.util.Base64
 
-import me.lightspeed7.sk8s.{ DockerImage, RunMode }
-import me.lightspeed7.sk8s.manifests.Common.{ Java, Java11, Java8, Requests }
+import me.lightspeed7.sk8s.{DockerImage, RunMode}
+import me.lightspeed7.sk8s.manifests.Common.{Java, Java11, Java8, Requests}
 import play.api.libs.json._
-import skuber.{ ConfigMap, EnvVar, ObjectMeta }
+import skuber.{ConfigMap, EnvVar, ObjectMeta}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 final case class Sk8sAppConfig private (
-    java: Java,
-    name: String,
-    namespace: String = "default",
-    envVars: List[EnvVar] = List(),
-    replicas: Int = 1,
-    apiApp: Boolean = true,
-    serviceAccountName: Option[String] = None,
-    version: Common.Version = Common.Version(),
-    image: Option[DockerImage] = None,
-    request: Common.Requests = Common.Requests(),
-    imagePullSecrets: String = Sk8sAppConfig.defaultDockerCreds,
-    imagePullPolicy: String = "IfNotPresent" //
+  java: Java,
+  name: String,
+  namespace: String = "default",
+  envVars: List[EnvVar] = List(),
+  replicas: Int = 1,
+  apiApp: Boolean = true,
+  serviceAccountName: Option[String] = None,
+  version: Common.Version = Common.Version(),
+  image: Option[DockerImage] = None,
+  request: Common.Requests = Common.Requests(),
+  imagePullSecrets: String = Sk8sAppConfig.defaultDockerCreds,
+  imagePullPolicy: String = "IfNotPresent" //
 ) {
 
   import com.softwaremill.quicklens._
@@ -81,11 +81,10 @@ final case class Sk8sAppConfig private (
   def readFromTopic(topicName: String, pollingInternvalMs: Int = 50): Sk8sAppConfig =
     this
       .modify(_.envVars)
-      .using(
-        in =>
-          in :+
-          createtEnvVar("READ_FROM_TOPIC", topicName) :+
-          createtEnvVar("KAFKA_POLLING_INTERVAL_MS", pollingInternvalMs.toString) //
+      .using(in =>
+        in :+
+        createtEnvVar("READ_FROM_TOPIC", topicName) :+
+        createtEnvVar("KAFKA_POLLING_INTERVAL_MS", pollingInternvalMs.toString) //
       )
 
   def withEnvVar(name: String, value: String): Sk8sAppConfig =
@@ -225,8 +224,10 @@ object Sk8sAppConfig {
           s"-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -Xms${cfg.request.memoryMb - 100}m -Xmx${cfg.request.memoryMb - 100}m  -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark"
         )
       case Java11 =>
-        cfg.createtEnvVar("JAVA_OPTS",
-                          "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 ")
+        cfg.createtEnvVar(
+          "JAVA_OPTS",
+          "-server -Dpidfile.path=/dev/null -Djava.io.tmpdir=/opt/docker -Dnetworkaddress.cache.ttl=20 -XX:MaxRAMPercentage=75 "
+        )
     }
 
     List(

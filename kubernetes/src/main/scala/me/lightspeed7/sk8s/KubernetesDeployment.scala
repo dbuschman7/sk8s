@@ -22,8 +22,9 @@ final case class KubernetesDeployment(skuber: Deployment) extends LazyLogging {
 
   lazy val image: Option[DockerImage] = container.flatMap(in => DockerImage.parse(in.image).toOption)
 
-  def upgradeImageVersion(version: String): Option[Container] = image.flatMap { img =>
-    container.map(_.copy(image = img.withVersion(version).toString))
-  }
+  def upgradeImageVersion(version: String): Option[Container] =
+    image.flatMap { img =>
+      container.map(_.copy(image = img.withVersion(version).toString))
+    }
 
 }

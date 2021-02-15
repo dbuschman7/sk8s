@@ -2,15 +2,15 @@ package me.lightspeed7.sk8s
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ HttpRequest, Uri }
+import akka.http.scaladsl.model.{HttpRequest, Uri}
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
-import play.api.libs.json.{ Format, JsValue, Json }
-import slack.api.{ ApiError, InvalidResponseError }
+import play.api.libs.json.{Format, JsValue, Json}
+import slack.api.{ApiError, InvalidResponseError}
 import slack.models.User
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContextExecutor, Future }
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 final case class SlackClient(token: String)(implicit system: ActorSystem) extends AutoCloseable with JsonImplicits {
 
@@ -101,7 +101,8 @@ final case class SlackClient(token: String)(implicit system: ActorSystem) extend
                                 iconUrl: Option[String] = None,
                                 iconEmoji: Option[String] = None,
                                 replaceOriginal: Option[Boolean] = None,
-                                deleteOriginal: Option[Boolean] = None): Future[String] = {
+                                deleteOriginal: Option[Boolean] = None
+  ): Future[String] = {
 
     val res = makeApiMethodRequest(
       "chat.postMessage",
@@ -127,12 +128,14 @@ final case class SlackClient(token: String)(implicit system: ActorSystem) extend
                                   ts: String,
                                   text: Option[String],
                                   asUser: Option[Boolean],
-                                  attachments: Option[Seq[Attachment]] = None): Future[UpdateResponse] = {
+                                  attachments: Option[Seq[Attachment]] = None
+  ): Future[UpdateResponse] = {
     val params = Seq( //
                      "channel"     -> channelIdFor(channelName),
                      "ts"          -> ts,
                      "text"        -> text,
-                     "attachments" -> attachments.map(a => Json.stringify(Json.toJson(a))))
+                     "attachments" -> attachments.map(a => Json.stringify(Json.toJson(a)))
+    )
 
     makeApiMethodRequest("chat.update", asUser.map(b => params :+ ("as_user" -> b)).getOrElse(params): _*)
       .map(_.as[UpdateResponse])

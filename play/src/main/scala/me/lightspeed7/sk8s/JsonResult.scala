@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 import com.typesafe.scalalogging.LazyLogging
 import me.lightspeed7.sk8s.json.JsonImplicits
 
-import play.api.libs.json.{ JsValue, Json, OFormat }
-import play.api.mvc.{ Result, Results }
+import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.mvc.{Result, Results}
 
 import scala.concurrent.ExecutionContext
 

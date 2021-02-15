@@ -1,17 +1,17 @@
 package me.lightspeed7.sk8s
 
 import akka.actor.ActorSystem
-import akka.stream.{ Materializer, SystemMaterializer }
+import akka.stream.{Materializer, SystemMaterializer}
 import com.typesafe.scalalogging.LazyLogging
 import javax.inject.Inject
-import me.lightspeed7.sk8s.telemetry.{ BasicCounter, BasicTimer, TelemetryRegistry }
-import play.api.mvc.{ Filter, RequestHeader, ResponseHeader, Result }
+import me.lightspeed7.sk8s.telemetry.{BasicCounter, BasicTimer, TelemetryRegistry}
+import play.api.mvc.{Filter, RequestHeader, ResponseHeader, Result}
 import play.api.routing.Router
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util._
 
-class ResponseFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter with LazyLogging {
+class ResponseFilter @Inject() (implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter with LazyLogging {
 
   implicit val mat: Materializer    = SystemMaterializer(akka).materializer
   implicit val ex: ExecutionContext = akka.dispatcher

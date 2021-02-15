@@ -1,9 +1,12 @@
 package me.lightspeed7.sk8s.manifests
 
 import me.lightspeed7.sk8s.manifests.Common.Selector
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
-case class Budget(kind: String = "PodDisruptionBudget", apiVersion: String = "policy/v1beta1", metadata: Common.Metadata, spec: Budget.Spec //
+case class Budget(kind: String = "PodDisruptionBudget",
+                  apiVersion: String = "policy/v1beta1",
+                  metadata: Common.Metadata,
+                  spec: Budget.Spec //
 )
 
 object Budget {
@@ -17,10 +20,10 @@ object Budget {
   implicit val __json: OFormat[Budget] = Json.format[Budget]
 
   def labelSelector(
-      name: String,
-      namespace: Option[String],
-      minAvailable: Option[Int] = None,
-      maxUnavailable: Option[Int] = None //
+    name: String,
+    namespace: Option[String],
+    minAvailable: Option[Int] = None,
+    maxUnavailable: Option[Int] = None //
   ): Budget = {
 
     val meta: Common.Metadata = Common.Metadata(name, namespace, None, None)

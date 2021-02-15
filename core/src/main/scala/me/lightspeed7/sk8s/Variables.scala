@@ -1,16 +1,16 @@
 package me.lightspeed7.sk8s
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.files.{ Sk8sCrypto, VolumeFiles }
+import me.lightspeed7.sk8s.files.{Sk8sCrypto, VolumeFiles}
 import org.slf4j.Logger
 import play.api.libs.json.Json
 
 import scala.collection.concurrent.TrieMap
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 //
 // Configuration Variables
@@ -39,7 +39,9 @@ trait Variable[T] extends LazyLogging {
       case Failure(ex)                       => throw ex;
     }
 
-    pad(indent) + s"""{ "name" : "$name", "display": "$displayName",  "security" : $security, "exists" : $exists, "value" : "$value" }"""
+    pad(
+      indent
+    ) + s"""{ "name" : "$name", "display": "$displayName",  "security" : $security, "exists" : $exists, "value" : "$value" }"""
   }
 
   def dump(indent: Int): String = {
@@ -85,8 +87,8 @@ trait Variable[T] extends LazyLogging {
 }
 
 /**
- * Holder for a constant value, use to handling defaults
- */
+  * Holder for a constant value, use to handling defaults
+  */
 sealed case class Constant[T](name: String, constantValue: T, override val security: Boolean = false) extends Variable[T] {
 
   val displayName: String = "Constant - " + name
@@ -106,12 +108,13 @@ object Constant {
 }
 
 /**
- * Returns data based on which RunMode is activated, otherwise the default
- */
+  * Returns data based on which RunMode is activated, otherwise the default
+  */
 sealed case class RunModeVariable[T](name: String,
                                      default: Constant[T],
                                      runModeMap: Map[RunMode, Variable[T]],
-                                     override val security: Boolean = false)(implicit val ct: ClassTag[T])
+                                     override val security: Boolean = false
+)(implicit val ct: ClassTag[T])
     extends Variable[T] {
 
   val displayName: String = name
@@ -124,11 +127,11 @@ sealed case class RunModeVariable[T](name: String,
 }
 
 /**
- * Returns a value from a config source, possibly dynamic
- */
+  * Returns a value from a config source, possibly dynamic
+  */
 sealed case class SourceVariable[T](name: String, source: Source, default: Variable[T], override val security: Boolean = false)(
-    implicit val ct: ClassTag[T])
-    extends Variable[T] {
+  implicit val ct: ClassTag[T]
+) extends Variable[T] {
 
   val displayName: String = s"Src(${source.name()}) - " + name
 
@@ -141,8 +144,8 @@ sealed case class SourceVariable[T](name: String, source: Source, default: Varia
 }
 
 /**
- * allows a list of variables where the first one with a value is returned
- */
+  * allows a list of variables where the first one with a value is returned
+  */
 sealed case class FirstValueVariable[T](name: String, default: Variable[T], ordered: Seq[Variable[T]]) extends Variable[T] {
 
   def displayName: String = s"Multi($name)"
@@ -157,8 +160,11 @@ sealed case class FirstValueVariable[T](name: String, default: Variable[T], orde
   def exists: Boolean = found.exists // delegate
 }
 
-sealed case class ExternalVariable[T](name: String, override val security: Boolean, default: Constant[T], function: () => Option[String])(
-    implicit val ct: ClassTag[T])
+sealed case class ExternalVariable[T](name: String,
+                                      override val security: Boolean,
+                                      default: Constant[T],
+                                      function: () => Option[String]
+)(implicit val ct: ClassTag[T])
     extends Variable[T] {
 
   val displayName: String = "External - " + name
@@ -194,34 +200,39 @@ sealed case class K8sSecretVariable(secret: String, key: String, default: String
 object Variables {
   private[sk8s] val registered: TrieMap[String, Variable[_]] = TrieMap[String, Variable[_]]()
 
-  def terminal[T](varName: String): Variable[T] = new Variable[T] {
-    def exists: Boolean = true
+  def terminal[T](varName: String): Variable[T] =
+    new Variable[T] {
+      def exists: Boolean = true
 
-    def name: String = varName
+      def name: String = varName
 
-    def displayName: String = "Terminal - " + varName
+      def displayName: String = "Terminal - " + varName
 
-    def value: T = throw new IllegalStateException("Undefined Variable  - " + varName)
+      def value: T = throw new IllegalStateException("Undefined Variable  - " + varName)
 
-    override def valueStr: String = "Undefined"
-  }
+      override def valueStr: String = "Undefined"
+    }
 
   def constant[T](name: String, value: T, security: Boolean = false)(implicit ct: ClassTag[T]): Variable[T] =
     new Constant[T](name, value, security).register()
 
   /**
-   * Create a Source based variable
-   */
-  def source[T](source: Source, name: String, default: Variable[T], security: Boolean = false)(implicit ct: ClassTag[T]): Variable[T] =
+    * Create a Source based variable
+    */
+  def source[T](source: Source, name: String, default: Variable[T], security: Boolean = false)(implicit
+    ct: ClassTag[T]
+  ): Variable[T] =
     new SourceVariable[T](name, source, default, security).register()
 
   def maybeSource[T](source: Source, name: String, security: Boolean = false)(implicit ct: ClassTag[T]): Variable[T] =
     new SourceVariable[T](name, source, terminal(name), security).register()
 
   /**
-   * Create a Multi-Value Source Variable
-   */
-  def multiSource[T](name: String, default: Constant[T], sourceMap: (Source, String, Boolean)*)(implicit ct: ClassTag[T]): Variable[T] = {
+    * Create a Multi-Value Source Variable
+    */
+  def multiSource[T](name: String, default: Constant[T], sourceMap: (Source, String, Boolean)*)(implicit
+    ct: ClassTag[T]
+  ): Variable[T] = {
     val ordered: Seq[Variable[T]] = sourceMap.map {
       case (src, lookupName, security) => SourceVariable[T](lookupName, src, default, security)
     }
@@ -229,14 +240,14 @@ object Variables {
   }
 
   /**
-   * Create a multi-possibility variable
-   */
+    * Create a multi-possibility variable
+    */
   def firstValue[T](name: String, variables: Variable[T]*)(implicit ct: ClassTag[T]): Variable[T] =
     FirstValueVariable[T](name, terminal(name), variables).register()
 
   /**
-   * Create a RunMode based variable
-   */
+    * Create a RunMode based variable
+    */
   def runMode[T](name: String, default: T, runModes: (RunMode, Variable[T])*)(implicit ct: ClassTag[T]): Variable[T] = {
     val secured: Boolean = runModes.foldLeft(false) { (res, next) =>
       res || next._2.security
@@ -245,15 +256,19 @@ object Variables {
   }
 
   /**
-   * Create a variable from a K8s secret
-   */
-  def secret(secret: String, key: String, default: String, mountPath: Path = Paths.get("/etc"))(implicit crypto: Sk8sCrypto): Variable[String] =
+    * Create a variable from a K8s secret
+    */
+  def secret(secret: String, key: String, default: String, mountPath: Path = Paths.get("/etc"))(implicit
+    crypto: Sk8sCrypto
+  ): Variable[String] =
     K8sSecretVariable(secret, key, default, mountPath).register()
 
   /**
-   * Create a External function based variable
-   */
-  def external[T](name: String, security: Boolean, default: Constant[T], function: () => Option[String])(implicit ct: ClassTag[T]): Variable[T] =
+    * Create a External function based variable
+    */
+  def external[T](name: String, security: Boolean, default: Constant[T], function: () => Option[String])(implicit
+    ct: ClassTag[T]
+  ): Variable[T] =
     ExternalVariable(name, security, default, function).register()
 
   def visitDefinedVariables[T](f: Variable[_] => T): Seq[T] = registered.toSeq.sortBy(m => m._1).map(_._2).map(f)
@@ -278,9 +293,9 @@ object Variables {
 
   def logConfig(logger: Logger): Unit = {
     val buf = new StringBuilder("\n")
-    dumpConfiguration({ in: String =>
+    dumpConfiguration { in: String =>
       buf.append(in).append("\n")
-    })
+    }
     logger.info(buf.toString)
   }
 }

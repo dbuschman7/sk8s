@@ -2,8 +2,8 @@ package me.lightspeed7.sk8s.manifests
 
 import play.api.libs.json
 import play.api.libs.json._
-import skuber.Pod.Affinity.{ PodAffinity, PodAntiAffinity }
-import skuber.{ EnvVar, LabelSelector, Resource }
+import skuber.Pod.Affinity.{PodAffinity, PodAntiAffinity}
+import skuber.{EnvVar, LabelSelector, Resource}
 
 //
 // Core classes
@@ -61,15 +61,18 @@ object Common {
   case object Java11 extends Java
 
   object Java {
+
     implicit val _reads: Reads[Java] = new Reads[Java] {
-      def reads(json: JsValue): JsResult[Java] = json match {
-        case JsString(s) =>
-          s match {
-            case "java8"  => JsSuccess(Java8)
-            case "java11" => JsSuccess(Java11)
-          }
-        case _ => JsError("error.expected.java.version")
-      }
+
+      def reads(json: JsValue): JsResult[Java] =
+        json match {
+          case JsString(s) =>
+            s match {
+              case "java8"  => JsSuccess(Java8)
+              case "java11" => JsSuccess(Java11)
+            }
+          case _ => JsError("error.expected.java.version")
+        }
     }
 
     implicit val _writes: Writes[Java] = json.Writes {
@@ -82,10 +85,10 @@ object Common {
   }
 
   case class Metadata(
-      name: String,
-      namespace: Option[String] = None,
-      labels: Option[Map[String, String]] = None,
-      annotations: Option[Map[String, String]] = None //
+    name: String,
+    namespace: Option[String] = None,
+    labels: Option[Map[String, String]] = None,
+    annotations: Option[Map[String, String]] = None //
   )
 
   object Metadata {
@@ -93,6 +96,7 @@ object Common {
   }
 
   case class Selector(matchLabels: Option[Map[String, String]] = None) {
+
     def toLabelSelector(statefulSet: StatefulSet): LabelSelector = {
       import skuber.LabelSelector.dsl._
       val name: String =
@@ -155,6 +159,7 @@ object Volumes {
     }
 
     val __volumeRefJsonReads: Reads[VolumeRef] = new Reads[VolumeRef] {
+
       def reads(json: JsValue): JsResult[VolumeRef] = {
         val obj = json.as[JsObject]
         obj.fields.find(_._1 == "secretName").map(_._2) match {
@@ -186,15 +191,15 @@ object Volumes {
 // Common
 // ///////////////////
 case class Container(
-    name: String,
-    image: String,
-    imagePullPolicy: String,
-    ports: Seq[Container.Port] = Seq(),
-    env: List[EnvVar] = List(),
-    resources: Option[Resource.Requirements],
-    livenessProbe: Option[Probes.HttpProbe] = None,
-    readinessProbe: Option[Probes.HttpProbe] = None,
-    volumeMounts: Option[List[Volumes.VolumeMount]] = None //
+  name: String,
+  image: String,
+  imagePullPolicy: String,
+  ports: Seq[Container.Port] = Seq(),
+  env: List[EnvVar] = List(),
+  resources: Option[Resource.Requirements],
+  livenessProbe: Option[Probes.HttpProbe] = None,
+  readinessProbe: Option[Probes.HttpProbe] = None,
+  volumeMounts: Option[List[Volumes.VolumeMount]] = None //
 )
 
 object Container {
@@ -213,9 +218,9 @@ object Container {
 object Probes {
 
   case class HTTPGet(
-      port: Int,
-      path: String,
-      scheme: String //
+    port: Int,
+    path: String,
+    scheme: String //
   )
 
   object HTTPGet {
@@ -223,12 +228,12 @@ object Probes {
   }
 
   case class HttpProbe(
-      httpGet: HTTPGet,
-      initialDelaySeconds: Int,
-      timeoutSeconds: Int,
-      periodSeconds: Int,
-      successThreshold: Int,
-      failureThreshold: Int //
+    httpGet: HTTPGet,
+    initialDelaySeconds: Int,
+    timeoutSeconds: Int,
+    periodSeconds: Int,
+    successThreshold: Int,
+    failureThreshold: Int //
   )
 
   object HttpProbe {

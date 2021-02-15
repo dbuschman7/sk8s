@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 import me.lightspeed7.sk8s.files.VolumeFiles
 import org.scalatest.funsuite.AnyFunSuite

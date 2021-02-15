@@ -1,55 +1,23 @@
 package me.lightspeed7.sk8s.telemetry
 
+import akka.http.scaladsl.model.ContentType
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import org.lyranthe.prometheus.client.registry.RegistryMetrics
-import org.lyranthe.prometheus.client.{ Counter, Gauge, _ }
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.util.Time
 import org.joda.time.DateTime
-import org.slf4j.{ Logger, LoggerFactory }
+import org.lyranthe.prometheus.client.registry.{ProtoFormat, RegistryMetrics, TextFormat}
+import org.lyranthe.prometheus.client.{Counter, Gauge, MetricName, _}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ ExecutionContext, Future }
-
-//
-// Telemetry Types
-// ////////////////////////////////////
-sealed trait Telemetry {
-
-  implicit class Snakify(in: String) {
-    def snakify: String =
-      in.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
-
-    def snakeClassname: String = in.replaceAll("\\.", "_").toLowerCase
-  }
-
-  def getType: String // define this in sub classes
-
-  def toMetricName(name: String, appInfo: AppInfo) =
-    MetricName("sk8s_" + appInfo.appName.snakify + "_" + name.snakify.replace("-", "_"))
-}
-
-sealed trait TimerLike {
-  def time[A](f: => A): A
-
-  def time[A](f: => Future[A])(implicit ec: ExecutionContext): Future[A]
-
-  def update(latencyInSeconds: Double): Unit
-
-  def update(latencyInMillis: Long): Unit
-
-  def update(latency: Duration): Unit
-
-  def deltaFrom(startTime: DateTime): Long
-
-  def deltaFrom(startTimeMillis: Long): Long
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class BasicGauge(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
-  val gauge: LabelledGauge = Gauge(toMetricName(name, appInfo), name)
+
+  val gauge: LabelledGauge = Gauge(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
     .labelValues(appInfo.version, getType)
@@ -70,7 +38,8 @@ final case class BasicGauge(name: String, appInfo: AppInfo)(implicit reg: Regist
 }
 
 final case class BasicCounter(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
-  val counter: LabelledCounter = Counter(toMetricName(name, appInfo), name)
+
+  val counter: LabelledCounter = Counter(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
     .labelValues(appInfo.version, getType)
@@ -83,8 +52,11 @@ final case class BasicCounter(name: String, appInfo: AppInfo)(implicit reg: Regi
 
 }
 
-final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Registry, buckets: HistogramBuckets) extends Telemetry with TimerLike {
-  val histo: LabelledHistogram = Histogram(toMetricName(name, appInfo), name)
+final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Registry, buckets: HistogramBuckets)
+    extends Telemetry
+    with TimerLike {
+
+  val histo: LabelledHistogram = Histogram(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
     .labelValues(appInfo.version, getType)
@@ -126,7 +98,8 @@ final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Regist
 }
 
 final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry with TimerLike {
-  val gauge: LabelledGauge = Gauge(toMetricName("timer_gauge_" + name, appInfo), name)
+
+  val gauge: LabelledGauge = Gauge(MetricName(toMetricName("timer_gauge_" + name, appInfo)), name)
     .labels(label"version", label"type")
     .register
     .labelValues(appInfo.version, getType)
@@ -169,20 +142,22 @@ final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: R
 
 }
 
-final case class PartitionTrackingGauge(name: String, topicName: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
+final case class PartitionTrackingGauge(name: String, topicName: String, appInfo: AppInfo)(implicit reg: Registry)
+    extends Telemetry {
 
   val gauge: TrieMap[Int, LabelledGauge] = TrieMap()
 
   private def createGauge(name: String, partition: Int) =
-    Gauge(toMetricName(s"${name.snakify}_$partition", appInfo), s"$name$partition")
+    Gauge(MetricName(toMetricName(s"${name.snakify}_$partition", appInfo)), s"$name$partition")
       .labels(label"version", label"type", label"partition")
       .register
       .labelValues(appInfo.version, getType, partition.toString)
 
-  def set(partition: Int, v: Long): Unit = synchronized {
-    val g = gauge.getOrElseUpdate(partition, createGauge(name, partition))
-    g.set(math.max(g.sum, v))
-  }
+  def set(partition: Int, v: Long): Unit =
+    synchronized {
+      val g = gauge.getOrElseUpdate(partition, createGauge(name, partition))
+      g.set(math.max(g.sum, v))
+    }
 
   def values: Seq[(Int, Double)] =
     gauge
@@ -214,12 +189,16 @@ object TelemetryRegistry {
 
   def counter(name: String)(implicit appInfo: AppInfo): BasicCounter = BasicCounter(name, appInfo)
 
-  def timer(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+  def timer(
+    name: String
+  )(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
     BasicTimer(name, appInfo)
 
   def timerGauge(name: String)(implicit appInfo: AppInfo) = BasicTimerGauge(name, appInfo)
 
-  def latency(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+  def latency(
+    name: String
+  )(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
     BasicTimer(name, appInfo)
 
   def partitionTracker(name: String, topicName: String)(implicit appInfo: AppInfo): PartitionTrackingGauge =
@@ -228,62 +207,74 @@ object TelemetryRegistry {
   //
   // Initialize Exception Logging
   // ////////////////////////////
-  def initializeExceptionLogging(implicit appInfo: AppInfo): Unit = EventTelemetry.initializeExceptionLogging
+  def initializeExceptionLogging(implicit appInfo: AppInfo): Unit = Events.initializeExceptionLogging
 
   //
   // Get Results
   // ////////////////////////////
-  def snapshot: scala.Iterator[RegistryMetrics] = registry.collect()
+  def rawSnapshot(protobufFormet: Boolean): Iterator[RegistryMetrics] = registry.collect()
+
+  def snapshot(protobufFormet: Boolean): (ContentType, Array[Byte]) = {
+    val data = rawSnapshot(protobufFormet)
+
+    val (ct, serialized) = if (protobufFormet) {
+      (ContentType.parse(ProtoFormat.contentType).right.get, ProtoFormat.output(data))
+    } else {
+      (ContentType.parse(TextFormat.contentType).right.get, TextFormat.output(data))
+    }
+
+    (ct, serialized)
+  }
 
   // DEBUG ONLY
   def debugOutput: String = registry.outputText
-}
 
-object EventTelemetry extends Telemetry {
+  object Events extends Telemetry {
 
-  private val counters: TrieMap[String, LabelledCounter] = new TrieMap[String, LabelledCounter].empty
+    private val counters: TrieMap[String, LabelledCounter] = new TrieMap[String, LabelledCounter].empty
 
-  def markEvent(eventName: String, tuple: (String, String))(implicit appInfo: AppInfo): Unit = {
+    def markEvent(eventName: String, tuple: (String, String))(implicit appInfo: AppInfo): Unit = {
 
-    def genKey(): String = eventName.snakeClassname
+      def genKey(): String = eventName.snakeClassname
 
-    def createCounter(): LabelledCounter =
-      Counter(toMetricName(genKey(), appInfo), eventName)
-        .labels(label"version", label"type", label"event", LabelName(tuple._1))
-        .register(TelemetryRegistry.registry)
-        .labelValues(appInfo.version, getType, "mark", tuple._2)
-
-    counters.getOrElse(genKey(), createCounter()).inc()
-  }
-
-  def initializeExceptionLogging(implicit app: AppInfo, registry: Registry): Unit = {
-    val appender: AppenderBase[ILoggingEvent] = new AppenderBase[ILoggingEvent] {
-
-      def genKey(element: StackTraceElement): String = element.getClassName.snakeClassname
-
-      def createCounter(element: StackTraceElement, event: ILoggingEvent): LabelledCounter =
-        Counter(MetricName(genKey(element)), element.getClassName)
-          .labels(label"version", label"exception", label"line_number", label"type", label"event")
+      def createCounter(): LabelledCounter =
+        Counter(MetricName(toMetricName(genKey(), appInfo)), eventName)
+          .labels(label"version", label"type", label"event", LabelName(tuple._1))
           .register
-          .labelValues(app.version, event.getThrowableProxy.getClassName, element.getLineNumber.toString, getType, "exception")
+          .labelValues(appInfo.version, getType, "mark", tuple._2)
 
-      override def append(event: ILoggingEvent): Unit =
-        event.getCallerData
-          .find(_.getClassName.contains("me.lightspeed7.sk8s"))
-          .foreach { element =>
-            counters.getOrElse(genKey(element), createCounter(element, event)).inc()
-          }
+      counters.getOrElse(genKey(), createCounter()).inc()
     }
 
-    appender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
-    appender.start()
+    def initializeExceptionLogging(implicit app: AppInfo, registry: Registry): Unit = {
+      val appender: AppenderBase[ILoggingEvent] = new AppenderBase[ILoggingEvent] {
 
-    LoggerFactory
-      .getLogger(Logger.ROOT_LOGGER_NAME)
-      .asInstanceOf[ch.qos.logback.classic.Logger]
-      .addAppender(appender)
+        def genKey(element: StackTraceElement): String = element.getClassName.snakeClassname
+
+        def createCounter(element: StackTraceElement, event: ILoggingEvent): LabelledCounter =
+          Counter(MetricName(genKey(element)), element.getClassName)
+            .labels(label"version", label"exception", label"line_number", label"type", label"event")
+            .register
+            .labelValues(app.version, event.getThrowableProxy.getClassName, element.getLineNumber.toString, getType, "exception")
+
+        override def append(event: ILoggingEvent): Unit =
+          event.getCallerData
+            .find(_.getClassName.contains("me.lightspeed7.sk8s"))
+            .foreach { element =>
+              counters.getOrElse(genKey(element), createCounter(element, event)).inc()
+            }
+      }
+
+      appender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
+      appender.start()
+
+      LoggerFactory
+        .getLogger(Logger.ROOT_LOGGER_NAME)
+        .asInstanceOf[ch.qos.logback.classic.Logger]
+        .addAppender(appender)
+    }
+
+    override def getType: String = "counter"
+
   }
-
-  override def getType: String = "counter"
-
 }

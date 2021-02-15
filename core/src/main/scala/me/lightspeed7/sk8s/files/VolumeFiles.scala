@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s.files
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 //
 //  Mounted Files

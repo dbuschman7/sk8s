@@ -1,23 +1,24 @@
 package me.lightspeed7.sk8s.logging
-import com.typesafe.scalalogging.{ Logger => Underlying }
+
+import com.typesafe.scalalogging.{Logger => Underlying}
 import org.slf4j.Marker
-import play.api.libs.json.{ JsValue, Writes }
+import play.api.libs.json.{JsValue, Writes}
 
 import scala.reflect.ClassTag
 
 /**
- * Defines `logger` as a lazy value initialized with an underlying `org.slf4j.Logger`
- * named according to the class into which this trait is mixed.
- */
+  * Defines `logger` as a lazy value initialized with an underlying `org.slf4j.Logger`
+  * named according to the class into which this trait is mixed.
+  */
 trait LazyJsonLogging {
 
   protected lazy val logger: Logger = Logger.apply(getClass.getName)
 }
 
 /**
- * Defines `logger` as a value initialized with an underlying `org.slf4j.Logger`
- * named according to the class into which this trait is mixed.
- */
+  * Defines `logger` as a value initialized with an underlying `org.slf4j.Logger`
+  * named according to the class into which this trait is mixed.
+  */
 trait StrictJsonLogging {
 
   protected val logger: Logger = Logger.apply(getClass.getName)
@@ -27,32 +28,32 @@ trait StrictJsonLogging {
 object Logger {
 
   /**
-   * Create a [[Logger]] wrapping the given underlying `org.slf4j.Logger`.
-   */
+    * Create a [[Logger]] wrapping the given underlying `org.slf4j.Logger`.
+    */
   def apply(underlying: Underlying): Logger = new Logger(underlying)
 
   /**
-   * Create a [[Logger]] for the given name.
-   * Example:
-   * {{{
-   *   val logger = Logger("application")
-   * }}}
-   */
+    * Create a [[Logger]] for the given name.
+    * Example:
+    * {{{
+    *   val logger = Logger("application")
+    * }}}
+    */
   def apply(name: String): Logger = new Logger(Underlying(name))
 
   /**
-   * Create a [[Logger]] wrapping the created underlying `org.slf4j.Logger`.
-   */
+    * Create a [[Logger]] wrapping the created underlying `org.slf4j.Logger`.
+    */
   def apply(clazz: Class[_]): Logger = new Logger(Underlying(clazz.getName))
 
   /**
-   * Create a [[Logger]] for the runtime class wrapped by the implicit class
-   * tag parameter.
-   * Example:
-   * {{{
-   *   val logger = Logger[MyClass]
-   * }}}
-   */
+    * Create a [[Logger]] for the runtime class wrapped by the implicit class
+    * tag parameter.
+    * Example:
+    * {{{
+    *   val logger = Logger[MyClass]
+    * }}}
+    */
   def apply[T](implicit ct: ClassTag[T]): Logger = new Logger(Underlying(ct.runtimeClass.getName.stripSuffix("$")))
 
 }
@@ -79,45 +80,55 @@ final class Logger private (val underlying: Underlying) extends Serializable {
     //
     // JsValue methods
     // ////////////////////////
-    def error(json: => JsValue): Unit = if (underlying.underlying.isErrorEnabled) {
-      underlying.error(json.toString)
-    }
+    def error(json: => JsValue): Unit =
+      if (underlying.underlying.isErrorEnabled) {
+        underlying.error(json.toString)
+      }
 
-    def error(json: => JsValue, message: => String): Unit = if (underlying.underlying.isErrorEnabled) {
-      underlying.error(message + " " + json.toString)
-    }
+    def error(json: => JsValue, message: => String): Unit =
+      if (underlying.underlying.isErrorEnabled) {
+        underlying.error(message + " " + json.toString)
+      }
 
-    def warn(json: => JsValue): Unit = if (underlying.underlying.isWarnEnabled()) {
-      underlying.warn(json.toString)
-    }
+    def warn(json: => JsValue): Unit =
+      if (underlying.underlying.isWarnEnabled()) {
+        underlying.warn(json.toString)
+      }
 
-    def warn(json: => JsValue, message: => String): Unit = if (underlying.underlying.isWarnEnabled()) {
-      underlying.warn(message + " " + json.toString)
-    }
+    def warn(json: => JsValue, message: => String): Unit =
+      if (underlying.underlying.isWarnEnabled()) {
+        underlying.warn(message + " " + json.toString)
+      }
 
-    def info(json: => JsValue): Unit = if (underlying.underlying.isInfoEnabled()) {
-      underlying.info(json.toString)
-    }
+    def info(json: => JsValue): Unit =
+      if (underlying.underlying.isInfoEnabled()) {
+        underlying.info(json.toString)
+      }
 
-    def info(json: => JsValue, message: => String): Unit = if (underlying.underlying.isInfoEnabled()) {
-      underlying.info(message + " " + json.toString)
-    }
+    def info(json: => JsValue, message: => String): Unit =
+      if (underlying.underlying.isInfoEnabled()) {
+        underlying.info(message + " " + json.toString)
+      }
 
-    def debug(json: => JsValue): Unit = if (underlying.underlying.isDebugEnabled()) {
-      underlying.debug(json.toString)
-    }
+    def debug(json: => JsValue): Unit =
+      if (underlying.underlying.isDebugEnabled()) {
+        underlying.debug(json.toString)
+      }
 
-    def debug(json: => JsValue, message: => String): Unit = if (underlying.underlying.isDebugEnabled()) {
-      underlying.debug(message + " " + json.toString)
-    }
+    def debug(json: => JsValue, message: => String): Unit =
+      if (underlying.underlying.isDebugEnabled()) {
+        underlying.debug(message + " " + json.toString)
+      }
 
-    def trace(json: => JsValue): Unit = if (underlying.underlying.isTraceEnabled()) {
-      underlying.trace(json.toString)
-    }
+    def trace(json: => JsValue): Unit =
+      if (underlying.underlying.isTraceEnabled()) {
+        underlying.trace(json.toString)
+      }
 
-    def trace(json: => JsValue, message: => String): Unit = if (underlying.underlying.isTraceEnabled()) {
-      underlying.trace(message + " " + json.toString)
-    }
+    def trace(json: => JsValue, message: => String): Unit =
+      if (underlying.underlying.isTraceEnabled()) {
+        underlying.trace(message + " " + json.toString)
+      }
 
   }
 

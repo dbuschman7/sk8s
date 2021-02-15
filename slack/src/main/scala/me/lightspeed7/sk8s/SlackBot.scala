@@ -3,12 +3,14 @@ package me.lightspeed7.sk8s
 import com.typesafe.scalalogging.LazyLogging
 import skuber.ConfigMap
 import slack.SlackUtil
-import slack.models.{ ChannelDeleted, FileShared, Message, UserTyping }
+import slack.models.{ChannelDeleted, FileShared, Message, UserTyping}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class MessageResponse(channelName: String, ts: String, bot: SlackBot) {
-  def update(newMsg: String)(implicit ec: ExecutionContext): Future[MessageResponse] = bot.updateMessage(this, newMsg).map(_ => this)
+
+  def update(newMsg: String)(implicit ec: ExecutionContext): Future[MessageResponse] =
+    bot.updateMessage(this, newMsg).map(_ => this)
 }
 
 final case class SlackContext(bot: SlackBot, kubernetes: Kubernetes, appCtx: Sk8sContext)
@@ -34,7 +36,9 @@ final case class SlackBot(token: String, channelName: String)(handler: Message =
     if (mentionedIds.contains(client.selfId.id)) {
       val channelMatch: Boolean = message.channel == chanId
       if (!channelMatch) {
-        client.sendMessage(message.channel, s"I am sorry <@${message.user}>, I am afraid that I cannot do that !") // Think Stanley Kubrick's 2001
+        client.sendMessage(message.channel,
+                           s"I am sorry <@${message.user}>, I am afraid that I cannot do that !"
+        ) // Think Stanley Kubrick's 2001
       } else {
         handler(message) // process the message
       }
