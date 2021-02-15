@@ -31,6 +31,7 @@ lazy val global = project
   .disablePlugins(AssemblyPlugin)
   .aggregate(
     core,
+    backend,
     play,
     kubernetes,
     mongo,
