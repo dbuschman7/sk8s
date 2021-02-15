@@ -1,12 +1,12 @@
 package me.lightspeed7.sk8s.manifests
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 case class Service(
-    kind: String = "Service",
-    apiVersion: String = "v1",
-    metadata: Common.Metadata,
-    spec: Service.Spec //
+  kind: String = "Service",
+  apiVersion: String = "v1",
+  metadata: Common.Metadata,
+  spec: Service.Spec //
 )
 
 object Service {
@@ -32,10 +32,10 @@ object Service {
   implicit val __json: OFormat[Service] = Json.format[Service]
 
   def labelSelector(
-      name: String,
-      namespace: Option[String],
-      port: Int,
-      portName: String //
+    name: String,
+    namespace: Option[String],
+    port: Int,
+    portName: String //
   ): Service = {
 
     val meta: Common.Metadata = Common.Metadata(name, namespace, Some(Map[String, String]("app" -> name)), None)

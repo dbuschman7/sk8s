@@ -19,12 +19,15 @@ class AutoCloseTest extends AnyFunSuite with Matchers {
   test("Test multi-line for comprehension") {
     var codeCalled: Boolean = false
 
-    val (aR, bR, cR) = for (a <- AutoClose(new DemoCloseable("a123"));
-                            b <- AutoClose(new DemoCloseable("b123"));
-                            c <- AutoClose(new DemoCloseable("c123"))) yield {
-      codeCalled = true
-      (a, b, c)
-    }
+    val (aR, bR, cR) =
+      for (
+        a <- AutoClose(new DemoCloseable("a123"));
+        b <- AutoClose(new DemoCloseable("b123"));
+        c <- AutoClose(new DemoCloseable("c123"))
+      ) yield {
+        codeCalled = true
+        (a, b, c)
+      }
 
     codeCalled should be(true)
     aR.closed should be(true)

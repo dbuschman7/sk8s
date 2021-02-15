@@ -1,13 +1,13 @@
 package me.lightspeed7.sk8s.server
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Cancellable, Props }
+import akka.actor.{Actor, ActorRef, ActorSystem, Cancellable, Props}
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.logging.LazyJsonLogging
 import me.lightspeed7.sk8s.util.PrettyPrint
-import play.api.libs.json.{ JsObject, Json }
+import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ ExecutionContext, ExecutionContextExecutor }
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: FiniteDuration) extends Actor with LazyJsonLogging {
 
@@ -33,7 +33,9 @@ class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: Fin
 
   def registerCancelable(delay: FiniteDuration, interval: FiniteDuration, token: Any)(implicit ec: ExecutionContext): Unit = {
     val cronTokenName = token.getClass.getName
-    logger.info(s"Starting Memory Cron -> Delay = ${delay.toString} Interval = ${interval.toString} with token of type $cronTokenName")
+    logger.info(
+      s"Starting Memory Cron -> Delay = ${delay.toString} Interval = ${interval.toString} with token of type $cronTokenName"
+    )
     cancellable = this.context.system.scheduler.schedule(delay, interval, self, token)
   }
 

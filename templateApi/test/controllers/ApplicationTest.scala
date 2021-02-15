@@ -1,11 +1,11 @@
 package controllers
 
-import me.lightspeed7.sk8s.auth.{ AuthContext, CookieHandling, Role, RolesRegistry }
+import me.lightspeed7.sk8s.auth.{AuthContext, CookieHandling, Role, RolesRegistry}
 import me.lightspeed7.sk8s.backend.BackgroundTasks
-import me.lightspeed7.sk8s.{ EnvironmentSource, PlayServerFunSuite, Sources }
+import me.lightspeed7.sk8s.{EnvironmentSource, PlayServerFunSuite, Sources}
 import org.scalatest.matchers.must.Matchers
-import play.api.mvc.{ Cookie, Result }
-import play.api.test.{ FakeRequest, Helpers }
+import play.api.mvc.{Cookie, Result}
+import play.api.test.{FakeRequest, Helpers}
 
 import scala.concurrent.Future
 

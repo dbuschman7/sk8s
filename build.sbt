@@ -198,10 +198,10 @@ lazy val dependencies =
   new {
     val akkaV               = "2.5.31"
     val akkaHttpV           = "10.1.10"
-    val ammoniteOpsVer      = "2.1.4"
+    val ammoniteOpsVer      = "2.3.8"
     val logbackV            = "1.2.3"
     val mongodbScalaVersion = "2.9.0"
-    val playV               = "2.7.7"
+    val playV               = "2.7.9"
     val playJsonV           = "2.7.4"
     val sttpV               = "1.7.2"
     val scalaLoggingV       = "3.9.2"
@@ -300,9 +300,7 @@ lazy val commonSettings = Seq(
 
 lazy val scalafmtSettings =
   Seq(
-    scalafmtOnCompile := true,
-    scalafmtTestOnCompile := true,
-    scalafmtVersion := "1.2.0"
+    scalafmtOnCompile := true
   )
 
 lazy val assemblySettings = Seq(

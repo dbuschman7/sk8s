@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s.telemetry
 
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 
 import me.lightspeed7.sk8s.AppInfo
 import org.scalatest.funsuite.AnyFunSuite
@@ -19,23 +19,23 @@ class PartitionTrackingGaugeTest extends AnyFunSuite with Matchers {
     g.asString should be("""{"my-topic": []}""")
 
     g.set(1, 1001)
-    g.values should be(Seq(1 -> 1001D))
+    g.values should be(Seq(1 -> 1001d))
     g.asString should be("""{"my-topic": [{1: 1001}]}""")
 
     g.set(20, 10)
-    g.values should be(Seq(1 -> 1001D, 20 -> 10D))
+    g.values should be(Seq(1 -> 1001d, 20 -> 10d))
     g.asString should be("""{"my-topic": [{1: 1001}, {20: 10}]}""")
 
     g.set(3, 900)
-    g.values should be(Seq(1 -> 1001D, 3 -> 900D, 20 -> 10D))
+    g.values should be(Seq(1 -> 1001d, 3 -> 900d, 20 -> 10d))
     g.asString should be("""{"my-topic": [{1: 1001}, {3: 900}, {20: 10}]}""")
 
     g.set(1, 900)
-    g.values should be(Seq(1 -> 1001D, 3 -> 900D, 20 -> 10D))
+    g.values should be(Seq(1 -> 1001d, 3 -> 900d, 20 -> 10d))
     g.asString should be("""{"my-topic": [{1: 1001}, {3: 900}, {20: 10}]}""")
 
     g.set(1, 9000)
-    g.values should be(Seq(1 -> 9000D, 3 -> 900D, 20 -> 10D))
+    g.values should be(Seq(1 -> 9000d, 3 -> 900d, 20 -> 10d))
     g.asString should be("""{"my-topic": [{1: 9000}, {3: 900}, {20: 10}]}""")
 
     g.reset()
@@ -43,7 +43,7 @@ class PartitionTrackingGaugeTest extends AnyFunSuite with Matchers {
     g.asString should be("""{"my-topic": []}""")
 
     g.set(1, 9001)
-    g.values should be(Seq(1 -> 9001D))
+    g.values should be(Seq(1 -> 9001d))
     g.asString should be("""{"my-topic": [{1: 9001}]}""")
   }
 }

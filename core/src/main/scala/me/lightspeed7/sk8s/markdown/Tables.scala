@@ -55,7 +55,7 @@ final case class PreFormattedBuild[T](title: String, columns: Seq[ColumnData[T]]
 final case class CsvTable[T](columns: Seq[ColumnData[T]] = Seq()) {
 
   def column(label: String)(
-      value: T => String
+    value: T => String
   ): CsvTable[T] =
     this.copy(columns = columns :+ ColumnData(label, rightJustified = false, value))
 

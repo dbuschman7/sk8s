@@ -14,6 +14,7 @@ object CacheConfig {
 }
 
 object TTLCache {
+
   def apply[K, V](config: CacheConfig)(implicit akka: ActorSystem): TTLCache[K, V] =
     apply(config.cacheTtl, config.reaper)
 

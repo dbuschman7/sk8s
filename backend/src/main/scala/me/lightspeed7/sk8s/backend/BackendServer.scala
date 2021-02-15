@@ -10,7 +10,7 @@ import me.lightspeed7.sk8s.server.JsonConfig
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999)(implicit ctx: Sk8sContext) extends LazyLogging {
 
@@ -44,13 +44,14 @@ class BackendServer(ipAddress: String = "0.0.0.0", port: Int = 8999)(implicit ct
   def configRoute: Route =
     path("config") {
       (get & extract(_.request.headers)) { requestHeaders =>
-        val accepts: String = requestHeaders.find(h => h.is("accept")).map(_.value().toLowerCase()).getOrElse("application/json").trim
+        val accepts: String =
+          requestHeaders.find(h => h.is("accept")).map(_.value().toLowerCase()).getOrElse("application/json").trim
         if (accepts == "text/plain") {
           val asText = {
             val buf = new StringBuilder("\n")
-            Variables.dumpConfiguration({ in: String =>
+            Variables.dumpConfiguration { in: String =>
               buf.append(in).append("\n")
-            })
+            }
             buf.toString()
           }
           complete(StatusCodes.OK -> asText) // respond with text

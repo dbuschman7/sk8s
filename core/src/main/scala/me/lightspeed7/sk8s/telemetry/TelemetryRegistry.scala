@@ -4,7 +4,7 @@ import me.lightspeed7.sk8s.AppInfo
 import org.joda.time.DateTime
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 //
 // Telemetry Types
@@ -12,6 +12,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait Telemetry {
 
   implicit class Snakify(in: String) {
+
     def snakify: String =
       in.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
 

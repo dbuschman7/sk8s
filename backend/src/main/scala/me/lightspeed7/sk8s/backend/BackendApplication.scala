@@ -3,8 +3,8 @@ package me.lightspeed7.sk8s.backend
 import akka.actor.Props
 import ch.qos.logback.classic.LoggerContext
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.actors.{ SK8SBus, Sk8sBusActor }
-import me.lightspeed7.sk8s.{ AppInfo, RunMode, Sk8s, Sk8sContext }
+import me.lightspeed7.sk8s.actors.{SK8SBus, Sk8sBusActor}
+import me.lightspeed7.sk8s.{AppInfo, RunMode, Sk8s, Sk8sContext}
 import org.slf4j.LoggerFactory
 
 final case class BackendApplication(info: AppInfo) extends LazyLogging with AutoCloseable {
@@ -47,6 +47,7 @@ final case class BackendApplication(info: AppInfo) extends LazyLogging with Auto
   }
 
   class ShutdownActor extends Sk8sBusActor(BackendApplication.channel) {
+
     def receive: Receive = {
       case None =>
         logger.info("Shutdown received with code - 0")

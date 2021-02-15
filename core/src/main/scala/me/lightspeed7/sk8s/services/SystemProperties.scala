@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.services
 
 import me.lightspeed7.sk8s.AppInfo
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 object SystemProperties {
 

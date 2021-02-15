@@ -1,16 +1,16 @@
 package me.lightspeed7.sk8s
 
 import java.io.File
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ActorRef, ActorSystem}
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.files.{ Sk8sFileIO, VolumeFiles }
+import me.lightspeed7.sk8s.files.{Sk8sFileIO, VolumeFiles}
 import me.lightspeed7.sk8s.http.RestQuery
-import me.lightspeed7.sk8s.server.{ HealthStatusSummary, MemoryCronActor }
+import me.lightspeed7.sk8s.server.{HealthStatusSummary, MemoryCronActor}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object Sk8s {
 
@@ -90,6 +90,7 @@ object Sk8s {
   }
 
   object MemoryCron {
+
     def startup(app: AppInfo, interval: Duration = 30 seconds)(implicit akka: ActorSystem): ActorRef =
       MemoryCronActor.startup(app, interval)
   }

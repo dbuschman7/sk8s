@@ -47,8 +47,8 @@ object AlphaId {
   def fromString(in: String): AlphaId = AlphaId(in.filter(allLetters.contains))
 
   /**
-   * Alpha numeric id with no alpha in the first position
-   */
+    * Alpha numeric id with no alpha in the first position
+    */
   def randomAlphaWithNumerics(length: Int = defaultLength): AlphaId = {
     require(length >= 1)
     AlphaId(randomStringFromCharList(1, allLetters) ++ randomStringFromCharList(length - 1, allLetters ++ numericLetters))

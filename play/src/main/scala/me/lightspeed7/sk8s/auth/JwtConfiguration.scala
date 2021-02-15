@@ -5,10 +5,10 @@ import java.time.Clock
 import akka.http.scaladsl.model.DateTime
 import com.typesafe.scalalogging.LazyLogging
 import pdi.jwt.algorithms.JwtHmacAlgorithm
-import pdi.jwt.{ JwtClaim, JwtJson }
-import play.api.libs.json.{ JsError, JsResult, JsSuccess }
+import pdi.jwt.{JwtClaim, JwtJson}
+import play.api.libs.json.{JsError, JsResult, JsSuccess}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 case class JwtResponse[TOKEN](claim: JwtClaim, token: TOKEN)
 
@@ -59,10 +59,10 @@ trait JwtConfigBase[TOKEN] extends LazyLogging {
 
   def pickOne: JwtHmacAlgorithm = algorithms(scala.util.Random.nextInt(algorithms.size))
 
-  protected def fullEncode(json: String, //
+  protected def fullEncode(json: String,                        //
                            expireTime: Option[DateTime] = None, //
-                           issuer: String = validIssuer, //
-                           audience: String = validAudience //
+                           issuer: String = validIssuer,        //
+                           audience: String = validAudience     //
   ): String = {
 
     val expiresInSecs: Long = expireTime match {

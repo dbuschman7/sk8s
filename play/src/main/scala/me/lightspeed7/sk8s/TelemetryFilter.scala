@@ -1,14 +1,14 @@
 package me.lightspeed7.sk8s
 
 import akka.actor.ActorSystem
-import akka.stream.{ Materializer, SystemMaterializer }
+import akka.stream.{Materializer, SystemMaterializer}
 import com.google.inject.Inject
-import me.lightspeed7.sk8s.telemetry.{ BasicCounter, TelemetryRegistry }
-import play.api.mvc.{ Filter, RequestHeader, Result }
+import me.lightspeed7.sk8s.telemetry.{BasicCounter, TelemetryRegistry}
+import play.api.mvc.{Filter, RequestHeader, Result}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
-class TelemetryFilter @Inject()(implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter {
+class TelemetryFilter @Inject() (implicit val akka: ActorSystem, appInfo: AppInfo) extends Filter {
 
   implicit val mat: Materializer    = SystemMaterializer(akka).materializer
   implicit val ex: ExecutionContext = akka.dispatcher

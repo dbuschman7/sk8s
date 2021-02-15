@@ -1,14 +1,14 @@
 package controllers
 
 import akka.http.scaladsl.model.DateTime
-import com.google.inject.{ Provider, Provides }
+import com.google.inject.{Provider, Provides}
 import javax.inject.Inject
-import me.lightspeed7.sk8s.auth.{ AuthContext, JwtConfigBase, JwtResponse, Role }
+import me.lightspeed7.sk8s.auth.{AuthContext, JwtConfigBase, JwtResponse, Role}
 import me.lightspeed7.sk8s.json.JsonImplicits
 import me.lightspeed7.sk8s._
 import pdi.jwt.algorithms.JwtHmacAlgorithm
-import pdi.jwt.{ JwtAlgorithm, JwtJsonImplicits }
-import play.api.libs.json.{ JsResult, Json, OFormat }
+import pdi.jwt.{JwtAlgorithm, JwtJsonImplicits}
+import play.api.libs.json.{JsResult, Json, OFormat}
 
 import scala.util.Try
 
@@ -26,7 +26,8 @@ class JwtConfiguration extends JwtConfigBase[JwtToken] with JwtJsonImplicits {
 
   override def domain(implicit ctx: AuthContext[JwtToken]): String = "foo.bar.com"
 
-  override def anonymous(implicit ctx: AuthContext[JwtToken]): JwtToken = JwtToken(JwtUser("anonymous", "anon@bar.com", "Foo", "Bar", None))
+  override def anonymous(implicit ctx: AuthContext[JwtToken]): JwtToken =
+    JwtToken(JwtUser("anonymous", "anon@bar.com", "Foo", "Bar", None))
 
   override def customRoleAuth(token: JwtToken, knowRoles: Set[Role]): Boolean = {
     val allowedSet: Set[String] = knowRoles.map(_.name)
@@ -82,7 +83,7 @@ class JwtConfiguration extends JwtConfigBase[JwtToken] with JwtJsonImplicits {
 
 }
 
-class AuthContextProvider @Inject()(appCtx: Sk8sContext) extends Provider[AuthContext[JwtToken]] {
+class AuthContextProvider @Inject() (appCtx: Sk8sContext) extends Provider[AuthContext[JwtToken]] {
 
   @Provides
   def get: AuthContext[JwtToken] =

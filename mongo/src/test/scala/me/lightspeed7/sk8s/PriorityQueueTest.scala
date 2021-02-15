@@ -1,13 +1,13 @@
 package me.lightspeed7.sk8s
 
-import java.time.{ OffsetDateTime, ZoneOffset }
+import java.time.{OffsetDateTime, ZoneOffset}
 
-import me.lightspeed7.sk8s.mongo.{ MongoContext, PriorityQueue, QueueItem }
-import org.bson.codecs.configuration.{ CodecProvider, CodecRegistry }
+import me.lightspeed7.sk8s.mongo.{MongoContext, PriorityQueue, QueueItem}
+import org.bson.codecs.configuration.{CodecProvider, CodecRegistry}
 import org.mongodb.scala.bson.codecs.Macros
 import org.scalatest.matchers.must.Matchers
-import os.{ Path, RelPath }
-import play.api.libs.json.{ Json, OFormat }
+import os.{Path, RelPath}
+import play.api.libs.json.{Json, OFormat}
 
 class PriorityQueueTest extends Sk8sFunSuite with Matchers {
 
@@ -72,8 +72,8 @@ final case class WorkItem private[sk8s] (_id: String,
                                          errors: Seq[String] = Seq(),
                                          override val createdOn: OffsetDateTime,
                                          override val startedOn: Option[OffsetDateTime],
-                                         override val completedOn: Option[OffsetDateTime])
-    extends QueueItem {}
+                                         override val completedOn: Option[OffsetDateTime]
+) extends QueueItem {}
 
 object WorkItem extends JsonImplicitsAmmonite {
   implicit val _json: OFormat[WorkItem] = Json.format[WorkItem]

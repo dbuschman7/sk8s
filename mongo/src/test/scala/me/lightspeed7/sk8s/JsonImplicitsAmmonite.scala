@@ -2,7 +2,7 @@ package me.lightspeed7.sk8s
 
 import me.lightspeed7.sk8s.json.JsonImplicits
 import os.RelPath
-import play.api.libs.json.{ Format, JsError, JsString, JsSuccess, Reads, Writes }
+import play.api.libs.json.{Format, JsError, JsString, JsSuccess, Reads, Writes}
 
 trait JsonImplicitsAmmonite extends JsonImplicits {
 

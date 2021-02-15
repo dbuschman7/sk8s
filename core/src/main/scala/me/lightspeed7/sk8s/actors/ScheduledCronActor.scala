@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s.actors
 
-import akka.actor.{ Actor, Cancellable }
+import akka.actor.{Actor, Cancellable}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext
@@ -17,7 +17,9 @@ trait ScheduledCronActor extends Actor with LazyLogging {
 
   def registerCancelable(delay: FiniteDuration, interval: FiniteDuration, token: Any)(implicit ec: ExecutionContext): Unit = {
     cronTokenName = token.getClass.getName
-    logger.info(s"$actorClassName Starting Scheduler -> Delay = ${delay.toString} Interval = ${interval.toString} with token of type $cronTokenName")
+    logger.info(
+      s"$actorClassName Starting Scheduler -> Delay = ${delay.toString} Interval = ${interval.toString} with token of type $cronTokenName"
+    )
     cancellable = this.context.system.scheduler.schedule(delay, interval, self, token)
   }
 

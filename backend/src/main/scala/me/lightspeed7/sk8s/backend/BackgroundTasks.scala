@@ -5,7 +5,7 @@ import me.lightspeed7.sk8s.Sk8s.HealthStatus
 import me.lightspeed7.sk8s._
 
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
 
@@ -64,11 +64,12 @@ object BackgroundTasks {
 
   var singleton: Option[BackgroundTasks] = None
 
-  def standup(implicit ctx: Sk8sContext): BackgroundTasks = synchronized {
-    if (singleton.isEmpty) {
-      val bTasks = new BackgroundTasks()
-      singleton = Some(bTasks)
+  def standup(implicit ctx: Sk8sContext): BackgroundTasks =
+    synchronized {
+      if (singleton.isEmpty) {
+        val bTasks = new BackgroundTasks()
+        singleton = Some(bTasks)
+      }
+      singleton.get
     }
-    singleton.get
-  }
 }

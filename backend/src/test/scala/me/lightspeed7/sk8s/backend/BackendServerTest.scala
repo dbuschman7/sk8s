@@ -1,13 +1,13 @@
 package me.lightspeed7.sk8s.backend
 
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 
 import me.lightspeed7.sk8s._
 import me.lightspeed7.sk8s.server.HealthStatus
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{JsValue, Json}
 
 class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers {
 

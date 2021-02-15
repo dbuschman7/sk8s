@@ -1,8 +1,8 @@
 package me.lightspeed7.sk8s.server
 
-import me.lightspeed7.sk8s.{ RunMode, Sk8sContext, Variables }
+import me.lightspeed7.sk8s.{RunMode, Sk8sContext, Variables}
 import me.lightspeed7.sk8s.services.SystemProperties
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{JsValue, Json}
 
 object JsonConfig {
 
@@ -34,9 +34,9 @@ object JsonConfig {
     //
     // variables
     // /////////////////////
-    Variables.dumpJson({ in: String =>
+    Variables.dumpJson { in: String =>
       buf.append(in).append("\n")
-    })(ctx.appInfo)
+    }(ctx.appInfo)
 
     buf.append(s"""}""")
 

@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s.services
 
-import java.time.{ LocalDateTime, ZoneOffset, ZonedDateTime }
+import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
 
 import me.lightspeed7.sk8s.AppInfo
 import play.api.libs.json.Json

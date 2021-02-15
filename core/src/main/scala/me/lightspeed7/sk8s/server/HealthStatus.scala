@@ -2,11 +2,12 @@ package me.lightspeed7.sk8s.server
 
 import java.util.concurrent.atomic.AtomicReference
 
-import play.api.libs.json.{ JsObject, Json }
+import play.api.libs.json.{JsObject, Json}
 
 object HealthStatus {
 
-  private[server] val currentHealth = new AtomicReference[HealthStatusSummary](HealthStatusSummary()) // holds the current health state
+  private[server] val currentHealth =
+    new AtomicReference[HealthStatusSummary](HealthStatusSummary()) // holds the current health state
 
   private[sk8s] def isHealthy: Boolean = currentHealth.get().overall
 
@@ -33,7 +34,8 @@ final case class HealthStatus(name: String, healthy: Boolean, value: Option[Doub
 final case class HealthStatusSummary(states: Map[String, HealthStatus] = Map()) {
   def overall: Boolean = states.values.forall(_.healthy)
 
-  def toJson: JsObject = states.values.foldLeft(Json.obj("sk8s" -> "health", "overall_health" -> overall)) {
-    case (acc, cur) => acc ++ cur.toJson
-  }
+  def toJson: JsObject =
+    states.values.foldLeft(Json.obj("sk8s" -> "health", "overall_health" -> overall)) {
+      case (acc, cur) => acc ++ cur.toJson
+    }
 }

@@ -1,19 +1,21 @@
 package me.lightspeed7.sk8s.manifests
 
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.{ Endpoints, Sk8s }
+import me.lightspeed7.sk8s.{Endpoints, Sk8s}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class K8sServiceDefinition(k8sService: String, k8sNamespace: String) {
+
   def endPoints(implicit ec: ExecutionContext): Future[Option[Endpoints]] =
     Sk8s.serviceAccount().endpoints(k8sService, k8sNamespace)
 
   def k8sServiceDnsName(portStr: String): String = s"$k8sService.$k8sNamespace.svc.cluster.local$portStr"
 }
 
-abstract class DataService(val name: String, val port: Int, includePort: Boolean = true)(val k8sServices: List[K8sServiceDefinition])
-    extends LazyLogging {
+abstract class DataService(val name: String, val port: Int, includePort: Boolean = true)(
+  val k8sServices: List[K8sServiceDefinition]
+) extends LazyLogging {
 
   def portStr: String = if (includePort) ":" + port.toString else ""
 
@@ -29,7 +31,9 @@ abstract class DataService(val name: String, val port: Int, includePort: Boolean
     lookup(toString)
   }
 
-  private def lookup(func: Endpoints => Set[String])(implicit executionContext: ExecutionContext): Future[(String, Set[String])] = {
+  private def lookup(
+    func: Endpoints => Set[String]
+  )(implicit executionContext: ExecutionContext): Future[(String, Set[String])] = {
 
     def find(defs: List[K8sServiceDefinition]): Future[Option[Endpoints]] = {
       logger.debug("dnsHosts.find - " + defs)

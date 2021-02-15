@@ -13,6 +13,7 @@ trait Source {
 }
 
 sealed case class EnvironmentSource() extends Source {
+
   lazy val valuesMap: TrieMap[String, String] = {
     val m = new TrieMap[String, String]()
     sys.env.map { case (k, v) => m.put(k, v) }
@@ -28,6 +29,7 @@ sealed case class EnvironmentSource() extends Source {
     logIt(s"WARNING WARNING -- Danger Will Robinson - Env Var '$key' has been cleared")
     valuesMap.remove(key)
   }
+
   def overrideVariable(key: String, value: String): Unit = {
     valuesMap.put(key, value)
     logIt(s"WARNING WARNING -- Danger Will Robinson - Env Var '$key' is now set to '$value'")
@@ -36,9 +38,11 @@ sealed case class EnvironmentSource() extends Source {
   def name(): String                      = "Env"
   def value(name: String): Option[String] = Option(name).flatMap(f => valuesMap.get(f))
 }
+
 //
 //
 object EnvironmentSource {
+
   lazy val valuesMap: TrieMap[String, String] = {
     val m = new TrieMap[String, String]()
     sys.env.map { case (k, v) => m.put(k, v) }
@@ -74,16 +78,20 @@ object EnvironmentSource {
 
 sealed case class SysPropsSource() extends Source {
   def name(): String = "SysProp"
-  def value(name: String): Option[String] = Option(name).flatMap { n =>
-    Option(System.getProperty(n))
-  }
+
+  def value(name: String): Option[String] =
+    Option(name).flatMap { n =>
+      Option(System.getProperty(n))
+    }
 }
 
 case class PropertiesSource(props: _root_.java.util.Properties) extends Source {
   def name(): String = "Props"
-  def value(name: String): Option[String] = Option(name).flatMap { n =>
-    Option(props.getProperty(n))
-  }
+
+  def value(name: String): Option[String] =
+    Option(name).flatMap { n =>
+      Option(props.getProperty(n))
+    }
 }
 
 object Sources {
@@ -96,6 +104,7 @@ object Sources {
   def getSource(name: String): Source = sources.getOrElse(name, env) // HACK for legacy system
 
   def registerSource(name: String, source: Source): Source = { sources.put(name, source); source }
+
   def registerProperties(name: String, properties: _root_.java.util.Properties): Source =
     registerSource(name, PropertiesSource(properties))
 }

@@ -2,7 +2,7 @@ package me.lightspeed7.sk8s.auth
 
 import java.time.Clock
 
-import me.lightspeed7.sk8s.{ Constant, Sk8sContext, Sources, Variable, Variables }
+import me.lightspeed7.sk8s.{Constant, Sk8sContext, Sources, Variable, Variables}
 
 import scala.concurrent.ExecutionContext
 

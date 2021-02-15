@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.auth
 
 import me.lightspeed7.sk8s.json.NamedEnumEntry
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 import scala.collection.concurrent.TrieMap
 
@@ -55,5 +55,6 @@ object RolesRegistry {
         new Role("Authenticated", Set("Anonymous"), 1, internal = true, authorized = false),
         new Role("User", Set("Anonymous"), 1, internal = false, authorized = true)
       ) //
-      : _*)
+      : _*
+    )
 }

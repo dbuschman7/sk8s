@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.files
 
 import javax.crypto.Cipher
-import javax.crypto.spec.{ IvParameterSpec, SecretKeySpec }
+import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 
 object TestCrypto {
 
@@ -11,7 +11,9 @@ object TestCrypto {
   implicit val crypto: Sk8sCrypto = new Sk8sCrypto {
 
     // Firefly theme
-    private val iv                = new IvParameterSpec("First rule of battle, little one ... don't ever let them know where you are.".substring(0, 16).getBytes)
+    private val iv = new IvParameterSpec(
+      "First rule of battle, little one ... don't ever let them know where you are.".substring(0, 16).getBytes
+    )
     private val rawAESKey: String = "Course, there're other schools of thought.".substring(0, 16)
     private val secretKey         = new SecretKeySpec(rawAESKey.getBytes, "AES")
 

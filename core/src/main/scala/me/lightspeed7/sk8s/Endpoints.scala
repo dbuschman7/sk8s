@@ -2,7 +2,7 @@ package me.lightspeed7.sk8s
 
 import java.time.LocalDateTime
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 //
 // Endpoints api domain
@@ -60,7 +60,7 @@ final case class Endpoints(kind: String, apiVersion: String, metadata: Metadata,
       .map(_.addresses)
       .map { endPts =>
         endPts
-        //          .filterNot(_.targetRef.name.contains("arbiter"))
+          //          .filterNot(_.targetRef.name.contains("arbiter"))
           .map { endP =>
             println(s"dnsHosts - $endP")
             endP.hostname orElse Option(endP.targetRef.name) match {
@@ -78,39 +78,39 @@ final case class Endpoints(kind: String, apiVersion: String, metadata: Metadata,
 }
 
 final case class Metadata(
-    name: String,
-    namespace: String,
-    selfLink: String,
-    uid: String,
-    resourceVersion: String,
-    creationTimestamp: LocalDateTime,
-    labels: Map[String, String] = Map() //
+  name: String,
+  namespace: String,
+  selfLink: String,
+  uid: String,
+  resourceVersion: String,
+  creationTimestamp: LocalDateTime,
+  labels: Map[String, String] = Map() //
 )
 
 final case class Subset(
-    addresses: Seq[EndPoint],
-    ports: Seq[Port] //
+  addresses: Seq[EndPoint],
+  ports: Seq[Port] //
 )
 
 final case class Port(
-    port: Int,
-    protocol: String,
-    name: Option[String] = None //
+  port: Int,
+  protocol: String,
+  name: Option[String] = None //
 )
 
 final case class EndPoint(
-    ip: String,
-    hostname: Option[String],
-    nodeName: String,
-    targetRef: TargetRef //
+  ip: String,
+  hostname: Option[String],
+  nodeName: String,
+  targetRef: TargetRef //
 )
 
 final case class TargetRef(
-    kind: String,
-    namespace: String,
-    name: String,
-    uid: String,
-    resourceVersion: String //
+  kind: String,
+  namespace: String,
+  name: String,
+  uid: String,
+  resourceVersion: String //
 )
 
 object EndpointJson {

@@ -2,12 +2,12 @@ package me.lightspeed7.sk8s
 
 import java.time.ZonedDateTime
 
-import com.softwaremill.sttp.{ HttpURLConnectionBackend, Id, SttpBackend }
+import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import com.typesafe.scalalogging.LazyLogging
-import me.lightspeed7.sk8s.backend.{ BackendApplication, BackendServerClient }
-import me.lightspeed7.sk8s.util.{ AlphaId, AutoClose }
+import me.lightspeed7.sk8s.backend.{BackendApplication, BackendServerClient}
+import me.lightspeed7.sk8s.util.{AlphaId, AutoClose}
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{ JsObject, Json }
+import play.api.libs.json.{JsObject, Json}
 
 class ApplicationTest extends Sk8sFunSuite with Matchers with LazyLogging {
 

@@ -1,11 +1,11 @@
 package me.lightspeed7.sk8s.actors
 
-import akka.actor.{ actorRef2Scala, ActorRef, ActorSystem, Props }
-import akka.event.{ EventBus, LookupClassification }
-import akka.pattern.{ BackoffOpts, BackoffSupervisor }
+import akka.actor.{actorRef2Scala, ActorRef, ActorSystem, Props}
+import akka.event.{EventBus, LookupClassification}
+import akka.pattern.{BackoffOpts, BackoffSupervisor}
 import me.lightspeed7.sk8s.actors.SK8SBus.BackoffMax
-import me.lightspeed7.sk8s.{ Constant, Sources, Variables }
-import org.slf4j.{ Logger, LoggerFactory }
+import me.lightspeed7.sk8s.{Constant, Sources, Variables}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 import scala.util.Try

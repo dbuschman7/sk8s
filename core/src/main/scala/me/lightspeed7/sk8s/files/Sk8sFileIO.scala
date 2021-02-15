@@ -1,18 +1,18 @@
 package me.lightspeed7.sk8s.files
 
 import java.io.File
-import java.nio.file.{ Path, Paths, StandardOpenOption }
+import java.nio.file.{Path, Paths, StandardOpenOption}
 
 import akka.stream
-import akka.stream.{ scaladsl, Materializer }
-import akka.stream.scaladsl.{ Framing, Sink }
+import akka.stream.{scaladsl, Materializer}
+import akka.stream.scaladsl.{Framing, Sink}
 import akka.util.ByteString
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.io.Source
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 //
 // File based helpers
@@ -40,7 +40,8 @@ object Sk8sFileIO extends LazyLogging {
 
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit): Unit = {
     val p = new java.io.PrintWriter(f)
-    try { op(p) } finally { p.close() }
+    try { op(p) }
+    finally { p.close() }
   }
 
   def writeContents(fullPath: Path)(data: String*): Unit =

@@ -1,9 +1,9 @@
 package me.lightspeed7.sk8s
 
 import java.time.format.DateTimeFormatter
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 
-import play.api.libs.json.{ JsResult, JsValue, Json }
+import play.api.libs.json.{JsResult, JsValue, Json}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 

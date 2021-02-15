@@ -1,7 +1,7 @@
 package me.lightspeed7.sk8s.auth
 
 import com.typesafe.scalalogging.LazyLogging
-import play.api.mvc.{ Cookie, Request }
+import play.api.mvc.{Cookie, Request}
 
 object CookieHandling extends LazyLogging {
 

@@ -1,7 +1,8 @@
 package me.lightspeed7.sk8s.mongo
-import java.time.{ OffsetDateTime, ZoneOffset }
 
-import com.mongodb.client.model.{ FindOneAndUpdateOptions, ReturnDocument }
+import java.time.{OffsetDateTime, ZoneOffset}
+
+import com.mongodb.client.model.{FindOneAndUpdateOptions, ReturnDocument}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.bson.conversions.Bson
@@ -34,9 +35,11 @@ case class JobError(message: String, date: OffsetDateTime = OffsetDateTime.now(Z
 //
 // Priority Queue
 // //////////////////////////////////
-final class PriorityQueue[T <: QueueItem](collectionName: String, attempts: Int = 3)(implicit mCtx: MongoContext,
-                                                                                     registry: CodecRegistry,
-                                                                                     ct: ClassTag[T]) {
+final class PriorityQueue[T <: QueueItem](collectionName: String, attempts: Int = 3)(implicit
+  mCtx: MongoContext,
+  registry: CodecRegistry,
+  ct: ClassTag[T]
+) {
 
   import mCtx.sk8s._
   import org.mongodb.scala.model.Filters._
@@ -54,7 +57,8 @@ final class PriorityQueue[T <: QueueItem](collectionName: String, attempts: Int 
   }
 
   def next(assigned: String): Future[Option[T]] = {
-    val filter: Bson                     = combine(exists("assigned", exists = false), exists("completedOn", exists = false), lt("attempts", attempts))
+    val filter: Bson =
+      combine(exists("assigned", exists = false), exists("completedOn", exists = false), lt("attempts", attempts))
     val sort: Bson                       = orderBy(descending("priority"), ascending("createdOn"))
     val update: Bson                     = combine(currentDate("startedOn"), set("assigned", assigned))
     val options: FindOneAndUpdateOptions = new FindOneAndUpdateOptions().sort(sort).returnDocument(ReturnDocument.AFTER)

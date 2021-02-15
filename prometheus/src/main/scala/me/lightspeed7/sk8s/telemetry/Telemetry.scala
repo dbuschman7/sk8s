@@ -7,15 +7,16 @@ import ch.qos.logback.core.AppenderBase
 import me.lightspeed7.sk8s.AppInfo
 import me.lightspeed7.sk8s.util.Time
 import org.joda.time.DateTime
-import org.lyranthe.prometheus.client.registry.{ ProtoFormat, RegistryMetrics, TextFormat }
-import org.lyranthe.prometheus.client.{ Counter, Gauge, MetricName, _ }
-import org.slf4j.{ Logger, LoggerFactory }
+import org.lyranthe.prometheus.client.registry.{ProtoFormat, RegistryMetrics, TextFormat}
+import org.lyranthe.prometheus.client.{Counter, Gauge, MetricName, _}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class BasicGauge(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
+
   val gauge: LabelledGauge = Gauge(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
@@ -37,6 +38,7 @@ final case class BasicGauge(name: String, appInfo: AppInfo)(implicit reg: Regist
 }
 
 final case class BasicCounter(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
+
   val counter: LabelledCounter = Counter(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
@@ -50,7 +52,10 @@ final case class BasicCounter(name: String, appInfo: AppInfo)(implicit reg: Regi
 
 }
 
-final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Registry, buckets: HistogramBuckets) extends Telemetry with TimerLike {
+final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Registry, buckets: HistogramBuckets)
+    extends Telemetry
+    with TimerLike {
+
   val histo: LabelledHistogram = Histogram(MetricName(toMetricName(name, appInfo)), name)
     .labels(label"version", label"type")
     .register
@@ -93,6 +98,7 @@ final case class BasicTimer(name: String, appInfo: AppInfo)(implicit reg: Regist
 }
 
 final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry with TimerLike {
+
   val gauge: LabelledGauge = Gauge(MetricName(toMetricName("timer_gauge_" + name, appInfo)), name)
     .labels(label"version", label"type")
     .register
@@ -136,7 +142,8 @@ final case class BasicTimerGauge(name: String, appInfo: AppInfo)(implicit reg: R
 
 }
 
-final case class PartitionTrackingGauge(name: String, topicName: String, appInfo: AppInfo)(implicit reg: Registry) extends Telemetry {
+final case class PartitionTrackingGauge(name: String, topicName: String, appInfo: AppInfo)(implicit reg: Registry)
+    extends Telemetry {
 
   val gauge: TrieMap[Int, LabelledGauge] = TrieMap()
 
@@ -146,10 +153,11 @@ final case class PartitionTrackingGauge(name: String, topicName: String, appInfo
       .register
       .labelValues(appInfo.version, getType, partition.toString)
 
-  def set(partition: Int, v: Long): Unit = synchronized {
-    val g = gauge.getOrElseUpdate(partition, createGauge(name, partition))
-    g.set(math.max(g.sum, v))
-  }
+  def set(partition: Int, v: Long): Unit =
+    synchronized {
+      val g = gauge.getOrElseUpdate(partition, createGauge(name, partition))
+      g.set(math.max(g.sum, v))
+    }
 
   def values: Seq[(Int, Double)] =
     gauge
@@ -181,12 +189,16 @@ object TelemetryRegistry {
 
   def counter(name: String)(implicit appInfo: AppInfo): BasicCounter = BasicCounter(name, appInfo)
 
-  def timer(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+  def timer(
+    name: String
+  )(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
     BasicTimer(name, appInfo)
 
   def timerGauge(name: String)(implicit appInfo: AppInfo) = BasicTimerGauge(name, appInfo)
 
-  def latency(name: String)(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
+  def latency(
+    name: String
+  )(implicit appInfo: AppInfo, buckets: HistogramBuckets = HistogramBuckets(1, 2, 5, 10, 20, 50, 100)): BasicTimer =
     BasicTimer(name, appInfo)
 
   def partitionTracker(name: String, topicName: String)(implicit appInfo: AppInfo): PartitionTrackingGauge =

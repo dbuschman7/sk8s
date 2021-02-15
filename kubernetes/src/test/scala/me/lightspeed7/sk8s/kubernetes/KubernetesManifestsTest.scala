@@ -1,15 +1,14 @@
 package me.lightspeed7.sk8s.kubernetes
 
-import java.time.{ ZoneId, ZonedDateTime }
-import java.util.UUID
+import java.time.{ZoneId, ZonedDateTime}
 
-import me.lightspeed7.sk8s.{ DockerImage, Sk8sFunSuite }
+import me.lightspeed7.sk8s
 import me.lightspeed7.sk8s.manifests.Common.Java11
-import me.lightspeed7.sk8s.manifests.{ Budget, JobStatus, Service, Sk8sAppConfig }
+import me.lightspeed7.sk8s.manifests.{Budget, JobStatus, Secret, Service, Sk8sAppConfig}
 import me.lightspeed7.sk8s.util.AlphaId
+import me.lightspeed7.sk8s.{DockerImage, KeyValue, Sk8sFunSuite}
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
-import skuber.EnvVar
 
 class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
 
@@ -116,6 +115,16 @@ class KubernetesManifestsTest extends Sk8sFunSuite with Matchers {
     val pretty      = Json.prettyPrint(Json.toJson(svc))
     println(pretty)
     pretty shouldBe expected
+  }
+
+  test("generate Secret definition") {
+
+//    val expected: String = getFileContents(getLibraryTestFilePath("kubernetes", "sk8s-secret.json")).utf8String
+
+    val secret: Secret = Secret.opaque("name", Some("namespace"), sk8s.KeyValue("key1", "value1"))
+    val pretty         = Json.prettyPrint(Json.toJson(secret))
+    println(pretty)
+//    pretty shouldBe expected
   }
 
 }

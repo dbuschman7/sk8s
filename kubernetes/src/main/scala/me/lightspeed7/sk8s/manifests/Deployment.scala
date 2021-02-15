@@ -1,14 +1,14 @@
 package me.lightspeed7.sk8s.manifests
 
-import play.api.libs.json.{ Json, OFormat }
-import skuber.Pod.Affinity.{ PodAffinityTerm, PodAntiAffinity }
-import skuber.{ ConfigMap, EnvVar, LabelSelector }
+import play.api.libs.json.{Json, OFormat}
+import skuber.Pod.Affinity.{PodAffinityTerm, PodAntiAffinity}
+import skuber.{ConfigMap, EnvVar, LabelSelector}
 
 case class Deployment(
-    kind: String = "Deployment",
-    apiVersion: String = "apps/v1",
-    metadata: Common.Metadata,
-    spec: Deployment.Spec //
+  kind: String = "Deployment",
+  apiVersion: String = "apps/v1",
+  metadata: Common.Metadata,
+  spec: Deployment.Spec //
 ) {
 
   import com.softwaremill.quicklens._
@@ -69,7 +69,7 @@ case class Deployment(
     val mnt = Volumes.VolumeMount(vol.name, mountDir)
 
     this
-    // add vol
+      // add vol
       .modify(_.spec.template.spec.volumes)
       .using { in =>
         Option(in.getOrElse(List()) :+ vol)
@@ -87,7 +87,7 @@ case class Deployment(
     val mnt = Volumes.VolumeMount(vol.name, mountDir)
 
     this
-    // add vol
+      // add vol
       .modify(_.spec.template.spec.volumes)
       .using { in =>
         Option(in.getOrElse(List()) :+ vol)
@@ -99,20 +99,21 @@ case class Deployment(
       }
   }
 
-  def withServiceAccount(name: Option[String]): Deployment = name match {
-    case None =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(Some(false))
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(None)
-    case Some(acctName) =>
-      this
-        .modify(_.spec.template.spec.automountServiceAccountToken)
-        .setTo(None)
-        .modify(_.spec.template.spec.serviceAccountName)
-        .setTo(Some(acctName))
-  }
+  def withServiceAccount(name: Option[String]): Deployment =
+    name match {
+      case None =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(Some(false))
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(None)
+      case Some(acctName) =>
+        this
+          .modify(_.spec.template.spec.automountServiceAccountToken)
+          .setTo(None)
+          .modify(_.spec.template.spec.serviceAccountName)
+          .setTo(Some(acctName))
+    }
 
 }
 
@@ -121,9 +122,9 @@ object Deployment {
   implicit val __json: OFormat[Deployment] = Json.format[Deployment]
 
   case class Spec(
-      replicas: Int = 1,
-      selector: Option[Common.Selector] = None,
-      template: Template //
+    replicas: Int = 1,
+    selector: Option[Common.Selector] = None,
+    template: Template //
   )
 
   object Spec {
@@ -131,8 +132,8 @@ object Deployment {
   }
 
   case class Template(
-      metadata: Common.Metadata,
-      spec: Pod.TemplateSpec //
+    metadata: Common.Metadata,
+    spec: Pod.TemplateSpec //
   )
 
   object Template {

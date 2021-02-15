@@ -1,11 +1,11 @@
 package sbtsk8s
 
 import java.io.File
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 
-import sbt.{ Def, _ }
-import Keys.{ libraryDependencies, _ }
+import sbt.{Def, _}
+import Keys.{libraryDependencies, _}
 
 object Sk8sPlugin extends AutoPlugin {
 
@@ -23,18 +23,19 @@ object Sk8sPlugin extends AutoPlugin {
     libraryDependencies ++= sk8sDeps(sk8sPlayApp.value, sk8sVersion.value)
   )
 
-  private def appInfoTask: Def.Initialize[Task[Seq[File]]] = Def.task {
-    implicit val log: Logger = sLog.value
-    //
+  private def appInfoTask: Def.Initialize[Task[Seq[File]]] =
+    Def.task {
+      implicit val log: Logger = sLog.value
+      //
 
-    //
-    val appBuild: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC.normalized()))
-    val sk8sBuildFile    = new File((sourceManaged in Compile).value.getAbsolutePath, "Sk8sAppInfo.scala")
-    log.info(s"Generating AppInfo file(${sk8sPlayApp.value}) - $sk8sBuildFile ... ")
-    writeFile(sk8sBuildFile)(FileGenerators.geneateAppInfo(name.value, version.value, appBuild))
-    //
-    Seq(sk8sBuildFile)
-  }
+      //
+      val appBuild: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC.normalized()))
+      val sk8sBuildFile    = new File((sourceManaged in Compile).value.getAbsolutePath, "Sk8sAppInfo.scala")
+      log.info(s"Generating AppInfo file(${sk8sPlayApp.value}) - $sk8sBuildFile ... ")
+      writeFile(sk8sBuildFile)(FileGenerators.geneateAppInfo(name.value, version.value, appBuild))
+      //
+      Seq(sk8sBuildFile)
+    }
 
   //
   // Helpers

@@ -2,14 +2,16 @@ package me.lightspeed7.sk8s
 
 import akka.stream.Materializer
 import com.typesafe.scalalogging.LazyLogging
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc._
 
 import scala.concurrent._
 
 @Singleton
-class ErrorHandler @Inject()(implicit val mat: Materializer, ec: ExecutionContext) extends play.api.http.HttpErrorHandler with LazyLogging {
+class ErrorHandler @Inject() (implicit val mat: Materializer, ec: ExecutionContext)
+    extends play.api.http.HttpErrorHandler
+    with LazyLogging {
 
   def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     import play.api.http.Status._
@@ -27,6 +29,7 @@ class ErrorHandler @Inject()(implicit val mat: Materializer, ec: ExecutionContex
     }
   }
 
-  def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = Future.successful(JsonResult.globalOnError(exception))
+  def onServerError(request: RequestHeader, exception: Throwable): Future[Result] =
+    Future.successful(JsonResult.globalOnError(exception))
 
 }

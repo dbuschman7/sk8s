@@ -26,19 +26,26 @@ class DockerImageTest extends Sk8sFunSuite with Matchers {
     DockerImage.parse("docker.io/my-org/some-container:1.2.3").get /*        */ shouldBe DockerImage("docker.io",
                                                                                                      Some("my-org"),
                                                                                                      "some-container",
-                                                                                                     Some("1.2.3"))
+                                                                                                     Some("1.2.3")
+    )
     DockerImage.parse("my-org/some-container:1.2.3").get /*                  */ shouldBe DockerImage("docker.io",
                                                                                                      Some("my-org"),
                                                                                                      "some-container",
-                                                                                                     Some("1.2.3"))
+                                                                                                     Some("1.2.3")
+    )
     DockerImage.parse("my-org/some-container").get /*                                  */ shouldBe DockerImage("docker.io",
                                                                                                                Some("my-org"),
                                                                                                                "some-container",
-                                                                                                               Some("latest"))
+                                                                                                               Some("latest")
+    )
   }
 
   test("Test toString") {
-    DockerImage("docker.io", Some("my-org"), "some-container", Some("1.2.3")).toString shouldBe "docker.io/my-org/some-container:1.2.3"
+    DockerImage("docker.io",
+                Some("my-org"),
+                "some-container",
+                Some("1.2.3")
+    ).toString shouldBe "docker.io/my-org/some-container:1.2.3"
     DockerImage("docker.io", None, "some-container", Some("1.2.3")).toString shouldBe "docker.io/some-container:1.2.3"
     DockerImage("docker.io", None, "some-container", None).toString shouldBe "docker.io/some-container:latest"
   }

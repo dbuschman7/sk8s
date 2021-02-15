@@ -1,11 +1,11 @@
 package me.lightspeed7.sk8s.auth
 
 import akka.http.scaladsl.model.DateTime
-import me.lightspeed7.sk8s.{ Constant, Sources, Variable, Variables }
+import me.lightspeed7.sk8s.{Constant, Sources, Variable, Variables}
 import me.lightspeed7.sk8s.json.JsonImplicits
-import pdi.jwt.{ JwtAlgorithm, JwtJsonImplicits }
+import pdi.jwt.{JwtAlgorithm, JwtJsonImplicits}
 import pdi.jwt.algorithms.JwtHmacAlgorithm
-import play.api.libs.json.{ JsResult, Json, OFormat }
+import play.api.libs.json.{JsResult, Json, OFormat}
 
 import scala.util.Try
 
@@ -23,7 +23,8 @@ class JwtConfiguration extends JwtConfigBase[JwtToken] with JwtJsonImplicits {
 
   override def domain(implicit ctx: AuthContext[JwtToken]): String = "foo.bar.com"
 
-  override def anonymous(implicit ctx: AuthContext[JwtToken]): JwtToken = JwtToken(JwtUser("anonymous", "anon@bar.com", "Foo", "Bar", None))
+  override def anonymous(implicit ctx: AuthContext[JwtToken]): JwtToken =
+    JwtToken(JwtUser("anonymous", "anon@bar.com", "Foo", "Bar", None))
 
   override def customRoleAuth(token: JwtToken, knowRoles: Set[Role]): Boolean = {
     val allowedSet: Set[String] = knowRoles.map(_.name)

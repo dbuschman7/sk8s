@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s.telemetry
 
-import java.time.{ ZoneOffset, ZonedDateTime }
+import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.concurrent.TimeUnit
 
 import me.lightspeed7.sk8s.AppInfo
@@ -60,7 +60,9 @@ class TelemetryTest extends AnyFunSuite with Matchers {
     val binary: Array[Byte] = ProtoFormat.output(metrics.iterator)
     binary.length should be > 1600
 
-    ProtoFormat.contentType should be("application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited")
+    ProtoFormat.contentType should be(
+      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited"
+    )
   }
 
   //
