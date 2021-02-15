@@ -1,3 +1,3 @@
 #! /bin/sh 
 
-sbt ';cc;test;assembly'
+sbt ';cc;test;package'
