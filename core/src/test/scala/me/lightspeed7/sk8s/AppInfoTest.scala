@@ -17,6 +17,8 @@ class AppInfoTest extends AnyFunSuite with Matchers {
 
     info.appName should be("name")
     info.version should be("version")
+    println("Host - " + info.hostname)
+    println("IP   - " + info.ipAddress)
     Option(info.hostname) should not be None
     Option(info.ipAddress) should not be None
     info.buildTime.isBefore(now)
