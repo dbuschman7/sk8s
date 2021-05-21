@@ -2,8 +2,8 @@ package me.lightspeed7.sk8s.backend
 
 import java.time.{ZoneOffset, ZonedDateTime}
 
-import me.lightspeed7.sk8s._
-import me.lightspeed7.sk8s.server.HealthStatus
+import me.lightspeed7.sk8s.Sk8s.HealthStatus
+import me.lightspeed7.sk8s.{AppInfo, Constant, Sk8sContext, Sources, Variables}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -15,8 +15,8 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
 
   implicit val ctx: Sk8sContext = Sk8sContext.create(appInfo)
 
-  val export = new BackendServer()
-  val client = BackendServerClient()
+  val export      = new BackendServer()
+  lazy val client = BackendServerClient()
 
   override def beforeAll(): Unit =
 //    TelemetryRegistry.counter("metric")
@@ -90,8 +90,8 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
     response.code shouldBe 200
     val body    = response.body.right.get
     val bodyStr = new String(body)
-    println(bodyStr)
-    bodyStr.length should be > 1200
+    println("BodyStr = " + bodyStr)
+    bodyStr.length should be > 400
 
     val bodyJson: JsValue = Json.parse(bodyStr)
     val pretty: String    = Json.prettyPrint(bodyJson)
@@ -103,9 +103,6 @@ class BackendServerTest extends AnyFunSuite with BeforeAndAfterAll with Matchers
     bodyStr.split("\n").filter(_.contains("java")).toList.size shouldBe 1
     bodyStr.split("\n").filter(_.contains("memory")).toList.size shouldBe 1
     bodyStr.split("\n").filter(_.contains("processors")).toList.size shouldBe 1
-
-    bodyStr.split("\n").filter(_.contains("dependencies")).toList.size shouldBe 1
-    bodyStr.split("\n").filter(_.contains("artifact")).toList.size shouldBe 1
 
     bodyStr.split("\n").filter(_.contains("variables")).toList.size shouldBe 1
     bodyStr.split("\n").filter(_.contains("display")).toList.size shouldBe 1

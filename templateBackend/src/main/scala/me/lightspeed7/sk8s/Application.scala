@@ -4,7 +4,6 @@ import java.time.{LocalDateTime, ZonedDateTime}
 
 import com.typesafe.scalalogging.StrictLogging
 import me.lightspeed7.sk8s.backend.BackendApplication
-import me.lightspeed7.sk8s.telemetry.TelemetryRegistry
 import me.lightspeed7.sk8s.util.AutoClose
 
 object Application extends App with StrictLogging {
@@ -17,8 +16,7 @@ object Application extends App with StrictLogging {
     try {
       // Stand up the application internals
       //
-      val _       = Variables.source(Sources.env, "MY_POD_IP", Constant("unknown")).value
-      val counter = TelemetryRegistry.counter("david")
+      val _ = Variables.source(Sources.env, "MY_POD_IP", Constant("unknown")).value
 
       // Standup Completed
       logger.info(banner)

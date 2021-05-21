@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import akka.stream.{Materializer, SystemMaterializer}
 import com.typesafe.scalalogging.LazyLogging
 import javax.inject.Inject
-import me.lightspeed7.sk8s.telemetry.{BasicCounter, BasicTimer, TelemetryRegistry}
 import play.api.mvc.{Filter, RequestHeader, ResponseHeader, Result}
 import play.api.routing.Router
 
@@ -18,10 +17,6 @@ class ResponseFilter @Inject() (implicit val akka: ActorSystem, appInfo: AppInfo
 
   val exclusionPaths: Seq[String]  = Seq("/", "/favicon.ico")
   val exclusionStarts: Seq[String] = Seq("/telemetry", "/health", "/assets", "/webjars", "/metrics", "/ip", "/ping", "/config")
-
-  lazy val requests: BasicCounter          = TelemetryRegistry.counter("requests")
-  lazy val requestTimes: BasicTimer        = TelemetryRegistry.latency("request_time")
-  lazy val requestTimesFailure: BasicTimer = TelemetryRegistry.latency("request_time_failures")
 
   // This will need to be better at performance eventually
   def logResponse(action: String, requestHeader: RequestHeader, responseHeader: ResponseHeader, requestTime: Long): Unit = {
@@ -43,11 +38,6 @@ class ResponseFilter @Inject() (implicit val akka: ActorSystem, appInfo: AppInfo
     if (!found) {
       val origin = Try(requestHeader.headers("Origin")).toOption.getOrElse("unknown")
       logger.info(s"($origin)$action took ${requestTime}ms on path ${requestHeader.path} and returned ${responseHeader.status}")
-      requests.increment()
-      requestTimes.update(requestTime)
-      if (action == "failure") {
-        requestTimesFailure.update(requestTime)
-      }
     }
   }
 

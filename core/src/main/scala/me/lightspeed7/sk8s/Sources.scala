@@ -14,29 +14,12 @@ trait Source {
 
 sealed case class EnvironmentSource() extends Source {
 
-  lazy val valuesMap: TrieMap[String, String] = {
-    val m = new TrieMap[String, String]()
-    sys.env.map { case (k, v) => m.put(k, v) }
-    m
-  }
+  def clearVariable(key: String): Option[String] = EnvironmentSource.valuesMap.remove(key)
 
-  private def logIt(msg: String): Unit = {
-    println(msg) // println intentional here
-    LoggerFactory.getLogger("me.lightspeed7.sk8s").warn(msg)
-  }
-
-  def clearVariable(key: String): Option[String] = {
-    logIt(s"WARNING WARNING -- Danger Will Robinson - Env Var '$key' has been cleared")
-    valuesMap.remove(key)
-  }
-
-  def overrideVariable(key: String, value: String): Unit = {
-    valuesMap.put(key, value)
-    logIt(s"WARNING WARNING -- Danger Will Robinson - Env Var '$key' is now set to '$value'")
-  }
+  def overrideVariable(key: String, value: String): Unit = EnvironmentSource.valuesMap.put(key, value)
 
   def name(): String                      = "Env"
-  def value(name: String): Option[String] = Option(name).flatMap(f => valuesMap.get(f))
+  def value(name: String): Option[String] = Option(name).flatMap(f => EnvironmentSource.valuesMap.get(f))
 }
 
 //

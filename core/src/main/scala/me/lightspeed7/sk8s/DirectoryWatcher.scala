@@ -117,17 +117,20 @@ class DirectoryWatcher(callBack: Seq[Path] => Unit, debug: Boolean = false) exte
 
       while (true) {
         val key = watchService.take()
-        val collectedEvents: Option[Seq[Path]] = keys.get(key).map { watch: Watch =>
-          key.pollEvents().asScala.flatMap { event =>
-            val kind = event.kind
-            import StandardWatchEventKinds._
-            kind match {
-              case OVERFLOW                        => None // ignore
-              case ENTRY_CREATE if watch.recursive => Option(registerNewChildren(logEvent(event, watch)))
-              case _                               => Option(logEvent(event, watch))
+        val collectedEvents: Option[Seq[Path]] = keys
+          .get(key)
+          .map { watch: Watch =>
+            key.pollEvents().asScala.flatMap { event =>
+              val kind = event.kind
+              import StandardWatchEventKinds._
+              kind match {
+                case OVERFLOW                        => None // ignore
+                case ENTRY_CREATE if watch.recursive => Option(registerNewChildren(logEvent(event, watch)))
+                case _                               => Option(logEvent(event, watch))
+              }
             }
           }
-        }
+          .map(_.toSeq)
 
         collectedEvents.foreach(callBack) // inform the invoker
 

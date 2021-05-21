@@ -1,6 +1,6 @@
 package me.lightspeed7.sk8s
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 import org.apache.ivy.core.settings._
 import org.apache.ivy.plugins.parser.m2._

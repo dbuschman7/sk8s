@@ -22,16 +22,6 @@ object JsonConfig {
     buf.append(s"""  "memory"  : ${MemoryInfo.create().toJson.toString}, """).append("\n")
 
     //
-    // jar dependencies
-    // /////////////////////
-    val jarsStr: Set[JsValue] =
-      SystemProperties
-        .fromEnvironment()
-        .jarDependencies()
-        .map(j => Json.toJson(j))
-    buf.append(jarsStr.mkString(s"""  "dependencies" : [\n""", ",\n", "\n  ],"))
-
-    //
     // variables
     // /////////////////////
     Variables.dumpJson { in: String =>

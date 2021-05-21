@@ -7,10 +7,9 @@ import play.filters.gzip.GzipFilter
 
 class Filters @Inject() (
   gzip: GzipFilter,
-  telemetry: TelemetryFilter,
   response: ResponseFilter //
 ) extends HttpFilters {
 
-  def filters: Seq[EssentialFilter] = Seq(gzip, response, telemetry)
+  def filters: Seq[EssentialFilter] = Seq(gzip, response)
 
 }

@@ -12,7 +12,7 @@ object SystemProperties {
 
 final class SystemProperties(rawData: String) {
 
-  private val rawLines: Seq[String]           = rawData.split(":").toSeq
+  private lazy val rawLines: Seq[String]      = rawData.split(":").toSeq
   private val commonLibSplitKeys: Set[String] = Set("maven2", "jcenter.bintray.com")
 
   def jarDependencies(extraSplitKeys: String*): Set[JarDependency] = {

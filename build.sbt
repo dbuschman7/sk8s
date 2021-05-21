@@ -5,14 +5,15 @@ import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
-version in ThisBuild := "0.7.0"
+version in ThisBuild := "0.8.0"
 
-lazy val scala212 = "2.12.12"
-lazy val scala213 = "2.13.4"
+lazy val scala212 = "2.12.13"
+//lazy val scala213 = "2.13.5"
 
 scalaVersion := scala212
 
-lazy val supportedScalaVersions = List(scala213, scala212)
+lazy val supportedScalaVersions = List(scala212)
+
 
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
@@ -25,8 +26,8 @@ lazy val global = project
   .settings(
     publishArtifact := false,
     skip in publish := true,
-    bintrayRelease := {}
-    //  crossScalaVersions := supportedScalaVersions,
+//    bintrayRelease := {},
+    crossScalaVersions := supportedScalaVersions,
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
@@ -34,8 +35,6 @@ lazy val global = project
     backend,
     play,
     kubernetes,
-    mongo,
-    prometheus,
     slack,
     //
     plugin, // SBT plugins
@@ -61,11 +60,10 @@ lazy val backend = project
     settings,
     assemblySettings,
     deploymentSettings,
-    libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp
+    libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp :+ dependencies.akkaHttp
   )
   .dependsOn(
-    core       % "test->test;compile->compile",
-    prometheus % "test->test;compile->compile"
+    core       % "test->test;compile->compile"
   )
 
 lazy val play = project
@@ -80,8 +78,7 @@ lazy val play = project
   )
   .dependsOn(
     core       % "test->test;compile->compile",
-    backend    % "test->test;compile->compile",
-    prometheus % "test->test;compile->compile"
+    backend    % "test->test;compile->compile"
   )
 
 lazy val kubernetes = project
@@ -96,29 +93,29 @@ lazy val kubernetes = project
     core % "test->test;compile->compile"
   )
 
-lazy val mongo = project
-  .settings(
-    name := "sk8s-mongodb",
-    settings,
-    assemblySettings,
-    deploymentSettings,
-    libraryDependencies ++= commonDependencies ++ Seq(dependencies.mongoScalaDB) :+ dependencies.ammoniteOps % "test"
-  )
-  .dependsOn(
-    core % "test->test;compile->compile"
-  )
+//lazy val mongo = project
+//  .settings(
+//    name := "sk8s-mongodb",
+//    settings,
+//    assemblySettings,
+//    deploymentSettings,
+//    libraryDependencies ++= commonDependencies ++ Seq(dependencies.mongoScalaDB) :+ dependencies.ammoniteOps % "test"
+//  )
+//  .dependsOn(
+//    core % "test->test;compile->compile"
+//  )
 
-lazy val prometheus = project
-  .settings(
-    name := "sk8s-prometheus",
-    settings,
-    assemblySettings,
-    deploymentSettings,
-    libraryDependencies ++= commonDependencies ++ Seq(dependencies.prometheusClient, dependencies.prometheusClientProto, dependencies.akkaHttp)
-  )
-  .dependsOn(
-    core % "test->test;compile->compile"
-  )
+//lazy val prometheus = project
+//  .settings(
+//    name := "sk8s-prometheus",
+//    settings,
+//    assemblySettings,
+//    deploymentSettings,
+//    libraryDependencies ++= commonDependencies ++ Seq(dependencies.prometheusClient, dependencies.prometheusClientProto, dependencies.akkaHttp)
+//  )
+//  .dependsOn(
+//    core % "test->test;compile->compile"
+//  )
 
 lazy val slack = project
   .settings(
@@ -134,7 +131,7 @@ lazy val slack = project
   )
 
 lazy val plugin = project
-  .enablePlugins(ScriptedPlugin)
+  .enablePlugins(SbtPlugin)
   .settings(
     name := "sbt-sk8s",
     description := "sbt plugin to generate build info and sk8s opinions",
@@ -142,13 +139,14 @@ lazy val plugin = project
 //    version := (version in ThisBuild).value + "-SNAPSHOT",
     sbtPlugin := true,
     publishMavenStyle := false,
-    bintrayRepository := "sbt-plugins",
-    bintrayOrganization in bintray := None,
+    crossScalaVersions := Seq(scala212),
+      //    bintrayRepository := "sbt-plugins",
+//    bintrayOrganization in bintray := None,
     //
     scalacOptions := Seq("-Xfuture", "-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
     scalacOptions += "-language:experimental.macros",
     libraryDependencies += "org.scala-lang" % "scala-reflect"    % scalaVersion.value % Provided,
-    libraryDependencies += "org.scala-sbt"  %% "scripted-plugin" % sbtVersion.value,
+    libraryDependencies += "org.scala-sbt"  % "scripted-plugin_2.12" % sbtVersion.value,
     licenses := Seq("MIT License" -> url("https://github.com/sbt/sbt-buildinfo/blob/master/LICENSE")),
     scriptedLaunchOpts ++= Seq("-Xmx1024M", "-Dplugin.version=" + version.value, "-Dsbt.log.noformat"),
     scriptedBufferLog := false
@@ -164,9 +162,9 @@ lazy val templateBackend = project
     settings,
     assemblySettings,
     publishArtifact := false,
-    bintrayRelease := {},
+//    bintrayRelease := {},
     skip in publish := true,
-    skip in bintrayRelease := true,
+//    skip in bintrayRelease := true,
     libraryDependencies ++= commonDependencies,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
@@ -181,9 +179,9 @@ lazy val templateApi = project
     settings,
     assemblySettings,
     publishArtifact := false,
-    bintrayRelease := {},
+//    bintrayRelease := {},
     skip in publish := true,
-    skip in bintrayRelease := true,
+//    skip in bintrayRelease := true,
     libraryDependencies ++= commonDependencies :+ dependencies.scalaTestPlus,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
@@ -197,16 +195,16 @@ lazy val templateApi = project
 
 lazy val dependencies =
   new {
-    val akkaV               = "2.5.31"
-    val akkaHttpV           = "10.1.10"
+    val akkaV               = "2.6.14" // 2.6.14
+    val akkaHttpV           = "10.1.12" // 10.2.4
     val ammoniteOpsVer      = "2.3.8"
     val logbackV            = "1.2.3"
-    val mongodbScalaVersion = "2.9.0"
+//    val mongodbScalaVersion = "2.9.0"
     val playV               = "2.7.9"
     val playJsonV           = "2.7.4"
     val sttpV               = "1.7.2"
-    val scalaLoggingV       = "3.9.2"
-    val scalatestV          = "3.1.1"
+    val scalaLoggingV       = "3.9.3"
+    val scalatestV          = "3.1.4"
     val scalacheckV         = "1.14.3"
     val slf4jV              = "1.7.30"
 
@@ -216,25 +214,23 @@ lazy val dependencies =
     val akkaStream  = "com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()
     val akkaHttp    = "com.typesafe.akka" %% "akka-http"            % akkaHttpV withSources ()
     val akkaSlf4j   = "com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()
-    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.6.1" exclude ("org.scala-lang", "scala-library") withSources ()
+    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.6.3" exclude ("org.scala-lang", "scala-library") withSources ()
     val javaxInject = "javax.inject"      % "javax.inject"          % "1" withSources ()
 
-    val joda         = "joda-time"         % "joda-time"           % "2.10.8"
-    val jwtPlayJson  = "com.pauldijou"     %% "jwt-play-json"      % "4.3.0"
-    val mongoScalaDB = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaVersion withSources ()
+    val joda         = "joda-time"         % "joda-time"           % "2.10.10"
+    val jwtPlayJson  = "com.pauldijou"     %% "jwt-play-json"      % "5.0.0"
+//    val mongoScalaDB = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaVersion withSources ()
 
-    val parserCombinators     = "org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.1" withSources ()
+    val parserCombinators     = "org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.2" withSources ()
     val playJson              = "com.typesafe.play"             %% "play-json"                % playJsonV withSources () exclude ("org.scala-lang", "scala-library")
-    val prometheusClient      = "org.lyranthe.prometheus"       %% "client"                   % "0.9.0-M5" withSources ()
-    val prometheusClientProto = "org.lyranthe.prometheus"       %% "protobuf"                 % "0.9.0-M5" withSources ()
-    val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.11" withSources ()
+    val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.13" withSources ()
     val scalacheck            = "org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()
     val scalatest             = "org.scalatest"                 %% "scalatest"                % scalatestV withSources ()
     val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "4.0.3" % "test" withSources ()
     val scalaLogging          = "com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()
-    val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.6" withSources ()
+    val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.16" withSources ()
     val slf4j                 = "org.slf4j"                     % "jcl-over-slf4j"            % slf4jV withSources ()
-    val skuber                = "io.skuber"                     %% "skuber"                   % "2.1.1" withSources ()
+    val skuber                = "io.skuber"                     %% "skuber"                   % "2.6.0" withSources ()
     val sttpWithAkkHttp       = "com.softwaremill.sttp"         %% "akka-http-backend"        % sttpV withSources ()
 
     def playLibs: Seq[ModuleID] =
@@ -286,13 +282,12 @@ lazy val compilerOptions = Seq(
 lazy val commonSettings = Seq(
   scalacOptions ++= compilerOptions,
   resolvers ++= Seq(
-    Resolver.jcenterRepo,
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots")
   ),
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git")),
-  bintrayReleaseOnPublish in ThisBuild := false
+  scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git"))
+//  bintrayReleaseOnPublish in ThisBuild := false
 )
 
 //lazy val wartremoverSettings = Seq(
