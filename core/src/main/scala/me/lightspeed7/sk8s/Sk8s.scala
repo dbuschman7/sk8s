@@ -13,6 +13,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 object Sk8s {
+  import scala.language.postfixOps
 
   def serviceAccount(basePath: Path = Paths.get("/var/run/secrets/")) =
     ServiceAccount(Paths.get(basePath.toString + "/kubernetes.io/serviceaccount"))

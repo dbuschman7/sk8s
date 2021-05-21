@@ -10,7 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: FiniteDuration) extends Actor with LazyJsonLogging {
-
+  import scala.language.postfixOps
   import MemoryCronActor._
 
   protected lazy val actorClassName: String = this.getClass.getName
@@ -56,7 +56,7 @@ class MemoryCronActor(application: AppInfo, delay: FiniteDuration, interval: Fin
 }
 
 object MemoryCronActor extends LazyJsonLogging {
-
+  import scala.language.postfixOps
   import scala.concurrent.duration._
 
   def pretty(in: Long): String = PrettyPrint.fileSizing(in)

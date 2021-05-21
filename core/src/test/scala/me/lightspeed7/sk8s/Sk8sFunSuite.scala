@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
 import org.scalatest.funsuite.AnyFunSuite
 
 class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
-
+  import scala.language.postfixOps
   RunMode.setTestRunMode()
 
   val localNow: LocalDateTime = LocalDateTime.now()
@@ -50,7 +50,7 @@ class Sk8sFunSuite extends AnyFunSuite with BeforeAndAfterAll {
     ActorMaterializer(ActorMaterializerSettings(actorSystem).withSupervisionStrategy(decider))
   }
 
-  override def beforeAll: Unit =
+  override def beforeAll(): Unit =
     super.beforeAll()
 
   override def afterAll(): Unit = {

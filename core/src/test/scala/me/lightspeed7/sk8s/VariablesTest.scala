@@ -9,7 +9,7 @@ import scala.util.Try
 import org.scalatest.matchers.should.Matchers
 
 class VariablesTest extends Sk8sFunSuite with Matchers {
-
+  import scala.language.postfixOps
   test("Test Sources") {
     Sources.env.value("HOME") should be(Sources.sysProps.value("user.home"))
   }

@@ -11,6 +11,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 object SK8SBus {
+  import scala.language.postfixOps
 
   def publish(channel: String, payload: Any): Unit = TheBus.publish(channel, payload)
 
@@ -44,7 +45,7 @@ object SK8SBus {
 
     override protected def compareSubscribers(a: Subscriber, b: Subscriber): Int = a.compareTo(b)
 
-    override protected def mapSize: Int = 128
+    override protected def mapSize(): Int = 128
 
     def publish(channel: String, payload: Any): Unit = publish(EventMessage(channel, payload))
   }

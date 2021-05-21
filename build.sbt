@@ -1,7 +1,7 @@
 import com.typesafe.sbt.packager.docker.Cmd
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.dockerCommands
 import sbtbuildinfo.BuildInfoKey
-import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoPackage }
+import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 
 name := "sk8s"
 organization in ThisBuild := "me.lightspeed7"
@@ -14,7 +14,7 @@ lazy val scala3 = "3.0.0"
 
 scalaVersion := scala3
 
-lazy val supportedScalaVersions = List( scala212, scala213)
+lazy val supportedScalaVersions = List(scala212, scala213)
 
 
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -24,7 +24,6 @@ licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LIC
 // ///////////////////////
 lazy val global = project
   .in(file("."))
-  .settings(settings)
   .settings(
     publishArtifact := false,
     skip in publish := true,
@@ -47,7 +46,6 @@ lazy val global = project
 lazy val core = project
   .settings(
     name := "sk8s-core",
-    settings,
     assemblySettings,
     deploymentSettings,
     crossScalaVersions := supportedScalaVersions,
@@ -59,7 +57,6 @@ lazy val core = project
 lazy val backend = project
   .settings(
     name := "sk8s-backend",
-    settings,
     assemblySettings,
     deploymentSettings,
     crossScalaVersions := supportedScalaVersions,
@@ -72,7 +69,6 @@ lazy val backend = project
 lazy val play = project
   .settings(
     name := "sk8s-play",
-    settings,
     assemblySettings,
     deploymentSettings,
     crossScalaVersions := supportedScalaVersions,
@@ -88,7 +84,6 @@ lazy val play = project
 lazy val kubernetes = project
   .settings(
     name := "sk8s-kubernetes",
-    settings,
     assemblySettings,
     deploymentSettings,
     crossScalaVersions := supportedScalaVersions,
@@ -101,7 +96,6 @@ lazy val kubernetes = project
 lazy val slack = project
   .settings(
     name := "sk8s-slack",
-    settings,
     assemblySettings,
     deploymentSettings,
     crossScalaVersions := supportedScalaVersions,
@@ -117,7 +111,6 @@ lazy val plugin = project
   .settings(
     name := "sbt-sk8s",
     description := "sbt plugin to generate build info and sk8s opinions",
-    settings,
     sbtPlugin := true,
     publishMavenStyle := false,
     crossScalaVersions := Seq(scala212),
@@ -138,7 +131,6 @@ lazy val templateBackend = project
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin, DockerPlugin)
   .settings(
     name := "backend",
-    settings,
     assemblySettings,
     publishArtifact := false,
     skip in publish := true,
@@ -154,7 +146,6 @@ lazy val templateApi = project
   .enablePlugins(PlayScala, BuildInfoPlugin, DockerPlugin)
   .settings(
     name := "api",
-    settings,
     assemblySettings,
     publishArtifact := false,
     skip in publish := true,
@@ -178,7 +169,7 @@ lazy val dependencies =
     val logbackV            = "1.2.3"
 //    val mongodbScalaVersion = "2.9.0"
     val playV               = "2.7.9"
-    val playJsonV           = "2.7.4"
+    val playJsonV           = "2.9.2"
     val sttpV               = "1.7.2"
     val scalaLoggingV       = "3.9.3"
     val scalatestV          = "3.1.4"
@@ -237,43 +228,41 @@ lazy val commonDependencies = Seq(
 )
 
 // SETTINGS
-
-lazy val settings =
-commonSettings ++
-//wartremoverSettings ++
-scalafmtSettings
-
-lazy val compilerOptions = Seq(
-  "-deprecation", //
-  "-encoding",
-  "UTF-8", //
-  "-feature",
-  "-language:postfixOps",
-  "-language:implicitConversions",
-  "-language:reflectiveCalls"
-  // "-language:existentials",
-  // "-language:higherKinds",
-)
-
-lazy val commonSettings = Seq(
-  scalacOptions ++= compilerOptions,
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
-  ),
-  licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git"))
-//  bintrayReleaseOnPublish in ThisBuild := false
-)
-
-//lazy val wartremoverSettings = Seq(
-//  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.Throw)
-//)
-
-lazy val scalafmtSettings =
+scalacOptions ++= {
   Seq(
-    scalafmtOnCompile := true
-  )
+    "-encoding",
+    "UTF-8",
+    "-feature",
+    "-language:implicitConversions",
+    "-language:postfixOps",
+    "-language:reflectiveCalls"
+    // disabled during the migration
+    // "-Xfatal-warnings"
+  ) ++
+    (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq(
+        "-unchecked",
+        "-source:3.0-migration"
+      )
+      case _ => Seq(
+        "-deprecation",
+        "-Xfatal-warnings",
+        "-Wunused:imports,privates,locals",
+        "-Wvalue-discard"
+      )
+    })
+}
+
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
+licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+
+scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git"))
+
+scalafmtOnCompile := true
 
 lazy val assemblySettings = Seq(
   assemblyJarName in assembly := name.value + ".jar",

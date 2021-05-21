@@ -10,6 +10,7 @@ import scala.concurrent.{Await, ExecutionContext}
 final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem, val mat: Materializer)
     extends AutoCloseable
     with LazyLogging {
+  import scala.language.postfixOps
 
   lazy val internalSdkCalls: Boolean = Sk8s.serviceAccount().isKubernetes
 
@@ -68,6 +69,7 @@ final case class Sk8sContext(appInfo: AppInfo)(implicit val system: ActorSystem,
 }
 
 object Sk8sContext extends LazyLogging {
+  import scala.language.postfixOps
 
   def create(appInfo: AppInfo): Sk8sContext = {
 

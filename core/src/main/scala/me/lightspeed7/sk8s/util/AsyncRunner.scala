@@ -7,6 +7,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object AsyncRunner extends LazyLogging {
+  import scala.language.postfixOps
 
   def runFor[T](runTime: FiniteDuration, refreshInterval: FiniteDuration = 2 seconds)(
     block: => Unit

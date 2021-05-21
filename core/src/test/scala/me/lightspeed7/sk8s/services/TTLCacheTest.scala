@@ -9,7 +9,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 class TTLCacheTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
-
+  import scala.language.postfixOps
   implicit val akka: ActorSystem = ActorSystem("TTLCACHE")
 
   override def afterAll(): Unit = Await.result(akka.terminate(), Duration.Inf)

@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 class BackgroundTasks(implicit val ctx: Sk8sContext) extends LazyLogging {
-
+  import scala.language.postfixOps
   import ctx._
 
   logger.info("Background tasks started")

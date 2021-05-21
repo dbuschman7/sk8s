@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 class AsyncRunnerTest extends Sk8sFunSuite with BeforeAndAfterAll with Matchers {
-
+  import scala.language.postfixOps
   override def afterAll(): Unit = {
     Try(ctx.close()) // just ignore
     super.afterAll()

@@ -18,6 +18,7 @@ import scala.util.{Failure, Success, Try}
 // File based helpers
 // ////////////////////////
 object Sk8sFileIO extends LazyLogging {
+  import scala.language.postfixOps
 
   def getContents(basePath: Path, filename: String): Option[String] =
     getContents(Paths.get(basePath.toString, filename))
