@@ -8,11 +8,13 @@ organization in ThisBuild := "me.lightspeed7"
 version in ThisBuild := "0.8.0"
 
 lazy val scala212 = "2.12.13"
-//lazy val scala213 = "2.13.5"
+lazy val scala213 = "2.13.5"
 
-scalaVersion := scala212
+lazy val scala3 = "3.0.0"
 
-lazy val supportedScalaVersions = List(scala212)
+scalaVersion := scala3
+
+lazy val supportedScalaVersions = List( scala212, scala213)
 
 
 licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
@@ -26,8 +28,7 @@ lazy val global = project
   .settings(
     publishArtifact := false,
     skip in publish := true,
-//    bintrayRelease := {},
-    crossScalaVersions := supportedScalaVersions,
+    crossScalaVersions := Nil
   )
   .disablePlugins(AssemblyPlugin)
   .aggregate(
@@ -49,6 +50,7 @@ lazy val core = project
     settings,
     assemblySettings,
     deploymentSettings,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies
   )
   .settings(testOptions in Test := Seq(Tests.Filter(harnessFilter)))
@@ -60,6 +62,7 @@ lazy val backend = project
     settings,
     assemblySettings,
     deploymentSettings,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies :+ dependencies.sttpWithAkkHttp :+ dependencies.akkaHttp
   )
   .dependsOn(
@@ -72,6 +75,7 @@ lazy val play = project
     settings,
     assemblySettings,
     deploymentSettings,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies ++ dependencies.playLibs ++ Seq(dependencies.javaxInject,
                                                                                dependencies.jwtPlayJson,
                                                                                dependencies.playJson)
@@ -87,35 +91,12 @@ lazy val kubernetes = project
     settings,
     assemblySettings,
     deploymentSettings,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.skuber, dependencies.parserCombinators, dependencies.quickLens)
   )
   .dependsOn(
     core % "test->test;compile->compile"
   )
-
-//lazy val mongo = project
-//  .settings(
-//    name := "sk8s-mongodb",
-//    settings,
-//    assemblySettings,
-//    deploymentSettings,
-//    libraryDependencies ++= commonDependencies ++ Seq(dependencies.mongoScalaDB) :+ dependencies.ammoniteOps % "test"
-//  )
-//  .dependsOn(
-//    core % "test->test;compile->compile"
-//  )
-
-//lazy val prometheus = project
-//  .settings(
-//    name := "sk8s-prometheus",
-//    settings,
-//    assemblySettings,
-//    deploymentSettings,
-//    libraryDependencies ++= commonDependencies ++ Seq(dependencies.prometheusClient, dependencies.prometheusClientProto, dependencies.akkaHttp)
-//  )
-//  .dependsOn(
-//    core % "test->test;compile->compile"
-//  )
 
 lazy val slack = project
   .settings(
@@ -123,6 +104,7 @@ lazy val slack = project
     settings,
     assemblySettings,
     deploymentSettings,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies ++ Seq(dependencies.slack)
   )
   .dependsOn(
@@ -136,17 +118,14 @@ lazy val plugin = project
     name := "sbt-sk8s",
     description := "sbt plugin to generate build info and sk8s opinions",
     settings,
-//    version := (version in ThisBuild).value + "-SNAPSHOT",
     sbtPlugin := true,
     publishMavenStyle := false,
     crossScalaVersions := Seq(scala212),
-      //    bintrayRepository := "sbt-plugins",
-//    bintrayOrganization in bintray := None,
     //
     scalacOptions := Seq("-Xfuture", "-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
     scalacOptions += "-language:experimental.macros",
-    libraryDependencies += "org.scala-lang" % "scala-reflect"    % scalaVersion.value % Provided,
-    libraryDependencies += "org.scala-sbt"  % "scripted-plugin_2.12" % sbtVersion.value,
+//    libraryDependencies += "org.scala-lang" % "scala-reflect"    % scalaVersion.value % Provided,
+//    libraryDependencies += "org.scala-sbt"  % "scripted-plugin_2.12" % sbtVersion.value,
     licenses := Seq("MIT License" -> url("https://github.com/sbt/sbt-buildinfo/blob/master/LICENSE")),
     scriptedLaunchOpts ++= Seq("-Xmx1024M", "-Dplugin.version=" + version.value, "-Dsbt.log.noformat"),
     scriptedBufferLog := false
@@ -162,9 +141,8 @@ lazy val templateBackend = project
     settings,
     assemblySettings,
     publishArtifact := false,
-//    bintrayRelease := {},
     skip in publish := true,
-//    skip in bintrayRelease := true,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
@@ -179,9 +157,8 @@ lazy val templateApi = project
     settings,
     assemblySettings,
     publishArtifact := false,
-//    bintrayRelease := {},
     skip in publish := true,
-//    skip in bintrayRelease := true,
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies :+ dependencies.scalaTestPlus,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
   )
@@ -208,39 +185,38 @@ lazy val dependencies =
     val scalacheckV         = "1.14.3"
     val slf4jV              = "1.7.30"
 
-    val ammoniteOps = "com.lihaoyi" %% "ammonite-ops" % ammoniteOpsVer
+    val ammoniteOps = ("com.lihaoyi" %% "ammonite-ops" % ammoniteOpsVer).cross(CrossVersion.for3Use2_13)
 
     val logback     = "ch.qos.logback"    % "logback-classic"       % logbackV withSources ()
-    val akkaStream  = "com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()
-    val akkaHttp    = "com.typesafe.akka" %% "akka-http"            % akkaHttpV withSources ()
-    val akkaSlf4j   = "com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()
-    val enumeratum  = "com.beachape"      %% "enumeratum-play-json" % "1.6.3" exclude ("org.scala-lang", "scala-library") withSources ()
+    val akkaStream  = ("com.typesafe.akka" %% "akka-stream"          % akkaV withSources ()).cross(CrossVersion.for3Use2_13)
+    val akkaHttp    = ("com.typesafe.akka" %% "akka-http"            % akkaHttpV withSources ()).cross(CrossVersion.for3Use2_13)
+    val akkaSlf4j   = ("com.typesafe.akka" %% "akka-slf4j"           % akkaV withSources ()).cross(CrossVersion.for3Use2_13)
+    val enumeratum  = ("com.beachape"      %% "enumeratum-play-json" % "1.6.3" withSources ()).cross(CrossVersion.for3Use2_13)
     val javaxInject = "javax.inject"      % "javax.inject"          % "1" withSources ()
 
     val joda         = "joda-time"         % "joda-time"           % "2.10.10"
-    val jwtPlayJson  = "com.pauldijou"     %% "jwt-play-json"      % "5.0.0"
-//    val mongoScalaDB = "org.mongodb.scala" %% "mongo-scala-driver" % mongodbScalaVersion withSources ()
+    val jwtPlayJson  = ("com.pauldijou"     %% "jwt-play-json"      % "5.0.0").cross(CrossVersion.for3Use2_13)
 
-    val parserCombinators     = "org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.2" withSources ()
-    val playJson              = "com.typesafe.play"             %% "play-json"                % playJsonV withSources () exclude ("org.scala-lang", "scala-library")
-    val quickLens             = "com.softwaremill.quicklens"    %% "quicklens"                % "1.4.13" withSources ()
-    val scalacheck            = "org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()
-    val scalatest             = "org.scalatest"                 %% "scalatest"                % scalatestV withSources ()
-    val scalaTestPlus         = "org.scalatestplus.play"        %% "scalatestplus-play"       % "4.0.3" % "test" withSources ()
-    val scalaLogging          = "com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()
-    val slack                 = "com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.16" withSources ()
+    val parserCombinators     = ("org.scala-lang.modules"        %% "scala-parser-combinators" % "1.1.2" withSources ()).cross(CrossVersion.for3Use2_13)
+    val playJson              = ("com.typesafe.play"             %% "play-json"                % playJsonV withSources () ).cross(CrossVersion.for3Use2_13)
+    val quickLens             = ("com.softwaremill.quicklens"    %% "quicklens"                % "1.4.13" withSources ()).cross(CrossVersion.for3Use2_13)
+    val scalacheck            = ("org.scalacheck"                %% "scalacheck"               % scalacheckV withSources ()).cross(CrossVersion.for3Use2_13)
+    val scalatest             = ("org.scalatest"                 %% "scalatest"                % scalatestV withSources ()).cross(CrossVersion.for3Use2_13)
+    val scalaTestPlus         = ("org.scalatestplus.play"        %% "scalatestplus-play"       % "4.0.3" % "test" withSources ()).cross(CrossVersion.for3Use2_13)
+    val scalaLogging          = ("com.typesafe.scala-logging"    %% "scala-logging"            % scalaLoggingV withSources ()).cross(CrossVersion.for3Use2_13)
+    val slack                 = ("com.github.slack-scala-client" %% "slack-scala-client"       % "0.2.16" withSources ()).cross(CrossVersion.for3Use2_13)
     val slf4j                 = "org.slf4j"                     % "jcl-over-slf4j"            % slf4jV withSources ()
-    val skuber                = "io.skuber"                     %% "skuber"                   % "2.6.0" withSources ()
-    val sttpWithAkkHttp       = "com.softwaremill.sttp"         %% "akka-http-backend"        % sttpV withSources ()
+    val skuber                = ("io.skuber"                     %% "skuber"                   % "2.6.0" withSources ()).cross(CrossVersion.for3Use2_13)
+    val sttpWithAkkHttp       = ("com.softwaremill.sttp"         %% "akka-http-backend"        % sttpV withSources ()).cross(CrossVersion.for3Use2_13)
 
     def playLibs: Seq[ModuleID] =
       Seq( //
         scalaTestPlus,
-        "com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava"),
-        "com.typesafe.play" %% "play-guice"      % playV withSources () exclude ("com.google.guava", "guava"), //
-        "com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava"),
-        "com.typesafe.play" %% "play" /*     */  % playV withSources () exclude ("com.google.guava", "guava") exclude ("com.typesafe.akka", "akka-actor") exclude ("org.scala-lang", "scala-library"),
-        "com.typesafe.play" %% "play-logback"    % playV withSources () exclude ("com.google.guava", "guava")
+        ("com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "play-guice"      % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13), //
+          ("com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "play" /*     */  % playV withSources () exclude ("com.google.guava", "guava") ).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "play-logback"    % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13)
       )
   }
 
