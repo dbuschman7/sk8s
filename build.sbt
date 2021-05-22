@@ -4,7 +4,6 @@ import sbtbuildinfo.BuildInfoKey
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 
 name := "sk8s"
-organization in ThisBuild := "me.lightspeed7"
 version in ThisBuild := "0.8.0"
 
 lazy val scala212 = "2.12.13"
@@ -16,17 +15,14 @@ scalaVersion := scala3
 
 lazy val supportedScalaVersions = List(scala212, scala213)
 
-
-licenses in ThisBuild += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
-
 //
 // PROJECTS
 // ///////////////////////
 lazy val global = project
   .in(file("."))
   .settings(
+    publish / skip := true,
     publishArtifact := false,
-    skip in publish := true,
     crossScalaVersions := Nil
   )
   .disablePlugins(AssemblyPlugin)
@@ -133,7 +129,7 @@ lazy val templateBackend = project
     name := "backend",
     assemblySettings,
     publishArtifact := false,
-    skip in publish := true,
+    publish / skip := true,
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
@@ -148,7 +144,7 @@ lazy val templateApi = project
     name := "api",
     assemblySettings,
     publishArtifact := false,
-    skip in publish := true,
+    publish / skip := true,
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= commonDependencies :+ dependencies.scalaTestPlus,
     buildInfoVars(name, version, scalaVersion, sbtVersion)
@@ -258,10 +254,43 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots")
 )
 
-licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+//
+// Publishing info
+// ////////////////////////////////////
+ThisBuild / versionScheme := Some("early-semver")
+ThisBuild / licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+ThisBuild / publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+ThisBuild / publishMavenStyle := true
+ThisBuild / scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git"))
+ThisBuild / pomIncludeRepository := { _ => false }
 
-scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/dbuschman7/sk8s.git"), "scm:git:https://github.com/dbuschman7/sk8s.git"))
+ThisBuild / organization := "me.lightspeed7"
+ThisBuild / organizationName := "me.lightspeed7"
+ThisBuild / organizationHomepage := Some(url("https://dbuschman7.github.io"))
 
+ThisBuild / homepage := Some(url("https://dbuschman7.github.io"))
+
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/dbuschman7/sk8s.git"),
+    "scm:git:https://github.com/dbuschman7/sk8s.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(
+    id    = "lightspeed7.me",
+    name  = "David Buschman",
+    email = "dbuschman7@gmail.com",
+    url   = url("https://dbuschman7.github.io")
+  )
+)
+
+ThisBuild / description := "Scala app support for running in Kubernetes"
+
+
+//
+// Settings setup
+// ////////////////////////////
 scalafmtOnCompile := true
 
 lazy val assemblySettings = Seq(
@@ -278,14 +307,8 @@ lazy val assemblySettings = Seq(
 lazy val deploymentSettings = Seq(
   publishArtifact in (Test, packageBin) := true, // Publish tests jarsproject
   publishArtifact in (Test, packageSrc) := true, // Publish tests-source jars
-  publishArtifact in (Compile, packageDoc) := false, // Disable ScalaDoc generation
-  publishArtifact in packageDoc := false,
   publishMavenStyle := true
-  //
-//  publishTo := publishDest // must use aliases to publish
 )
-
-//def publishDest: Option[Resolver] = Some("Some Realm" at "tbd")
 
 def harnessFilter(name: String): Boolean = !(name endsWith "Harness")
 

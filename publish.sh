@@ -1,3 +1,3 @@
 #!/bin/sh 
 
-sbt ';cc;publsh'
+sbt ';cc ;+publishSigned'

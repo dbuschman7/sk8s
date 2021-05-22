@@ -13,7 +13,7 @@ import org.scalatest.matchers.should.Matchers
 
 class ConfigMapWatcherTest extends AnyFunSuite with Matchers {
   import scala.language.postfixOps
-  
+
   val pwd: Path           = Paths.get("sk8s").toAbsolutePath
   val resourcesPath: Path = Paths.get(pwd.toString + "/target")
   val configMap: Path     = Paths.get(resourcesPath.toString, "configMap")
