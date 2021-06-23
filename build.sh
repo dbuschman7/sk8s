@@ -1,3 +1,3 @@
 #! /bin/sh 
 
-sbt ';cc;test;package'
+sbt ';cc;+test;package'

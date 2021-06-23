@@ -4,7 +4,22 @@ import sbtbuildinfo.BuildInfoKey
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 
 name := "sk8s"
-version in ThisBuild := "0.8.0"
+
+
+version in ThisBuild := {
+  val versionFile = "version.txt"
+  val valueStr ="0.8.1"
+
+  // write to a file
+  import java.io._
+  val pw = new PrintWriter(new File(versionFile))
+  pw.write(valueStr)
+  pw.close()
+
+  println("Version file -> " + valueStr)
+  valueStr
+}
+
 
 lazy val scala212 = "2.12.13"
 lazy val scala213 = "2.13.5"
@@ -108,8 +123,8 @@ lazy val plugin = project
     name := "sbt-sk8s",
     description := "sbt plugin to generate build info and sk8s opinions",
     sbtPlugin := true,
-    publishMavenStyle := false,
     crossScalaVersions := Seq(scala212),
+    publishMavenStyle := false,
     //
     scalacOptions := Seq("-Xfuture", "-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
     scalacOptions += "-language:experimental.macros",
@@ -201,7 +216,7 @@ lazy val dependencies =
         scalaTestPlus,
         ("com.typesafe.play" %% "play-functional" % playJsonV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.play" %% "play-guice"      % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13), //
-          ("com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "filters-helpers" % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.play" %% "play" /*     */  % playV withSources () exclude ("com.google.guava", "guava") ).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.play" %% "play-logback"    % playV withSources () exclude ("com.google.guava", "guava")).cross(CrossVersion.for3Use2_13)
       )
@@ -307,7 +322,6 @@ lazy val assemblySettings = Seq(
 lazy val deploymentSettings = Seq(
   publishArtifact in (Test, packageBin) := true, // Publish tests jarsproject
   publishArtifact in (Test, packageSrc) := true, // Publish tests-source jars
-  publishMavenStyle := true
 )
 
 def harnessFilter(name: String): Boolean = !(name endsWith "Harness")
